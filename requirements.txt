@@ -1,0 +1,11 @@
+classla==2.2.1
+trankit==1.1.2
+
+# Trankit compatibility pins: newer adapters/transformers break with torch<=2.0.1.
+adapters==0.1.1
+transformers==4.35.2
+huggingface-hub==0.19.4
+torch==2.0.1
+
+# CLASSLA + torch==2.0.1 require NumPy 1.x in this environment.
+numpy==1.26.4
