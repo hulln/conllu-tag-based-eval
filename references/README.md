@@ -1,0 +1,16 @@
+# references/
+
+Reference material used by this project.
+
+- Papers and external source documents.
+- Instruction snapshots that define project scope and methodology.
+
+Current contents include:
+
+- `Dobrovoljc,+Terčon,+Ljubešić.pdf`
+
+Local private instruction snapshots can be stored as:
+
+- `instructions-task-mail-YYYY-MM-DD.txt`
+
+These local mail snapshots are intentionally ignored by Git.
