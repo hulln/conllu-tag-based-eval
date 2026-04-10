@@ -37,6 +37,11 @@ Each prediction is evaluated against gold, plus error/comparison reports.
 - SSJ source repository: https://github.com/UniversalDependencies/UD_Slovenian-SSJ
 - Local copy obtainment date: 2026-04-10
 
+## Reference Article
+
+- Dobrovoljc, K., Terčon, L., Ljubešić, N. (2023). *Universal Dependencies za slovenščino: nove smernice, ročno označeni podatki in razčlenjevalni model.*
+- DOI: https://doi.org/10.4312/slo2.0.2023.1.218-246
+
 ## Quick Start
 
 ```bash
