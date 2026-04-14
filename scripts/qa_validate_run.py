@@ -227,12 +227,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--run-stamp", required=True, help="Run stamp, e.g. 20260409-2248")
     parser.add_argument("--gold", default="data/gold/sl_ssj-ud-test.conllu", help="Gold CoNLL-U path")
     parser.add_argument("--run-label", default="full", help="Run label used by pipeline (default: full)")
-    parser.add_argument(
-        "--modes",
-        choices=["aligned", "both"],
-        default="aligned",
-        help="QA scope: aligned only (default) or aligned+base.",
-    )
     parser.add_argument("--pred-root", default="predictions/runs", help="Predictions root")
     parser.add_argument("--results-root", default="results/runs", help="Results root")
     parser.add_argument(
@@ -261,7 +255,6 @@ def main() -> None:
     supplementary_base_root = run_results_root / "supplementary" / "base"
     supplementary_base_main_root = supplementary_base_root / "main"
     supplementary_base_diagnostics_root = supplementary_base_root / "diagnostics"
-    active_modes = ["aligned"] if args.modes == "aligned" else ["aligned", "base"]
 
     output_path = Path(args.output) if args.output else (main_results_root / "qa_validation.md")
 
@@ -269,7 +262,7 @@ def main() -> None:
 
     checks: Dict[str, PredictionCheck] = {}
     for model in ("classla", "trankit"):
-        for mode in active_modes:
+        for mode in ("aligned", "base"):
             key = f"{model}_{mode}"
             pred_path = first_existing_path(
                 [
@@ -282,24 +275,18 @@ def main() -> None:
     expected_main_groups = [
         [main_results_root / "classla_aligned_eval.txt"],
         [main_results_root / "trankit_aligned_eval.txt"],
+        [supplementary_base_main_root / "classla_base_eval.txt", main_results_root / "classla_base_eval.txt"],
+        [supplementary_base_main_root / "trankit_base_eval.txt", main_results_root / "trankit_base_eval.txt"],
         [main_results_root / "classla-vs-trankit_aligned_comparison.md"],
+        [
+            supplementary_base_main_root / "classla-vs-trankit_base_comparison.md",
+            main_results_root / "classla-vs-trankit_base_comparison.md",
+        ],
     ]
-
-    if "base" in active_modes:
-        expected_main_groups.extend(
-            [
-                [supplementary_base_main_root / "classla_base_eval.txt", main_results_root / "classla_base_eval.txt"],
-                [supplementary_base_main_root / "trankit_base_eval.txt", main_results_root / "trankit_base_eval.txt"],
-                [
-                    supplementary_base_main_root / "classla-vs-trankit_base_comparison.md",
-                    main_results_root / "classla-vs-trankit_base_comparison.md",
-                ],
-            ]
-        )
 
     expected_diagnostics_groups: List[List[Path]] = []
     for model in ("classla", "trankit"):
-        for mode in active_modes:
+        for mode in ("aligned", "base"):
             if mode == "aligned":
                 expected_diagnostics_groups.append([diagnostics_root / f"{model}_{mode}_eval-tagged.txt"])
                 expected_diagnostics_groups.append([diagnostics_root / f"{model}_{mode}_errors.md"])
@@ -351,16 +338,14 @@ def main() -> None:
     eval_metrics = {
         "classla_aligned": parse_eval_metrics(main_results_root / "classla_aligned_eval.txt"),
         "trankit_aligned": parse_eval_metrics(main_results_root / "trankit_aligned_eval.txt"),
+        "classla_base": parse_eval_metrics(classla_base_eval_path),
+        "trankit_base": parse_eval_metrics(trankit_base_eval_path),
     }
-    if "base" in active_modes:
-        eval_metrics["classla_base"] = parse_eval_metrics(classla_base_eval_path)
-        eval_metrics["trankit_base"] = parse_eval_metrics(trankit_base_eval_path)
 
     comparison_counts = {
-        "aligned": parse_comparison_counts(main_results_root / "classla-vs-trankit_aligned_comparison.md")
+        "aligned": parse_comparison_counts(main_results_root / "classla-vs-trankit_aligned_comparison.md"),
+        "base": parse_comparison_counts(base_comparison_path),
     }
-    if "base" in active_modes:
-        comparison_counts["base"] = parse_comparison_counts(base_comparison_path)
 
     failures: List[str] = []
     warnings: List[str] = []
@@ -400,9 +385,7 @@ def main() -> None:
     lines.append(f"- Predictions root: {pred_root}")
     lines.append(f"- Results root: {run_results_root}")
     lines.append(f"- Aligned results root: {main_results_root}")
-    lines.append(f"- QA modes: {', '.join(active_modes)}")
-    if "base" in active_modes:
-        lines.append(f"- Supplementary base results root: {supplementary_base_root}")
+    lines.append(f"- Supplementary base results root: {supplementary_base_root}")
     lines.append("")
 
     lines.append("## Prediction File Checks")
@@ -434,11 +417,7 @@ def main() -> None:
     lines.append("")
 
     lines.append("## Core Metrics (F1 from eval summaries)")
-    metric_keys = ["classla_aligned", "trankit_aligned"]
-    if "base" in active_modes:
-        metric_keys.extend(["classla_base", "trankit_base"])
-
-    for key in metric_keys:
+    for key in ("classla_aligned", "trankit_aligned", "classla_base", "trankit_base"):
         metric_map = eval_metrics[key]
         lines.append(f"### {key}")
         for metric in ("LAS", "UAS", "UPOS", "XPOS", "Lemmas", "MLAS"):
@@ -448,7 +427,7 @@ def main() -> None:
         lines.append("")
 
     lines.append("## Model-vs-Model LAS Difference Snapshot")
-    for mode in active_modes:
+    for mode in ("aligned", "base"):
         lines.append(f"### {mode}")
         snap = comparison_counts[mode]
         if not snap:
