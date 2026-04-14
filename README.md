@@ -5,7 +5,7 @@ Reproducible evaluation of CLASSLA and Trankit on Slovenian UD SSJ.
 ## What Is Canonical
 
 - Primary method: aligned mode only (gold sentence/token boundaries are fixed).
-- Public canonical run: 20260414-1323_sl-ssj-ud-test_full
+- Public canonical run: 20260414-1819_sl-ssj-ud-test_full
 - Old and non-canonical outputs: local-only under archive/local/ (gitignored).
 
 ## Quick Setup
@@ -36,7 +36,19 @@ Main outputs:
 - predictions/output/<run-stamp>_sl-ssj-ud-test_full_classla_aligned_predicted.conllu
 - predictions/output/<run-stamp>_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu
 - results/output/<run-stamp>_sl-ssj-ud-test_full/main/
+- results/output/<run-stamp>_sl-ssj-ud-test_full/diagnostics/
 - results/output/<run-stamp>_sl-ssj-ud-test_full/main/classla-vs-trankit_aligned_content-comparison.md (Table-style content comparison)
+
+If the public interactive table should be refreshed from that run, use:
+
+```bash
+python scripts/run_pipeline.py --modes aligned --run-stamp <run-stamp> --publish-interactive-table
+```
+
+This updates:
+
+- tables/comparison_table.html
+- tables/comparison_table_data.js
 
 ## Verify Rerun
 
@@ -56,6 +68,7 @@ python scripts/verify_canonical_run.py --run-stamp <run-stamp>
 - scripts/: pipeline, prediction, QA, and verification scripts
 - predictions/: canonical public prediction artifacts
 - results/: canonical public evaluation artifacts
+- tables/: canonical public interactive comparison table bundle
 - archive/: local-only historical artifacts (not public)
 - references/: paper link and canonical verification manifest
 

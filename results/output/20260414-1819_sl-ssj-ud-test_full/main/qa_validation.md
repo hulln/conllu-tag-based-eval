@@ -1,12 +1,12 @@
-# QA Validation Report: 20260414-1323_sl-ssj-ud-test_full
+# QA Validation Report: 20260414-1819_sl-ssj-ud-test_full
 
 - Status: **PASS**
 - Modes validated: aligned
 - Gold file: data/gold/sl_ssj-ud-test.conllu
 - Predictions root: predictions/output
-- Results root: results/output/20260414-1323_sl-ssj-ud-test_full
-- Aligned results root: results/output/20260414-1323_sl-ssj-ud-test_full/main
-- Supplementary base results root: results/output/20260414-1323_sl-ssj-ud-test_full/supplementary/base
+- Results root: results/output/20260414-1819_sl-ssj-ud-test_full
+- Aligned results root: results/output/20260414-1819_sl-ssj-ud-test_full/main
+- Supplementary base results root: results/output/20260414-1819_sl-ssj-ud-test_full/supplementary/base
 
 ## Gold Reference Counts
 - Sentences (evaluator): 1282
@@ -19,7 +19,7 @@
 
 ## Prediction File Checks
 ### classla_aligned
-- Path: predictions/output/20260414-1323_sl-ssj-ud-test_full_classla_aligned_predicted.conllu
+- Path: predictions/output/20260414-1819_sl-ssj-ud-test_full_classla_aligned_predicted.conllu
 - Exists: True
 - Evaluator parse OK: True
 - Sentences (evaluator): 1282
@@ -34,7 +34,7 @@
 - Ends with blank line: True
 
 ### trankit_aligned
-- Path: predictions/output/20260414-1323_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu
+- Path: predictions/output/20260414-1819_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu
 - Exists: True
 - Evaluator parse OK: True
 - Sentences (evaluator): 1282
@@ -70,19 +70,19 @@
 - Sentences: 100.00
 - Tokens: 100.00
 - Words: 100.00
-- LAS: 91.07
-- UAS: 92.98
-- UPOS: 98.81
-- XPOS: 96.52
-- Lemmas: 97.41
-- MLAS: 83.83
+- LAS: 94.59
+- UAS: 95.79
+- UPOS: 98.99
+- XPOS: 97.49
+- Lemmas: 98.05
+- MLAS: 89.52
 
 ## Model-vs-Model LAS Difference Snapshot
 ### aligned
-- CLASSLA aligned correct, Trankit aligned wrong: 1195 (4.70%)
-- Trankit aligned correct, CLASSLA aligned wrong: 1345 (5.29%)
-- Both correct: 21826 (85.79%)
-- Both wrong: 1076 (4.23%)
+- CLASSLA aligned correct, Trankit aligned wrong: 478 (1.88%)
+- Trankit aligned correct, CLASSLA aligned wrong: 1523 (5.99%)
+- Both correct: 22543 (88.61%)
+- Both wrong: 898 (3.53%)
 
 ## Failures
 - None

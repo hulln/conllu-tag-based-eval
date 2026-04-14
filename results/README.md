@@ -10,7 +10,7 @@ Supplementary base-mode outputs are local-only (gitignored).
 
 Current active canonical run:
 
-- `output/20260414-1323_sl-ssj-ud-test_full/`
+- `output/20260414-1819_sl-ssj-ud-test_full/`
 
 Strict rerun verification:
 
@@ -20,3 +20,7 @@ Strict rerun verification:
 First file to open for a run:
 
 - `output/<run-id>/main/qa_validation.md`
+
+Public interactive table for the active canonical aligned run:
+
+- `../tables/comparison_table.html`

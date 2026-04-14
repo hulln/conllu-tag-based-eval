@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<title>Analiza napak: CLASSLA-Stanza vs. Trankit – SSJ-UD testna množica</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    background: #f8f7f4;
+    color: #1a1a1a;
+    padding: 36px 40px 60px;
+    max-width: 980px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: .01em;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 28px;
+    font-weight: 300;
+  }
+
+  /* ── section headers ── */
+  h2 {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #444;
+    margin: 32px 0 8px;
+    padding-bottom: 4px;
+    border-bottom: 1.5px solid #d0cdc7;
+  }
+
+  /* ── tables ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    margin-bottom: 4px;
+  }
+  th {
+    text-align: left;
+    padding: 5px 10px;
+    background: #1a1a1a;
+    color: #f0ede8;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    white-space: nowrap;
+  }
+  th.right { text-align: right; }
+  td { padding: 4px 10px; border-bottom: 1px solid #e4e1db; vertical-align: middle; }
+  td.right { text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+  td.label { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: #333; }
+  td.indent { padding-left: 22px; color: #555; }
+  td.bold { font-weight: 600; }
+
+  tr.total-row td { background: #f0ede8; font-weight: 600; }
+  tr:hover td { background: #f3f0eb; }
+  tr.total-row:hover td { background: #ebe8e2; }
+
+  /* diff coloring */
+  .pos { color: #1a7a3a; font-weight: 600; }
+  .neg { color: #b83232; font-weight: 600; }
+  .neut { color: #888; }
+
+  /* ── overview grid ── */
+  .overview {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .metric-box {
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 14px 16px;
+    border-radius: 2px;
+  }
+  .metric-box .label { font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: #888; margin-bottom: 3px; }
+  .metric-box .val { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; color: #1a1a1a; }
+  .metric-box .sub { font-size: 10.5px; color: #aaa; margin-top: 2px; }
+  .metric-box.highlight { border-color: #1a7a3a; background: #f4fbf6; }
+
+  /* ── per-relation table ── */
+  .bar-wrap { display: inline-block; width: 70px; height: 8px; background: #e8e5e0; vertical-align: middle; margin-left: 6px; border-radius: 1px; }
+  .bar { height: 8px; border-radius: 1px; }
+  .bar-c { background: #4a6fa5; }
+  .bar-t { background: #2a9d5c; }
+
+  .note {
+    font-size: 11px;
+    color: #888;
+    margin-top: 8px;
+    line-height: 1.6;
+  }
+  .note strong { color: #555; }
+
+  /* highlight rows */
+  .classla-better td { background: #f0f4fb; }
+  .trankit-better td { background: #f0fbf5; }
+  .classla-better:hover td { background: #e6edf7; }
+  .trankit-better:hover td { background: #e6f7ed; }
+
+  /* interactive relation drilldown */
+  tr.clickable-rel td.indent.label {
+    cursor: pointer;
+    position: relative;
+    padding-left: 28px;
+  }
+  tr.clickable-rel td.indent.label::before {
+    content: '↳';
+    position: absolute;
+    left: 10px;
+    color: #999;
+    font-size: 11px;
+  }
+  tr.clickable-rel:hover td.indent.label::before { color: #444; }
+  tr.selected-rel td {
+    background: #ede9ff !important;
+    border-bottom-color: #d9d0ff;
+  }
+
+  .table1-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 0 10px;
+  }
+  .table1-controls label {
+    font-size: 11px;
+    color: #555;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: .03em;
+  }
+  .table1-filter-input {
+    min-width: 240px;
+    flex: 1 1 320px;
+    border: 1px solid #d1cec8;
+    background: #fff;
+    color: #222;
+    padding: 7px 9px;
+    border-radius: 2px;
+    font-size: 12px;
+  }
+  .table1-filter-input:focus {
+    outline: none;
+    border-color: #888;
+    box-shadow: 0 0 0 2px rgba(60, 60, 60, 0.08);
+  }
+  .table1-filter-clear {
+    border: 1px solid #cfcac3;
+    background: #f7f5f2;
+    color: #333;
+    padding: 7px 10px;
+    border-radius: 2px;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .table1-filter-clear:hover {
+    background: #efebe6;
+  }
+  .table1-toggle-obscure {
+    border: 1px solid #cfcac3;
+    background: #f2f1ee;
+    color: #333;
+    padding: 7px 10px;
+    border-radius: 2px;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .table1-toggle-obscure:hover {
+    background: #e9e6e1;
+  }
+  .table1-obscure-info {
+    font-size: 11px;
+    color: #666;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .table1-filter-status {
+    font-size: 11px;
+    color: #666;
+    font-family: 'IBM Plex Mono', monospace;
+    margin-left: auto;
+  }
+
+  .examples-panel {
+    margin-top: 12px;
+    border: 1px solid #d8d5cf;
+    background: #fff;
+    padding: 14px 16px 14px;
+    border-radius: 3px;
+    display: none;
+  }
+  .examples-panel.active { display: block; }
+  .panel-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: .03em;
+    margin-bottom: 6px;
+    color: #262626;
+  }
+  .panel-meta {
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 10px;
+  }
+  .panel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .panel-col {
+    border: 1px solid #e2dfd8;
+    background: #faf9f7;
+    min-height: 120px;
+    max-height: 380px;
+    overflow: auto;
+  }
+  .panel-col h3 {
+    margin: 0;
+    padding: 8px 10px;
+    font-size: 11px;
+    letter-spacing: .04em;
+    font-family: 'IBM Plex Mono', monospace;
+    background: #1f1f1f;
+    color: #f4f1eb;
+  }
+  .ex-list {
+    list-style: none;
+    padding: 8px 10px 10px;
+    margin: 0;
+  }
+  .ex-item {
+    border-bottom: 1px solid #e6e2dc;
+    padding: 7px 0 8px;
+  }
+  .ex-item:last-child { border-bottom: none; }
+  .ex-head {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    color: #666;
+    line-height: 1.35;
+    margin-bottom: 3px;
+  }
+  .ex-sent {
+    font-size: 12px;
+    line-height: 1.45;
+    color: #262626;
+  }
+  .problem-token {
+    color: #b83232;
+    font-weight: 600;
+    background: rgba(184, 50, 50, 0.1);
+    border-radius: 2px;
+    padding: 0 2px;
+  }
+  .panel-empty {
+    padding: 10px;
+    font-size: 11px;
+    color: #777;
+  }
+
+  @media (max-width: 850px) {
+    .panel-grid { grid-template-columns: 1fr; }
+    .table1-filter-status { width: 100%; margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Primerjalna analiza napak: CLASSLA-Stanza 2.0 in Trankit</h1>
+<div class="subtitle">Testna množica SSJ-UD (1.282 povedi, 25.442 pojavnic) &nbsp;·&nbsp; Stolpci 7–8 (head + deprel) &nbsp;·&nbsp; Metriki LAS in UAS</div>
+
+<!-- ── OVERVIEW ── -->
+<h2>Splošna natančnost</h2>
+<div class="overview">
+  <div class="metric-box">
+    <div class="label">CLASSLA LAS</div>
+    <div class="val">90,48</div>
+    <div class="sub">labeled attachment score</div>
+  </div>
+  <div class="metric-box highlight">
+    <div class="label">Trankit LAS</div>
+    <div class="val">94,59</div>
+    <div class="sub">+4,11 pp vs. CLASSLA</div>
+  </div>
+  <div class="metric-box">
+    <div class="label">CLASSLA UAS</div>
+    <div class="val">92,12</div>
+    <div class="sub">unlabeled attachment score</div>
+  </div>
+  <div class="metric-box highlight">
+    <div class="label">Trankit UAS</div>
+    <div class="val">95,79</div>
+    <div class="sub">+3,67 pp vs. CLASSLA</div>
+  </div>
+</div>
+
+<!-- ── ERROR TABLE ── -->
+<h2>Tabela 1 &nbsp;·&nbsp; Distribucija napak glede na tip (po vzoru Tabele 3 v Dobrovoljc idr. 2023)</h2>
+<div class="table1-controls" aria-label="Filtriranje relacij v Tabeli 1">
+  <label for="table1-filter">Filter relacije:</label>
+  <input id="table1-filter" class="table1-filter-input" type="text" placeholder="npr. nsubj, obl-nmod, parataxis..." autocomplete="off">
+  <button id="table1-filter-clear" class="table1-filter-clear" type="button">Počisti</button>
+  <button id="table1-toggle-obscure" class="table1-toggle-obscure" type="button">Prikaži vse relacije</button>
+  <span id="table1-obscure-count" class="table1-obscure-info" aria-live="polite"></span>
+  <span id="table1-filter-status" class="table1-filter-status" aria-live="polite"></span>
+</div>
+<table id="error-table">
+  <thead>
+    <tr>
+      <th style="width:42%">Tip napake</th>
+      <th class="right" style="width:14%">CLASSLA</th>
+      <th class="right" style="width:14%">Trankit</th>
+      <th class="right" style="width:14%">Razlika</th>
+    </tr>
+  </thead>
+    <tbody>
+    <tr class="total-row">
+      <td class="bold">Napačno jedro</td>
+      <td class="right bold">1.202</td>
+      <td class="right bold">666</td>
+      <td class="right"><span class="pos">-536</span></td>
+    </tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="punct_punct"><td class="indent label">punct-punct</td><td class="right">355</td><td class="right">198</td><td class="right"><span class="pos">-157</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="advmod_advmod"><td class="indent label">advmod-advmod</td><td class="right">161</td><td class="right">97</td><td class="right"><span class="pos">-64</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="conj_conj"><td class="indent label">conj-conj</td><td class="right">108</td><td class="right">80</td><td class="right"><span class="pos">-28</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="nmod_nmod"><td class="indent label">nmod-nmod</td><td class="right">116</td><td class="right">76</td><td class="right"><span class="pos">-40</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="obl_obl"><td class="indent label">obl-obl</td><td class="right">76</td><td class="right">34</td><td class="right"><span class="pos">-42</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="parataxis_parataxis"><td class="indent label">parataxis-parataxis</td><td class="right">37</td><td class="right">27</td><td class="right"><span class="pos">-10</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="acl_acl"><td class="indent label">acl-acl</td><td class="right">52</td><td class="right">21</td><td class="right"><span class="pos">-31</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="cc_cc"><td class="indent label">cc-cc</td><td class="right">39</td><td class="right">15</td><td class="right"><span class="pos">-24</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="aux_aux"><td class="indent label">aux-aux</td><td class="right">37</td><td class="right">12</td><td class="right"><span class="pos">-25</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="mark_mark"><td class="indent label">mark-mark</td><td class="right">34</td><td class="right">10</td><td class="right"><span class="pos">-24</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="nsubj_nsubj"><td class="indent label">nsubj-nsubj</td><td class="right">30</td><td class="right">13</td><td class="right"><span class="pos">-17</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="cop_cop"><td class="indent label">cop-cop</td><td class="right">29</td><td class="right">11</td><td class="right"><span class="pos">-18</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="advcl_advcl"><td class="indent label">advcl-advcl</td><td class="right">27</td><td class="right">21</td><td class="right"><span class="pos">-6</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="appos_appos"><td class="indent label">appos-appos</td><td class="right">19</td><td class="right">15</td><td class="right"><span class="pos">-4</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="case_case"><td class="indent label">case-case</td><td class="right">17</td><td class="right">9</td><td class="right"><span class="pos">-8</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="obj_obj"><td class="indent label">obj-obj</td><td class="right">11</td><td class="right">4</td><td class="right"><span class="pos">-7</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="csubj_csubj"><td class="indent label">csubj-csubj</td><td class="right">17</td><td class="right">1</td><td class="right"><span class="pos">-16</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="amod_amod"><td class="indent label">amod-amod</td><td class="right">10</td><td class="right">4</td><td class="right"><span class="pos">-6</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="head_only" data-key="nummod_nummod"><td class="indent label">nummod-nummod</td><td class="right">4</td><td class="right">5</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="expl_expl"><td class="indent label">expl-expl</td><td class="right">6</td><td class="right">2</td><td class="right"><span class="pos">-4</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="iobj_iobj"><td class="indent label">iobj-iobj</td><td class="right">4</td><td class="right">1</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="orphan_orphan"><td class="indent label">orphan-orphan</td><td class="right">4</td><td class="right">1</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="flat_flat"><td class="indent label">flat-flat</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="xcomp_xcomp"><td class="indent label">xcomp-xcomp</td><td class="right">2</td><td class="right">1</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="det_det"><td class="indent label">det-det</td><td class="right">2</td><td class="right">1</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="head_only" data-key="discourse_discourse"><td class="indent label">discourse-discourse</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="head_only" data-key="ccomp_ccomp"><td class="indent label">ccomp-ccomp</td><td class="right">1</td><td class="right">4</td><td class="right"><span class="neg">+3</span></td></tr>
+    <tr class="clickable-rel" data-case="head_only" data-key="dep_dep"><td class="indent label">dep-dep</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="head_only" data-key="list_list"><td class="indent label">list-list</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+
+    <tr class="total-row">
+      <td class="bold">Napačno jedro in oznaka</td>
+      <td class="right bold">803</td>
+      <td class="right bold">404</td>
+      <td class="right"><span class="pos">-399</span></td>
+    </tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="obl_to_nmod"><td class="indent label">obl→nmod</td><td class="right">89</td><td class="right">44</td><td class="right"><span class="pos">-45</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="nmod_to_obl"><td class="indent label">nmod→obl</td><td class="right">62</td><td class="right">39</td><td class="right"><span class="pos">-23</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="root_to_parataxis"><td class="indent label">root→parataxis</td><td class="right">18</td><td class="right">12</td><td class="right"><span class="pos">-6</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="parataxis_to_root"><td class="indent label">parataxis→root</td><td class="right">23</td><td class="right">21</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="nsubj_to_root"><td class="indent label">nsubj→root</td><td class="right">24</td><td class="right">10</td><td class="right"><span class="pos">-14</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="root_to_cop"><td class="indent label">root→cop</td><td class="right">28</td><td class="right">7</td><td class="right"><span class="pos">-21</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="orphan_to_advmod"><td class="indent label">orphan→advmod</td><td class="right">4</td><td class="right">2</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="advcl_to_acl"><td class="indent label">advcl→acl</td><td class="right">12</td><td class="right">9</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="root_to_nsubj"><td class="indent label">root→nsubj</td><td class="right">13</td><td class="right">6</td><td class="right"><span class="pos">-7</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="ccomp_to_root"><td class="indent label">ccomp→root</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="cop_to_root"><td class="indent label">cop→root</td><td class="right">15</td><td class="right">3</td><td class="right"><span class="pos">-12</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="parataxis_to_appos"><td class="indent label">parataxis→appos</td><td class="right">9</td><td class="right">8</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="obj_to_nmod"><td class="indent label">obj→nmod</td><td class="right">11</td><td class="right">4</td><td class="right"><span class="pos">-7</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="conj_to_parataxis"><td class="indent label">conj→parataxis</td><td class="right">5</td><td class="right">1</td><td class="right"><span class="pos">-4</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="nsubj_to_nmod"><td class="indent label">nsubj→nmod</td><td class="right">8</td><td class="right">3</td><td class="right"><span class="pos">-5</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="nmod_to_nsubj"><td class="indent label">nmod→nsubj</td><td class="right">10</td><td class="right">2</td><td class="right"><span class="pos">-8</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="parataxis_to_conj"><td class="indent label">parataxis→conj</td><td class="right">3</td><td class="right">2</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="flat_to_nmod"><td class="indent label">flat→nmod</td><td class="right">4</td><td class="right">4</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="obl_to_appos"><td class="indent label">obl→appos</td><td class="right">6</td><td class="right">2</td><td class="right"><span class="pos">-4</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="acl_to_advcl"><td class="indent label">acl→advcl</td><td class="right">7</td><td class="right">5</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="parataxis_to_nummod"><td class="indent label">parataxis→nummod</td><td class="right">6</td><td class="right">3</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="conj_to_cop"><td class="indent label">conj→cop</td><td class="right">9</td><td class="right">1</td><td class="right"><span class="pos">-8</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="cc_to_advmod"><td class="indent label">cc→advmod</td><td class="right">8</td><td class="right">0</td><td class="right"><span class="pos">-8</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="parataxis_to_acl"><td class="indent label">parataxis→acl</td><td class="right">7</td><td class="right">3</td><td class="right"><span class="pos">-4</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="nsubj_to_conj"><td class="indent label">nsubj→conj</td><td class="right">10</td><td class="right">0</td><td class="right"><span class="pos">-10</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="nsubj_to_parataxis"><td class="indent label">nsubj→parataxis</td><td class="right">9</td><td class="right">1</td><td class="right"><span class="pos">-8</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="parataxis_to_nsubj"><td class="indent label">parataxis→nsubj</td><td class="right">6</td><td class="right">3</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="appos_to_nmod"><td class="indent label">appos→nmod</td><td class="right">4</td><td class="right">4</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="nmod_to_obj"><td class="indent label">nmod→obj</td><td class="right">4</td><td class="right">4</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="nsubj_to_acl"><td class="indent label">nsubj→acl</td><td class="right">7</td><td class="right">4</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="orphan_to_conj"><td class="indent label">orphan→conj</td><td class="right">2</td><td class="right">2</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="parataxis_to_advmod"><td class="indent label">parataxis→advmod</td><td class="right">2</td><td class="right">2</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="nsubj_to_ccomp"><td class="indent label">nsubj→ccomp</td><td class="right">6</td><td class="right">1</td><td class="right"><span class="pos">-5</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="conj_to_advmod"><td class="indent label">conj→advmod</td><td class="right">3</td><td class="right">3</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="appos_to_nummod"><td class="indent label">appos→nummod</td><td class="right">4</td><td class="right">4</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="root_to_advmod"><td class="indent label">root→advmod</td><td class="right">4</td><td class="right">2</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="root_to_ccomp"><td class="indent label">root→ccomp</td><td class="right">7</td><td class="right">7</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="cop_to_acl"><td class="indent label">cop→acl</td><td class="right">5</td><td class="right">3</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="root_to_obl"><td class="indent label">root→obl</td><td class="right">3</td><td class="right">2</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="amod_to_conj"><td class="indent label">amod→conj</td><td class="right">4</td><td class="right">2</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="ccomp_to_cop"><td class="indent label">ccomp→cop</td><td class="right">6</td><td class="right">1</td><td class="right"><span class="pos">-5</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="conj_to_nmod"><td class="indent label">conj→nmod</td><td class="right">6</td><td class="right">2</td><td class="right"><span class="pos">-4</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="obl_to_root"><td class="indent label">obl→root</td><td class="right">6</td><td class="right">1</td><td class="right"><span class="pos">-5</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="root_to_csubj"><td class="indent label">root→csubj</td><td class="right">6</td><td class="right">0</td><td class="right"><span class="pos">-6</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="conj_to_nummod"><td class="indent label">conj→nummod</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="advcl_to_root"><td class="indent label">advcl→root</td><td class="right">5</td><td class="right">1</td><td class="right"><span class="pos">-4</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="conj_to_nsubj"><td class="indent label">conj→nsubj</td><td class="right">5</td><td class="right">2</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="cop_to_parataxis"><td class="indent label">cop→parataxis</td><td class="right">5</td><td class="right">0</td><td class="right"><span class="pos">-5</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="conj_to_obl"><td class="indent label">conj→obl</td><td class="right">4</td><td class="right">0</td><td class="right"><span class="pos">-4</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="both_wrong" data-key="nmod_to_appos"><td class="indent label">nmod→appos</td><td class="right">4</td><td class="right">6</td><td class="right"><span class="neg">+2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="nmod_to_conj"><td class="indent label">nmod→conj</td><td class="right">4</td><td class="right">2</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="fixed_to_case"><td class="indent label">fixed→case</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="list_to_conj"><td class="indent label">list→conj</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="both_wrong" data-key="orphan_to_obl"><td class="indent label">orphan→obl</td><td class="right">0</td><td class="right">1</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="both_wrong" data-key="acl_to_parataxis"><td class="indent label">acl→parataxis</td><td class="right">1</td><td class="right">3</td><td class="right"><span class="neg">+2</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="fixed_to_advmod"><td class="indent label">fixed→advmod</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="appos_to_obj"><td class="indent label">appos→obj</td><td class="right">4</td><td class="right">1</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="both_wrong" data-key="conj_to_amod"><td class="indent label">conj→amod</td><td class="right">4</td><td class="right">5</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="det_to_advmod"><td class="indent label">det→advmod</td><td class="right">4</td><td class="right">1</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="iobj_to_nmod"><td class="indent label">iobj→nmod</td><td class="right">4</td><td class="right">2</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="both_wrong" data-key="nmod_to_flat"><td class="indent label">nmod→flat</td><td class="right">2</td><td class="right">6</td><td class="right"><span class="neg">+4</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="acl_to_nsubj"><td class="indent label">acl→nsubj</td><td class="right">3</td><td class="right">2</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="advcl_to_cop"><td class="indent label">advcl→cop</td><td class="right">3</td><td class="right">2</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="amod_to_advmod"><td class="indent label">amod→advmod</td><td class="right">3</td><td class="right">1</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="appos_to_parataxis"><td class="indent label">appos→parataxis</td><td class="right">3</td><td class="right">1</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="mark_to_fixed"><td class="indent label">mark→fixed</td><td class="right">3</td><td class="right">3</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="advmod_to_orphan"><td class="indent label">advmod→orphan</td><td class="right">5</td><td class="right">2</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="nmod_to_parataxis"><td class="indent label">nmod→parataxis</td><td class="right">5</td><td class="right">0</td><td class="right"><span class="pos">-5</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="appos_to_conj"><td class="indent label">appos→conj</td><td class="right">4</td><td class="right">1</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="orphan_to_parataxis"><td class="indent label">orphan→parataxis</td><td class="right">4</td><td class="right">2</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="appos_to_root"><td class="indent label">appos→root</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="acl_to_cop"><td class="indent label">acl→cop</td><td class="right">3</td><td class="right">2</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="advmod_to_det"><td class="indent label">advmod→det</td><td class="right">3</td><td class="right">2</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="advmod_to_root"><td class="indent label">advmod→root</td><td class="right">3</td><td class="right">1</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="nmod_to_root"><td class="indent label">nmod→root</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="nsubj_to_amod"><td class="indent label">nsubj→amod</td><td class="right">2</td><td class="right">2</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="case_to_obl"><td class="indent label">case→obl</td><td class="right">4</td><td class="right">0</td><td class="right"><span class="pos">-4</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="cop_to_conj"><td class="indent label">cop→conj</td><td class="right">4</td><td class="right">3</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="nmod_to_orphan"><td class="indent label">nmod→orphan</td><td class="right">4</td><td class="right">1</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="advmod_to_fixed"><td class="indent label">advmod→fixed</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="parataxis_to_nmod"><td class="indent label">parataxis→nmod</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="acl_to_csubj"><td class="indent label">acl→csubj</td><td class="right">3</td><td class="right">1</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="amod_to_root"><td class="indent label">amod→root</td><td class="right">3</td><td class="right">2</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="appos_to_obl"><td class="indent label">appos→obl</td><td class="right">3</td><td class="right">2</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="ccomp_to_csubj"><td class="indent label">ccomp→csubj</td><td class="right">3</td><td class="right">1</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="obj_to_nsubj"><td class="indent label">obj→nsubj</td><td class="right">3</td><td class="right">0</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="parataxis_to_amod"><td class="indent label">parataxis→amod</td><td class="right">3</td><td class="right">1</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="root_to_obj"><td class="indent label">root→obj</td><td class="right">3</td><td class="right">1</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="both_wrong" data-key="appos_to_flat"><td class="indent label">appos→flat</td><td class="right">1</td><td class="right">4</td><td class="right"><span class="neg">+3</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="iobj_to_obj"><td class="indent label">iobj→obj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="nmod_to_amod"><td class="indent label">nmod→amod</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="both_wrong" data-key="root_to_nmod"><td class="indent label">root→nmod</td><td class="right">1</td><td class="right">2</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="both_wrong" data-key="case_to_fixed"><td class="indent label">case→fixed</td><td class="right">2</td><td class="right">4</td><td class="right"><span class="neg">+2</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="nummod_to_conj"><td class="indent label">nummod→conj</td><td class="right">2</td><td class="right">2</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="obj_to_advmod"><td class="indent label">obj→advmod</td><td class="right">2</td><td class="right">2</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="root_to_appos"><td class="indent label">root→appos</td><td class="right">2</td><td class="right">2</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="advmod_to_nsubj"><td class="indent label">advmod→nsubj</td><td class="right">3</td><td class="right">0</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="conj_to_csubj"><td class="indent label">conj→csubj</td><td class="right">3</td><td class="right">0</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="conj_to_root"><td class="indent label">conj→root</td><td class="right">3</td><td class="right">0</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="csubj_to_root"><td class="indent label">csubj→root</td><td class="right">3</td><td class="right">0</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="parataxis_to_csubj"><td class="indent label">parataxis→csubj</td><td class="right">3</td><td class="right">0</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="root_to_amod"><td class="indent label">root→amod</td><td class="right">3</td><td class="right">0</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="obl_to_amod"><td class="indent label">obl→amod</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="root_to_nummod"><td class="indent label">root→nummod</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="advcl_to_aux"><td class="indent label">advcl→aux</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="advcl_to_ccomp"><td class="indent label">advcl→ccomp</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="advcl_to_nsubj"><td class="indent label">advcl→nsubj</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="advmod_to_amod"><td class="indent label">advmod→amod</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="amod_to_nsubj"><td class="indent label">amod→nsubj</td><td class="right">2</td><td class="right">1</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="ccomp_to_nsubj"><td class="indent label">ccomp→nsubj</td><td class="right">2</td><td class="right">1</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="conj_to_acl"><td class="indent label">conj→acl</td><td class="right">2</td><td class="right">1</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="conj_to_advcl"><td class="indent label">conj→advcl</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="cop_to_advcl"><td class="indent label">cop→advcl</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="cop_to_ccomp"><td class="indent label">cop→ccomp</td><td class="right">2</td><td class="right">1</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="nmod_to_iobj"><td class="indent label">nmod→iobj</td><td class="right">2</td><td class="right">2</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="nsubj_to_appos"><td class="indent label">nsubj→appos</td><td class="right">2</td><td class="right">2</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="obj_to_conj"><td class="indent label">obj→conj</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="obl_to_conj"><td class="indent label">obl→conj</td><td class="right">2</td><td class="right">1</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="obl_to_det"><td class="indent label">obl→det</td><td class="right">2</td><td class="right">1</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="root_to_aux"><td class="indent label">root→aux</td><td class="right">2</td><td class="right">1</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="advcl_to_advmod"><td class="indent label">advcl→advmod</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="advcl_to_amod"><td class="indent label">advcl→amod</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="advmod_to_nmod"><td class="indent label">advmod→nmod</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="conj_to_appos"><td class="indent label">conj→appos</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="flat_to_conj"><td class="indent label">flat→conj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="flat_to_nummod"><td class="indent label">flat→nummod</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="mark_to_advmod"><td class="indent label">mark→advmod</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="mark_to_case"><td class="indent label">mark→case</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="nsubj_to_case"><td class="indent label">nsubj→case</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="orphan_to_nmod"><td class="indent label">orphan→nmod</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="acl_to_xcomp"><td class="indent label">acl→xcomp</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="advcl_to_conj"><td class="indent label">advcl→conj</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="advmod_to_appos"><td class="indent label">advmod→appos</td><td class="right">2</td><td class="right">1</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="amod_to_acl"><td class="indent label">amod→acl</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="amod_to_ccomp"><td class="indent label">amod→ccomp</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="amod_to_parataxis"><td class="indent label">amod→parataxis</td><td class="right">2</td><td class="right">2</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="conj_to_ccomp"><td class="indent label">conj→ccomp</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="csubj_to_conj"><td class="indent label">csubj→conj</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="dep_to_nummod"><td class="indent label">dep→nummod</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="det_to_nsubj"><td class="indent label">det→nsubj</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="nsubj_to_det"><td class="indent label">nsubj→det</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="obj_to_appos"><td class="indent label">obj→appos</td><td class="right">2</td><td class="right">1</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="obj_to_root"><td class="indent label">obj→root</td><td class="right">2</td><td class="right">1</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="obl_to_orphan"><td class="indent label">obl→orphan</td><td class="right">2</td><td class="right">1</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="parataxis_to_cop"><td class="indent label">parataxis→cop</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="parataxis_to_orphan"><td class="indent label">parataxis→orphan</td><td class="right">2</td><td class="right">1</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="root_to_conj"><td class="indent label">root→conj</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="xcomp_to_cop"><td class="indent label">xcomp→cop</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="both_wrong" data-key="amod_to_obl"><td class="indent label">amod→obl</td><td class="right">0</td><td class="right">2</td><td class="right"><span class="neg">+2</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="appos_to_nsubj"><td class="indent label">appos→nsubj</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="both_wrong" data-key="ccomp_to_parataxis"><td class="indent label">ccomp→parataxis</td><td class="right">0</td><td class="right">1</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="conj_to_cc"><td class="indent label">conj→cc</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="flat_to_appos"><td class="indent label">flat→appos</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="obl_to_nummod"><td class="indent label">obl→nummod</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="orphan_to_amod"><td class="indent label">orphan→amod</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="acl_to_ccomp"><td class="indent label">acl→ccomp</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="advcl_to_nmod"><td class="indent label">advcl→nmod</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="advmod_to_conj"><td class="indent label">advmod→conj</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="amod_to_advcl"><td class="indent label">amod→advcl</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="appos_to_advmod"><td class="indent label">appos→advmod</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="conj_to_obj"><td class="indent label">conj→obj</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="csubj_to_advcl"><td class="indent label">csubj→advcl</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="csubj_to_ccomp"><td class="indent label">csubj→ccomp</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="dep_to_conj"><td class="indent label">dep→conj</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="det_to_root"><td class="indent label">det→root</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="nmod_to_advmod"><td class="indent label">nmod→advmod</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="both_wrong" data-key="nsubj_to_obj"><td class="indent label">nsubj→obj</td><td class="right">1</td><td class="right">2</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="nummod_to_parataxis"><td class="indent label">nummod→parataxis</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="nummod_to_root"><td class="indent label">nummod→root</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="both_wrong" data-key="obj_to_iobj"><td class="indent label">obj→iobj</td><td class="right">1</td><td class="right">2</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="xcomp_to_conj"><td class="indent label">xcomp→conj</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="acl_to_advmod"><td class="indent label">acl→advmod</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="acl_to_case"><td class="indent label">acl→case</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="acl_to_conj"><td class="indent label">acl→conj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="acl_to_mark"><td class="indent label">acl→mark</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="advcl_to_csubj"><td class="indent label">advcl→csubj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="advmod_to_iobj"><td class="indent label">advmod→iobj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="advmod_to_obj"><td class="indent label">advmod→obj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="advmod_to_obl"><td class="indent label">advmod→obl</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="advmod_to_parataxis"><td class="indent label">advmod→parataxis</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="advmod_to_xcomp"><td class="indent label">advmod→xcomp</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="amod_to_appos"><td class="indent label">amod→appos</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="amod_to_nmod"><td class="indent label">amod→nmod</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="appos_to_case"><td class="indent label">appos→case</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="appos_to_iobj"><td class="indent label">appos→iobj</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="appos_to_list"><td class="indent label">appos→list</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="aux_to_advcl"><td class="indent label">aux→advcl</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="case_to_advmod"><td class="indent label">case→advmod</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="ccomp_to_amod"><td class="indent label">ccomp→amod</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="ccomp_to_conj"><td class="indent label">ccomp→conj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="ccomp_to_nmod"><td class="indent label">ccomp→nmod</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="ccomp_to_obl"><td class="indent label">ccomp→obl</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="both_wrong" data-key="conj_to_flat"><td class="indent label">conj→flat</td><td class="right">1</td><td class="right">3</td><td class="right"><span class="neg">+2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="conj_to_mark"><td class="indent label">conj→mark</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="cop_to_aux"><td class="indent label">cop→aux</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="cop_to_csubj"><td class="indent label">cop→csubj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="csubj_to_obl"><td class="indent label">csubj→obl</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="dep_to_appos"><td class="indent label">dep→appos</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="dep_to_case"><td class="indent label">dep→case</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="dep_to_cc"><td class="indent label">dep→cc</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="dep_to_obl"><td class="indent label">dep→obl</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="det_to_obj"><td class="indent label">det→obj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="discourse_to_advmod"><td class="indent label">discourse→advmod</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="discourse_to_ccomp"><td class="indent label">discourse→ccomp</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="discourse_to_root"><td class="indent label">discourse→root</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="fixed_to_cc"><td class="indent label">fixed→cc</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="fixed_to_orphan"><td class="indent label">fixed→orphan</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="fixed_to_parataxis"><td class="indent label">fixed→parataxis</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="flat_to_advmod"><td class="indent label">flat→advmod</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="flat_to_fixed"><td class="indent label">flat→fixed</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="flat_to_obj"><td class="indent label">flat→obj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="iobj_to_det"><td class="indent label">iobj→det</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="nmod_to_case"><td class="indent label">nmod→case</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="nsubj_to_iobj"><td class="indent label">nsubj→iobj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="nsubj_to_nummod"><td class="indent label">nsubj→nummod</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="nsubj_to_obl"><td class="indent label">nsubj→obl</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="nsubj_to_orphan"><td class="indent label">nsubj→orphan</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="nummod_to_obl"><td class="indent label">nummod→obl</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="obj_to_acl"><td class="indent label">obj→acl</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="obj_to_case"><td class="indent label">obj→case</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="obj_to_det"><td class="indent label">obj→det</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="obj_to_parataxis"><td class="indent label">obj→parataxis</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="obl_to_ccomp"><td class="indent label">obl→ccomp</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="orphan_to_appos"><td class="indent label">orphan→appos</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="orphan_to_ccomp"><td class="indent label">orphan→ccomp</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="orphan_to_root"><td class="indent label">orphan→root</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="orphan_to_xcomp"><td class="indent label">orphan→xcomp</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="parataxis_to_aux"><td class="indent label">parataxis→aux</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="root_to_advcl"><td class="indent label">root→advcl</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="root_to_case"><td class="indent label">root→case</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="root_to_discourse"><td class="indent label">root→discourse</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="root_to_vocative"><td class="indent label">root→vocative</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="xcomp_to_advmod"><td class="indent label">xcomp→advmod</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="xcomp_to_nmod"><td class="indent label">xcomp→nmod</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="both_wrong" data-key="xcomp_to_obj"><td class="indent label">xcomp→obj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="acl_to_nummod"><td class="indent label">acl→nummod</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="both_wrong" data-key="acl_to_obl"><td class="indent label">acl→obl</td><td class="right">0</td><td class="right">1</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="advcl_to_appos"><td class="indent label">advcl→appos</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="advcl_to_parataxis"><td class="indent label">advcl→parataxis</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="both_wrong" data-key="advmod_to_acl"><td class="indent label">advmod→acl</td><td class="right">0</td><td class="right">1</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="advmod_to_advcl"><td class="indent label">advmod→advcl</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="both_wrong" data-key="advmod_to_mark"><td class="indent label">advmod→mark</td><td class="right">0</td><td class="right">2</td><td class="right"><span class="neg">+2</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="appos_to_csubj"><td class="indent label">appos→csubj</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="aux_to_root"><td class="indent label">aux→root</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="cc_to_discourse"><td class="indent label">cc→discourse</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="cc_to_nmod"><td class="indent label">cc→nmod</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="cc_to_root"><td class="indent label">cc→root</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="ccomp_to_xcomp"><td class="indent label">ccomp→xcomp</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="cop_to_xcomp"><td class="indent label">cop→xcomp</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="dep_to_acl"><td class="indent label">dep→acl</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="dep_to_nmod"><td class="indent label">dep→nmod</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="dep_to_parataxis"><td class="indent label">dep→parataxis</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="both_wrong" data-key="fixed_to_mark"><td class="indent label">fixed→mark</td><td class="right">0</td><td class="right">1</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="fixed_to_obl"><td class="indent label">fixed→obl</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="nmod_to_acl"><td class="indent label">nmod→acl</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="both_wrong" data-key="nmod_to_xcomp"><td class="indent label">nmod→xcomp</td><td class="right">0</td><td class="right">1</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="both_wrong" data-key="obj_to_amod"><td class="indent label">obj→amod</td><td class="right">0</td><td class="right">1</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="obl_to_advcl"><td class="indent label">obl→advcl</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="both_wrong" data-key="obl_to_case"><td class="indent label">obl→case</td><td class="right">0</td><td class="right">1</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="obl_to_parataxis"><td class="indent label">obl→parataxis</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="orphan_to_nsubj"><td class="indent label">orphan→nsubj</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="orphan_to_nummod"><td class="indent label">orphan→nummod</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="parataxis_to_ccomp"><td class="indent label">parataxis→ccomp</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="parataxis_to_obl"><td class="indent label">parataxis→obl</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="root_to_fixed"><td class="indent label">root→fixed</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="vocative_to_root"><td class="indent label">vocative→root</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="both_wrong" data-key="xcomp_to_nsubj"><td class="indent label">xcomp→nsubj</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+
+    <tr class="total-row">
+      <td class="bold">Napačna oznaka</td>
+      <td class="right bold">416</td>
+      <td class="right bold">306</td>
+      <td class="right"><span class="pos">-110</span></td>
+    </tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="iobj_to_obj"><td class="indent label">iobj→obj</td><td class="right">10</td><td class="right">19</td><td class="right"><span class="neg">+9</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="conj_to_parataxis"><td class="indent label">conj→parataxis</td><td class="right">16</td><td class="right">13</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="obj_to_nsubj"><td class="indent label">obj→nsubj</td><td class="right">30</td><td class="right">10</td><td class="right"><span class="pos">-20</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="nsubj_to_obj"><td class="indent label">nsubj→obj</td><td class="right">28</td><td class="right">12</td><td class="right"><span class="pos">-16</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="obj_to_iobj"><td class="indent label">obj→iobj</td><td class="right">29</td><td class="right">14</td><td class="right"><span class="pos">-15</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="orphan_to_advmod"><td class="indent label">orphan→advmod</td><td class="right">2</td><td class="right">6</td><td class="right"><span class="neg">+4</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="nmod_to_obl"><td class="indent label">nmod→obl</td><td class="right">4</td><td class="right">7</td><td class="right"><span class="neg">+3</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="iobj_to_expl"><td class="indent label">iobj→expl</td><td class="right">8</td><td class="right">5</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="flat_to_nmod"><td class="indent label">flat→nmod</td><td class="right">9</td><td class="right">2</td><td class="right"><span class="pos">-7</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="nmod_to_flat"><td class="indent label">nmod→flat</td><td class="right">12</td><td class="right">17</td><td class="right"><span class="neg">+5</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="cc_to_advmod"><td class="indent label">cc→advmod</td><td class="right">9</td><td class="right">5</td><td class="right"><span class="pos">-4</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="appos_to_conj"><td class="indent label">appos→conj</td><td class="right">10</td><td class="right">5</td><td class="right"><span class="pos">-5</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="obl_to_obj"><td class="indent label">obl→obj</td><td class="right">7</td><td class="right">3</td><td class="right"><span class="pos">-4</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="obl_to_nsubj"><td class="indent label">obl→nsubj</td><td class="right">11</td><td class="right">3</td><td class="right"><span class="pos">-8</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="advcl_to_parataxis"><td class="indent label">advcl→parataxis</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="obl_to_nmod"><td class="indent label">obl→nmod</td><td class="right">5</td><td class="right">3</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="det_to_nmod"><td class="indent label">det→nmod</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="nmod_to_amod"><td class="indent label">nmod→amod</td><td class="right">5</td><td class="right">4</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="appos_to_nmod"><td class="indent label">appos→nmod</td><td class="right">4</td><td class="right">6</td><td class="right"><span class="neg">+2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="conj_to_appos"><td class="indent label">conj→appos</td><td class="right">8</td><td class="right">2</td><td class="right"><span class="pos">-6</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="orphan_to_nmod"><td class="indent label">orphan→nmod</td><td class="right">4</td><td class="right">4</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="advmod_to_cc"><td class="indent label">advmod→cc</td><td class="right">4</td><td class="right">3</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="case_to_advmod"><td class="indent label">case→advmod</td><td class="right">0</td><td class="right">1</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="advmod_to_amod"><td class="indent label">advmod→amod</td><td class="right">6</td><td class="right">3</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="obl_to_advmod"><td class="indent label">obl→advmod</td><td class="right">3</td><td class="right">2</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="obl_to_xcomp"><td class="indent label">obl→xcomp</td><td class="right">3</td><td class="right">1</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="nsubj_to_obl"><td class="indent label">nsubj→obl</td><td class="right">6</td><td class="right">0</td><td class="right"><span class="pos">-6</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="parataxis_to_nsubj"><td class="indent label">parataxis→nsubj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="advmod_to_obl"><td class="indent label">advmod→obl</td><td class="right">4</td><td class="right">5</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="csubj_to_advcl"><td class="indent label">csubj→advcl</td><td class="right">4</td><td class="right">1</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="nmod_to_conj"><td class="indent label">nmod→conj</td><td class="right">4</td><td class="right">3</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="parataxis_to_obl"><td class="indent label">parataxis→obl</td><td class="right">4</td><td class="right">0</td><td class="right"><span class="pos">-4</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="advcl_to_ccomp"><td class="indent label">advcl→ccomp</td><td class="right">3</td><td class="right">5</td><td class="right"><span class="neg">+2</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="advmod_to_mark"><td class="indent label">advmod→mark</td><td class="right">3</td><td class="right">3</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="obj_to_obl"><td class="indent label">obj→obl</td><td class="right">3</td><td class="right">3</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="list_to_conj"><td class="indent label">list→conj</td><td class="right">0</td><td class="right">1</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="advmod_to_nsubj"><td class="indent label">advmod→nsubj</td><td class="right">5</td><td class="right">1</td><td class="right"><span class="pos">-4</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="advmod_to_nmod"><td class="indent label">advmod→nmod</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="nmod_to_nummod"><td class="indent label">nmod→nummod</td><td class="right">2</td><td class="right">3</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="advcl_to_csubj"><td class="indent label">advcl→csubj</td><td class="right">3</td><td class="right">2</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="advcl_to_xcomp"><td class="indent label">advcl→xcomp</td><td class="right">3</td><td class="right">1</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="mark_to_cc"><td class="indent label">mark→cc</td><td class="right">3</td><td class="right">3</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="conj_to_flat"><td class="indent label">conj→flat</td><td class="right">5</td><td class="right">5</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="cc_to_nmod"><td class="indent label">cc→nmod</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="advcl_to_advmod"><td class="indent label">advcl→advmod</td><td class="right">1</td><td class="right">5</td><td class="right"><span class="neg">+4</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="conj_to_nmod"><td class="indent label">conj→nmod</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="advcl_to_conj"><td class="indent label">advcl→conj</td><td class="right">3</td><td class="right">3</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="xcomp_to_obl"><td class="indent label">xcomp→obl</td><td class="right">3</td><td class="right">3</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="appos_to_amod"><td class="indent label">appos→amod</td><td class="right">2</td><td class="right">1</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="orphan_to_nummod"><td class="indent label">orphan→nummod</td><td class="right">2</td><td class="right">2</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="cc_to_case"><td class="indent label">cc→case</td><td class="right">4</td><td class="right">0</td><td class="right"><span class="pos">-4</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="nsubj_to_iobj"><td class="indent label">nsubj→iobj</td><td class="right">4</td><td class="right">1</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="amod_to_nmod"><td class="indent label">amod→nmod</td><td class="right">3</td><td class="right">2</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="ccomp_to_advcl"><td class="indent label">ccomp→advcl</td><td class="right">3</td><td class="right">1</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="obj_to_advmod"><td class="indent label">obj→advmod</td><td class="right">3</td><td class="right">0</td><td class="right"><span class="pos">-3</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="nmod_to_advmod"><td class="indent label">nmod→advmod</td><td class="right">1</td><td class="right">3</td><td class="right"><span class="neg">+2</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="advmod_to_xcomp"><td class="indent label">advmod→xcomp</td><td class="right">2</td><td class="right">2</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="cc_to_mark"><td class="indent label">cc→mark</td><td class="right">2</td><td class="right">1</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="mark_to_advmod"><td class="indent label">mark→advmod</td><td class="right">2</td><td class="right">3</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="obj_to_expl"><td class="indent label">obj→expl</td><td class="right">2</td><td class="right">1</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="amod_to_advmod"><td class="indent label">amod→advmod</td><td class="right">3</td><td class="right">2</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="cc_to_dep"><td class="indent label">cc→dep</td><td class="right">3</td><td class="right">3</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="csubj_to_ccomp"><td class="indent label">csubj→ccomp</td><td class="right">3</td><td class="right">3</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="expl_to_iobj"><td class="indent label">expl→iobj</td><td class="right">3</td><td class="right">2</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="cop_to_aux"><td class="indent label">cop→aux</td><td class="right">0</td><td class="right">2</td><td class="right"><span class="neg">+2</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="dep_to_punct"><td class="indent label">dep→punct</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="flat_to_conj"><td class="indent label">flat→conj</td><td class="right">0</td><td class="right">1</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="list_to_appos"><td class="indent label">list→appos</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="nmod_to_appos"><td class="indent label">nmod→appos</td><td class="right">0</td><td class="right">2</td><td class="right"><span class="neg">+2</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="nmod_to_obj"><td class="indent label">nmod→obj</td><td class="right">0</td><td class="right">1</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="parataxis_to_advmod"><td class="indent label">parataxis→advmod</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="xcomp_to_ccomp"><td class="indent label">xcomp→ccomp</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="advcl_to_nsubj"><td class="indent label">advcl→nsubj</td><td class="right">2</td><td class="right">1</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="ccomp_to_csubj"><td class="indent label">ccomp→csubj</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="ccomp_to_xcomp"><td class="indent label">ccomp→xcomp</td><td class="right">2</td><td class="right">2</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="csubj_to_acl"><td class="indent label">csubj→acl</td><td class="right">2</td><td class="right">1</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="mark_to_obj"><td class="indent label">mark→obj</td><td class="right">2</td><td class="right">1</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="nsubj_to_xcomp"><td class="indent label">nsubj→xcomp</td><td class="right">2</td><td class="right">1</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="parataxis_to_conj"><td class="indent label">parataxis→conj</td><td class="right">2</td><td class="right">4</td><td class="right"><span class="neg">+2</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="appos_to_parataxis"><td class="indent label">appos→parataxis</td><td class="right">1</td><td class="right">3</td><td class="right"><span class="neg">+2</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="det_to_amod"><td class="indent label">det→amod</td><td class="right">1</td><td class="right">2</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="mark_to_case"><td class="indent label">mark→case</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="nsubj_to_advmod"><td class="indent label">nsubj→advmod</td><td class="right">1</td><td class="right">2</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="parataxis_to_appos"><td class="indent label">parataxis→appos</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="parataxis_to_obj"><td class="indent label">parataxis→obj</td><td class="right">1</td><td class="right">2</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="advmod_to_aux"><td class="indent label">advmod→aux</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="cc_to_orphan"><td class="indent label">cc→orphan</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="discourse_to_ccomp"><td class="indent label">discourse→ccomp</td><td class="right">2</td><td class="right">2</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="nummod_to_nmod"><td class="indent label">nummod→nmod</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="xcomp_to_nsubj"><td class="indent label">xcomp→nsubj</td><td class="right">2</td><td class="right">0</td><td class="right"><span class="pos">-2</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="amod_to_flat"><td class="indent label">amod→flat</td><td class="right">0</td><td class="right">2</td><td class="right"><span class="neg">+2</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="appos_to_obl"><td class="indent label">appos→obl</td><td class="right">0</td><td class="right">1</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="conj_to_advmod"><td class="indent label">conj→advmod</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="det_to_advmod"><td class="indent label">det→advmod</td><td class="right">0</td><td class="right">1</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="expl_to_nmod"><td class="indent label">expl→nmod</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="obl_to_iobj"><td class="indent label">obl→iobj</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="orphan_to_appos"><td class="indent label">orphan→appos</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="parataxis_to_discourse"><td class="indent label">parataxis→discourse</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="xcomp_to_advmod"><td class="indent label">xcomp→advmod</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="advcl_to_obl"><td class="indent label">advcl→obl</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="appos_to_nummod"><td class="indent label">appos→nummod</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="aux_to_ccomp"><td class="indent label">aux→ccomp</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="conj_to_advcl"><td class="indent label">conj→advcl</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="det_to_nsubj"><td class="indent label">det→nsubj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="discourse_to_advmod"><td class="indent label">discourse→advmod</td><td class="right">1</td><td class="right">2</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="flat_to_amod"><td class="indent label">flat→amod</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="list_to_flat"><td class="indent label">list→flat</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="nsubj_to_conj"><td class="indent label">nsubj→conj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="nsubj_to_nmod"><td class="indent label">nsubj→nmod</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="nsubj_to_parataxis"><td class="indent label">nsubj→parataxis</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="obj_to_amod"><td class="indent label">obj→amod</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="orphan_to_amod"><td class="indent label">orphan→amod</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="orphan_to_det"><td class="indent label">orphan→det</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="parataxis_to_advcl"><td class="indent label">parataxis→advcl</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="acl_to_advcl"><td class="indent label">acl→advcl</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="acl_to_appos"><td class="indent label">acl→appos</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="acl_to_csubj"><td class="indent label">acl→csubj</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="acl_to_orphan"><td class="indent label">acl→orphan</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="advcl_to_acl"><td class="indent label">advcl→acl</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="advcl_to_obj"><td class="indent label">advcl→obj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="advmod_to_advcl"><td class="indent label">advmod→advcl</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="advmod_to_det"><td class="indent label">advmod→det</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="advmod_to_obj"><td class="indent label">advmod→obj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="advmod_to_orphan"><td class="indent label">advmod→orphan</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="amod_to_nsubj"><td class="indent label">amod→nsubj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="amod_to_nummod"><td class="indent label">amod→nummod</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="amod_to_obl"><td class="indent label">amod→obl</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="appos_to_list"><td class="indent label">appos→list</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="appos_to_xcomp"><td class="indent label">appos→xcomp</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="aux_to_cop"><td class="indent label">aux→cop</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="cc_to_discourse"><td class="indent label">cc→discourse</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="ccomp_to_aux"><td class="indent label">ccomp→aux</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="conj_to_obl"><td class="indent label">conj→obl</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="csubj_to_obj"><td class="indent label">csubj→obj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="csubj_to_orphan"><td class="indent label">csubj→orphan</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="csubj_to_xcomp"><td class="indent label">csubj→xcomp</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="dep_to_nmod"><td class="indent label">dep→nmod</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="discourse_to_mark"><td class="indent label">discourse→mark</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="discourse_to_orphan"><td class="indent label">discourse→orphan</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="expl_to_nsubj"><td class="indent label">expl→nsubj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="nmod_to_cc"><td class="indent label">nmod→cc</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="nmod_to_list"><td class="indent label">nmod→list</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="nmod_to_orphan"><td class="indent label">nmod→orphan</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="nsubj_to_advcl"><td class="indent label">nsubj→advcl</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="nsubj_to_nummod"><td class="indent label">nsubj→nummod</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="nummod_to_flat"><td class="indent label">nummod→flat</td><td class="right">1</td><td class="right">1</td><td class="right">0</td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="obj_to_conj"><td class="indent label">obj→conj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="obl_to_conj"><td class="indent label">obl→conj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="obl_to_det"><td class="indent label">obl→det</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="parataxis_to_cop"><td class="indent label">parataxis→cop</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="vocative_to_ccomp"><td class="indent label">vocative→ccomp</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="xcomp_to_advcl"><td class="indent label">xcomp→advcl</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="classla-better clickable-rel" data-case="rel_only" data-key="xcomp_to_csubj"><td class="indent label">xcomp→csubj</td><td class="right">1</td><td class="right">0</td><td class="right"><span class="pos">-1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="acl_to_case"><td class="indent label">acl→case</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="acl_to_ccomp"><td class="indent label">acl→ccomp</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="amod_to_det"><td class="indent label">amod→det</td><td class="right">0</td><td class="right">1</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="ccomp_to_advmod"><td class="indent label">ccomp→advmod</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="ccomp_to_obl"><td class="indent label">ccomp→obl</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="conj_to_ccomp"><td class="indent label">conj→ccomp</td><td class="right">0</td><td class="right">1</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="dep_to_appos"><td class="indent label">dep→appos</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="dep_to_case"><td class="indent label">dep→case</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="discourse_to_parataxis"><td class="indent label">discourse→parataxis</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="expl_to_obl"><td class="indent label">expl→obl</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="fixed_to_advmod"><td class="indent label">fixed→advmod</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="flat_to_appos"><td class="indent label">flat→appos</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="flat_to_fixed"><td class="indent label">flat→fixed</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="mark_to_fixed"><td class="indent label">mark→fixed</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="mark_to_nsubj"><td class="indent label">mark→nsubj</td><td class="right">0</td><td class="right">1</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="nummod_to_conj"><td class="indent label">nummod→conj</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="nummod_to_dep"><td class="indent label">nummod→dep</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="obj_to_xcomp"><td class="indent label">obj→xcomp</td><td class="right">0</td><td class="right">1</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="obl_to_fixed"><td class="indent label">obl→fixed</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="obl_to_mark"><td class="indent label">obl→mark</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="parataxis_to_amod"><td class="indent label">parataxis→amod</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="parataxis_to_ccomp"><td class="indent label">parataxis→ccomp</td><td class="right">0</td><td class="right">1</td><td class="right"><span class="neg">+1</span></td></tr>
+    <tr class="clickable-rel" data-case="rel_only" data-key="root_to_nsubj"><td class="indent label">root→nsubj</td><td class="right">0</td><td class="right">0</td><td class="right">0</td></tr>
+    <tr class="trankit-better clickable-rel" data-case="rel_only" data-key="xcomp_to_obj"><td class="indent label">xcomp→obj</td><td class="right">0</td><td class="right">1</td><td class="right"><span class="neg">+1</span></td></tr>
+
+    <tr style="border-top:2px solid #aaa">
+      <td class="bold" style="background:#1a1a1a;color:#f0ede8;font-family:'IBM Plex Mono',monospace;letter-spacing:.03em">VSE NAPAKE</td>
+      <td class="right bold" style="background:#1a1a1a;color:#f0ede8;font-family:'IBM Plex Mono',monospace">2.421</td>
+      <td class="right bold" style="background:#1a1a1a;color:#f0ede8;font-family:'IBM Plex Mono',monospace">1.376</td>
+      <td class="right bold" style="background:#1a1a1a;color:#9de8b0;font-family:'IBM Plex Mono',monospace">-1.045</td>
+    </tr>
+  </tbody>
+</table>
+<div class="note">
+  <strong>Barvno ozadje:</strong> <span style="background:#f0fbf5;padding:1px 5px;border:1px solid #cce8d8">zelena</span> = Trankit naredi več napak tega tipa &nbsp;·&nbsp; brez ozadja = CLASSLA naredi več ali enako.
+  Pozitivna razlika v stolpcu Razlika pomeni, da Trankit naredi <em>več</em> napak; negativna, da <em>manj</em>.
+</div>
+
+<div id="examples-panel" class="examples-panel" aria-live="polite">
+  <div id="examples-title" class="panel-title">Klikni relacijo v Tabeli 1 za prikaz primerov.</div>
+  <div id="examples-meta" class="panel-meta">Prikažejo se vsi primeri za izbrani tip napake in relacijski vzorec.</div>
+  <div class="panel-grid">
+    <div class="panel-col">
+      <h3 id="classla-col-title">CLASSLA</h3>
+      <div id="classla-list" class="panel-empty">Ni izbrane relacije.</div>
+    </div>
+    <div class="panel-col">
+      <h3 id="trankit-col-title">Trankit</h3>
+      <div id="trankit-list" class="panel-empty">Ni izbrane relacije.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PER-RELATION TABLE ── -->
+<h2>Tabela 2 &nbsp;·&nbsp; Natančnost po relacijah (LAS, v %)</h2>
+<table>
+  <thead>
+    <tr>
+      <th style="width:12%">Relacija</th>
+      <th style="width:28%">Opis</th>
+      <th class="right" style="width:8%">Testna</th>
+      <th class="right" style="width:11%">CLASSLA</th>
+      <th class="right" style="width:11%">Trankit</th>
+      <th class="right" style="width:10%">Razlika</th>
+      <th style="width:20%">Vizualizacija</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- high-agreement rows first, then sorted by abs diff -->
+
+    <!-- clearly trankit better -->
+    <tr class="trankit-better">
+      <td class="label">csubj</td><td>clausal subject</td><td class="right">78</td>
+      <td class="right">50,3</td><td class="right">90,9</td><td class="right"><span class="pos">+40,6</span></td>
+      <td><div class="bar-wrap"><div class="bar bar-c" style="width:50.3%"></div></div><div class="bar-wrap"><div class="bar bar-t" style="width:90.9%"></div></div></td>
+    </tr>
+    <tr class="trankit-better">
+      <td class="label">discourse</td><td>discourse element</td><td class="right">15</td>
+      <td class="right">50,0</td><td class="right">66,7</td><td class="right"><span class="pos">+16,7</span></td>
+      <td><div class="bar-wrap"><div class="bar bar-c" style="width:50%"></div></div><div class="bar-wrap"><div class="bar bar-t" style="width:66.7%"></div></div></td>
+    </tr>
+    <tr class="trankit-better">
+      <td class="label">obj</td><td>object</td><td class="right">1.085</td>
+      <td class="right">91,3</td><td class="right">95,2</td><td class="right"><span class="pos">+4,0</span></td>
+      <td><div class="bar-wrap"><div class="bar bar-c" style="width:91.3%"></div></div><div class="bar-wrap"><div class="bar bar-t" style="width:95.2%"></div></div></td>
+    </tr>
+    <tr class="trankit-better">
+      <td class="label">nsubj</td><td>nominal subject</td><td class="right">1.312</td>
+      <td class="right">89,0</td><td class="right">96,0</td><td class="right"><span class="pos">+7,0</span></td>
+      <td><div class="bar-wrap"><div class="bar bar-c" style="width:89%"></div></div><div class="bar-wrap"><div class="bar bar-t" style="width:96%"></div></div></td>
+    </tr>
+    <tr class="trankit-better">
+      <td class="label">cop</td><td>copula</td><td class="right">542</td>
+      <td class="right">86,6</td><td class="right">95,7</td><td class="right"><span class="pos">+9,1</span></td>
+      <td><div class="bar-wrap"><div class="bar bar-c" style="width:86.6%"></div></div><div class="bar-wrap"><div class="bar bar-t" style="width:95.7%"></div></div></td>
+    </tr>
+    <tr class="trankit-better">
+      <td class="label">acl</td><td>clausal modifier of noun</td><td class="right">437</td>
+      <td class="right">80,7</td><td class="right">90,1</td><td class="right"><span class="pos">+9,4</span></td>
+      <td><div class="bar-wrap"><div class="bar bar-c" style="width:80.7%"></div></div><div class="bar-wrap"><div class="bar bar-t" style="width:90.1%"></div></div></td>
+    </tr>
+    <tr class="trankit-better">
+      <td class="label">obl</td><td>oblique nominal</td><td class="right">1.722</td>
+      <td class="right">88,3</td><td class="right">94,0</td><td class="right"><span class="pos">+5,8</span></td>
+      <td><div class="bar-wrap"><div class="bar bar-c" style="width:88.3%"></div></div><div class="bar-wrap"><div class="bar bar-t" style="width:94%"></div></div></td>
+    </tr>
+    <tr class="trankit-better">
+      <td class="label">aux</td><td>auxiliary</td><td class="right">1.162</td>
+      <td class="right">96,3</td><td class="right">98,8</td><td class="right"><span class="pos">+2,5</span></td>
+      <td><div class="bar-wrap"><div class="bar bar-c" style="width:96.3%"></div></div><div class="bar-wrap"><div class="bar bar-t" style="width:98.8%"></div></div></td>
+    </tr>
+    <tr class="trankit-better">
+      <td class="label">conj</td><td>conjunct</td><td class="right">1.108</td>
+      <td class="right">83,1</td><td class="right">89,0</td><td class="right"><span class="pos">+5,9</span></td>
+      <td><div class="bar-wrap"><div class="bar bar-c" style="width:83.1%"></div></div><div class="bar-wrap"><div class="bar bar-t" style="width:89%"></div></div></td>
+    </tr>
+    <!-- roughly equal -->
+    <tr class="trankit-better">
+      <td class="label">amod</td><td>adjectival modifier</td><td class="right">2.165</td>
+      <td class="right">98,1</td><td class="right">98,8</td><td class="right"><span class="pos">+0,8</span></td>
+      <td><div class="bar-wrap"><div class="bar bar-c" style="width:98.1%"></div></div><div class="bar-wrap"><div class="bar bar-t" style="width:98.8%"></div></div></td>
+    </tr>
+    <tr class="trankit-better">
+      <td class="label">case</td><td>case marking</td><td class="right">2.415</td>
+      <td class="right">98,9</td><td class="right">99,4</td><td class="right"><span class="pos">+0,5</span></td>
+      <td><div class="bar-wrap"><div class="bar bar-c" style="width:98.9%"></div></div><div class="bar-wrap"><div class="bar bar-t" style="width:99.4%"></div></div></td>
+    </tr>
+    <tr class="trankit-better">
+      <td class="label">nmod</td><td>nominal modifier</td><td class="right">1.887</td>
+      <td class="right">86,1</td><td class="right">90,9</td><td class="right"><span class="pos">+4,8</span></td>
+      <td><div class="bar-wrap"><div class="bar bar-c" style="width:86.1%"></div></div><div class="bar-wrap"><div class="bar bar-t" style="width:90.9%"></div></div></td>
+    </tr>
+    <tr class="trankit-better">
+      <td class="label">mark</td><td>marker</td><td class="right">804</td>
+      <td class="right">94,5</td><td class="right">97,4</td><td class="right"><span class="pos">+3,0</span></td>
+      <td><div class="bar-wrap"><div class="bar bar-c" style="width:94.5%"></div></div><div class="bar-wrap"><div class="bar bar-t" style="width:97.4%"></div></div></td>
+    </tr>
+    <tr class="trankit-better">
+      <td class="label">root</td><td>root</td><td class="right">1.282</td>
+      <td class="right">92,5</td><td class="right">96,6</td><td class="right"><span class="pos">+4,1</span></td>
+      <td><div class="bar-wrap"><div class="bar bar-c" style="width:92.5%"></div></div><div class="bar-wrap"><div class="bar bar-t" style="width:96.6%"></div></div></td>
+    </tr>
+    <!-- classla better -->
+    <tr class="trankit-better">
+      <td class="label">iobj</td><td>indirect object</td><td class="right">145</td>
+      <td class="right">76,0</td><td class="right">82,5</td><td class="right"><span class="pos">+6,5</span></td>
+      <td><div class="bar-wrap"><div class="bar bar-c" style="width:76%"></div></div><div class="bar-wrap"><div class="bar bar-t" style="width:82.5%"></div></div></td>
+    </tr>
+    <tr class="trankit-better">
+      <td class="label">orphan</td><td>orphan</td><td class="right">83</td>
+      <td class="right">66,3</td><td class="right">73,2</td><td class="right"><span class="pos">+6,9</span></td>
+      <td><div class="bar-wrap"><div class="bar bar-c" style="width:66.3%"></div></div><div class="bar-wrap"><div class="bar bar-t" style="width:73.2%"></div></div></td>
+    </tr>
+    <tr class="classla-better">
+      <td class="label">list</td><td>list</td><td class="right">16</td>
+      <td class="right">82,3</td><td class="right">74,3</td><td class="right"><span class="neg">−8,1</span></td>
+      <td><div class="bar-wrap"><div class="bar bar-c" style="width:82.3%"></div></div><div class="bar-wrap"><div class="bar bar-t" style="width:74.3%"></div></div></td>
+    </tr>
+    <tr class="classla-better">
+      <td class="label">fixed</td><td>fixed multiword expression</td><td class="right">95</td>
+      <td class="right">94,8</td><td class="right">93,8</td><td class="right"><span class="neg">−1,0</span></td>
+      <td><div class="bar-wrap"><div class="bar bar-c" style="width:94.8%"></div></div><div class="bar-wrap"><div class="bar bar-t" style="width:93.8%"></div></div></td>
+    </tr>
+    <tr class="classla-better">
+      <td class="label">flat</td><td>flat multiword expression</td><td class="right">156</td>
+      <td class="right">86,1</td><td class="right">84,6</td><td class="right"><span class="neg">−1,5</span></td>
+      <td><div class="bar-wrap"><div class="bar bar-c" style="width:86.1%"></div></div><div class="bar-wrap"><div class="bar bar-t" style="width:84.6%"></div></div></td>
+    </tr>
+    <tr class="trankit-better">
+      <td class="label">advmod</td><td>adverbial modifier</td><td class="right">1.929</td>
+      <td class="right">88,5</td><td class="right">92,8</td><td class="right"><span class="pos">+4,3</span></td>
+      <td><div class="bar-wrap"><div class="bar bar-c" style="width:88.5%"></div></div><div class="bar-wrap"><div class="bar bar-t" style="width:92.8%"></div></div></td>
+    </tr>
+    <tr class="trankit-better">
+      <td class="label">parataxis</td><td>parataxis</td><td class="right">325</td>
+      <td class="right">64,9</td><td class="right">76,7</td><td class="right"><span class="pos">+11,8</span></td>
+      <td><div class="bar-wrap"><div class="bar bar-c" style="width:64.9%"></div></div><div class="bar-wrap"><div class="bar bar-t" style="width:76.7%"></div></div></td>
+    </tr>
+    <tr class="trankit-better">
+      <td class="label">det</td><td>determiner</td><td class="right">617</td>
+      <td class="right">97,9</td><td class="right">98,7</td><td class="right"><span class="pos">+0,8</span></td>
+      <td><div class="bar-wrap"><div class="bar bar-c" style="width:97.9%"></div></div><div class="bar-wrap"><div class="bar bar-t" style="width:98.7%"></div></div></td>
+    </tr>
+    <!-- summary row -->
+    <tr style="border-top:2px solid #aaa">
+      <td colspan="2" class="bold" style="background:#1a1a1a;color:#f0ede8;font-family:'IBM Plex Mono',monospace;letter-spacing:.03em">VSE RELACIJE</td>
+      <td class="right bold" style="background:#1a1a1a;color:#f0ede8;font-family:'IBM Plex Mono',monospace">25.442</td>
+      <td class="right bold" style="background:#1a1a1a;color:#f0ede8;font-family:'IBM Plex Mono',monospace">90,48</td>
+      <td class="right bold" style="background:#1a1a1a;color:#f0ede8;font-family:'IBM Plex Mono',monospace">94,59</td>
+      <td class="right bold" style="background:#1a1a1a;color:#9de8b0;font-family:'IBM Plex Mono',monospace">+4,11</td>
+      <td style="background:#1a1a1a">
+        <div class="bar-wrap" style="background:#444"><div class="bar bar-c" style="width:90.48%"></div></div>
+        <div class="bar-wrap" style="background:#444"><div class="bar bar-t" style="width:94.59%"></div></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="note">
+  <strong>Barvno ozadje:</strong>
+  <span style="background:#f0f4fb;padding:1px 5px;border:1px solid #c8d8ee">modra</span> = CLASSLA boljši &nbsp;·&nbsp;
+  <span style="background:#f0fbf5;padding:1px 5px;border:1px solid #cce8d8">zelena</span> = Trankit boljši &nbsp;·&nbsp;
+  Miniaturne vrstice: <span style="color:#4a6fa5">■</span> CLASSLA &nbsp; <span style="color:#2a9d5c">■</span> Trankit. Vrednosti so preproste točnosti (gold count v imenovalcu), ne F1.
+</div>
+
+<!-- ── SUMMARY ── -->
+<h2>Povzetek: kje je kateri model boljši / slabši</h2>
+<table>
+  <thead>
+    <tr>
+      <th style="width:22%">Dimenzija</th>
+      <th style="width:39%">Trankit boljši</th>
+      <th style="width:39%">CLASSLA boljši</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="bold">Jedrne arg. strukture</td>
+      <td>obj (+4,0), nsubj (+7,0), cop (+9,1), iobj (+6,6) — Trankit je boljši pri vseh glavnih argumentnih relacijah</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td class="bold">Stavčni odvisniki</td>
+      <td>csubj (+40,6), parataxis (+11,8), advcl (+9,9), acl (+9,4) — izrazita prednost Trankita pri vseh štirih relacijah</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td class="bold">Prislovna določila</td>
+      <td>advmod (+4,3) — Trankit je tudi tu stabilno boljši na ravni LAS</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td class="bold">Večbesedne enote</td>
+      <td>—</td>
+      <td>fixed (−1,0), flat (−1,5) — CLASSLA je nekoliko boljši pri obeh relacijah</td>
+    </tr>
+    <tr>
+      <td class="bold">Elipsa / redke str.</td>
+      <td>orphan (+6,9) — Trankit je boljši pri relaciji orphan</td>
+      <td>list (−8,1) — CLASSLA ostaja boljši pri relaciji list</td>
+    </tr>
+    <tr>
+      <td class="bold">Oznake napak</td>
+      <td>Trankit: manj napak tipa "napačno jedro in oznaka" (803 → 404) in "napačna oznaka" (416 → 306), zlasti pri obl/nmod zamenjavah</td>
+      <td>CLASSLA: manj specifičnih zamenjav iobj→obj (10 vs. 19; Trankit +9)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="note" style="margin-top:20px">
+  Analiza temelji na tokenih, za katere se pokrivata gold in predicted segmentacija (25.442 pojavnic, 1.282 povedi). Metrika je token-level LAS (labeled attachment score), izračunana z enakim postopkom kot v Tabeli 2 članka Dobrovoljc idr. (2023). Razlike pri relacijah z majhnim številom pojavnic (discourse, csubj, list, orphan) so statistično manj zanesljive.
+</div>
+
+<script src="comparison_table_data.js"></script>
+<script>
+  (function () {
+    const caseLabel = {
+      head_only: 'Napačno jedro',
+      both_wrong: 'Napačno jedro in oznaka',
+      rel_only: 'Napačna oznaka',
+    };
+
+    const panel = document.getElementById('examples-panel');
+    const titleEl = document.getElementById('examples-title');
+    const metaEl = document.getElementById('examples-meta');
+    const classlaEl = document.getElementById('classla-list');
+    const trankitEl = document.getElementById('trankit-list');
+    const filterInput = document.getElementById('table1-filter');
+    const filterClearBtn = document.getElementById('table1-filter-clear');
+    const toggleObscureBtn = document.getElementById('table1-toggle-obscure');
+    const obscureInfoEl = document.getElementById('table1-obscure-count');
+    const filterStatusEl = document.getElementById('table1-filter-status');
+
+    const rows = Array.from(document.querySelectorAll('#error-table tr.clickable-rel[data-case][data-key]'));
+    const data = window.TABLE1_EXAMPLES || {};
+    const totalRows = rows.length;
+    const MAX_VISIBLE_PER_BUCKET = 15;
+    let expandedObscureRows = false;
+    let obscureRowCount = 0;
+
+    // Keep reference-style relation notation in the UI: use '-' instead of arrow glyphs.
+    rows.forEach((row) => {
+      const labelCell = row.querySelector('td.indent.label');
+      if (labelCell && labelCell.textContent) {
+        labelCell.textContent = labelCell.textContent.replace(/→/g, '-');
+      }
+    });
+
+    // Start with a compact first look: keep only the most frequent rows per case visible.
+    const rowsByCase = { head_only: [], both_wrong: [], rel_only: [] };
+    rows.forEach((row) => {
+      const caseType = row.dataset.case;
+      if (rowsByCase[caseType]) {
+        rowsByCase[caseType].push(row);
+      }
+    });
+    Object.values(rowsByCase).forEach((bucketRows) => {
+      bucketRows.forEach((row, idx) => {
+        if (idx >= MAX_VISIBLE_PER_BUCKET) {
+          row.classList.add('obscure-rel');
+          obscureRowCount += 1;
+        }
+      });
+    });
+
+    function updateObscureToggleState() {
+      if (obscureRowCount <= 0) {
+        toggleObscureBtn.style.display = 'none';
+        obscureInfoEl.style.display = 'none';
+        return;
+      }
+
+      toggleObscureBtn.textContent = expandedObscureRows
+        ? 'Strni manj pogoste relacije'
+        : 'Prikaži vse relacije';
+      obscureInfoEl.textContent = expandedObscureRows
+        ? `Razširjen pogled (+${obscureRowCount} manj pogostih)`
+        : `Skrite manj pogoste: ${obscureRowCount}`;
+    }
+
+    function resetPanel() {
+      titleEl.textContent = 'Klikni relacijo v Tabeli 1 za prikaz primerov.';
+      metaEl.textContent = 'Prikažejo se vsi primeri za izbrani tip napake in relacijski vzorec.';
+      classlaEl.className = 'panel-empty';
+      classlaEl.textContent = 'Ni izbrane relacije.';
+      trankitEl.className = 'panel-empty';
+      trankitEl.textContent = 'Ni izbrane relacije.';
+      panel.classList.remove('active');
+    }
+
+    function renderColumn(targetEl, items) {
+      if (!items || items.length === 0) {
+        targetEl.className = 'panel-empty';
+        targetEl.textContent = 'Ni zadetkov za izbrani vzorec.';
+        return;
+      }
+
+      const ul = document.createElement('ul');
+      ul.className = 'ex-list';
+
+      items.forEach((ex) => {
+        const li = document.createElement('li');
+        li.className = 'ex-item';
+
+        const head = document.createElement('div');
+        head.className = 'ex-head';
+        head.textContent = `sid=${ex.sid} · tok=${ex.token}#${ex.token_id} · gold=${ex.gold} · pred=${ex.pred}`;
+
+        const sent = document.createElement('div');
+        sent.className = 'ex-sent';
+        sent.innerHTML = ex.sentence_html;
+
+        li.appendChild(head);
+        li.appendChild(sent);
+        ul.appendChild(li);
+      });
+
+      targetEl.className = '';
+      targetEl.innerHTML = '';
+      targetEl.appendChild(ul);
+    }
+
+    function onRowClick(row) {
+      rows.forEach((r) => r.classList.remove('selected-rel'));
+      row.classList.add('selected-rel');
+
+      const caseType = row.dataset.case;
+      const key = row.dataset.key;
+      const relLabel = row.querySelector('td.indent.label')?.textContent?.trim() || key;
+      const node = (data[caseType] && data[caseType][key]) || { classla: [], trankit: [] };
+
+      titleEl.textContent = `Primeri za relacijo: ${relLabel}`;
+      metaEl.textContent = `${caseLabel[caseType] || caseType} · CLASSLA: ${node.classla.length} · Trankit: ${node.trankit.length}`;
+
+      renderColumn(classlaEl, node.classla);
+      renderColumn(trankitEl, node.trankit);
+
+      panel.classList.add('active');
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function normalizeSearch(value) {
+      return (value || '')
+        .toLowerCase()
+        .replace(/\s*-\s*>\s*/g, '-')
+        .replace(/\s*→\s*/g, '-')
+        .replace(/_to_/g, '-')
+        .replace(/\bto\b/g, '-')
+        .replace(/_/g, '-')
+        .replace(/\s+/g, '')
+        .trim();
+    }
+
+    function applyFilter() {
+      const q = normalizeSearch(filterInput.value);
+      let visible = 0;
+      let selectedVisible = false;
+
+      rows.forEach((row) => {
+        const label = normalizeSearch(row.querySelector('td.indent.label')?.textContent || '');
+        const key = normalizeSearch(row.dataset.key || '');
+        const match = !q || label.includes(q) || key.includes(q);
+        const hideAsObscure = row.classList.contains('obscure-rel') && !expandedObscureRows && !q;
+        const show = match && !hideAsObscure;
+
+        row.style.display = show ? '' : 'none';
+        if (show) {
+          visible += 1;
+          if (row.classList.contains('selected-rel')) {
+            selectedVisible = true;
+          }
+        }
+      });
+
+      filterStatusEl.textContent = `Prikaz: ${visible}/${totalRows} relacij`;
+
+      if (!selectedVisible) {
+        rows.forEach((r) => r.classList.remove('selected-rel'));
+        resetPanel();
+      }
+    }
+
+    rows.forEach((row) => {
+      row.addEventListener('click', () => onRowClick(row));
+      row.setAttribute('title', 'Klik za prikaz vseh primerov');
+    });
+
+    filterInput.addEventListener('input', applyFilter);
+    filterClearBtn.addEventListener('click', () => {
+      filterInput.value = '';
+      applyFilter();
+      filterInput.focus();
+    });
+
+    toggleObscureBtn.addEventListener('click', () => {
+      expandedObscureRows = !expandedObscureRows;
+      updateObscureToggleState();
+      applyFilter();
+    });
+
+    updateObscureToggleState();
+    applyFilter();
+  })();
+</script>
+
+</body>
+</html>
