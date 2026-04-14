@@ -3,7 +3,6 @@
 Generated model outputs in CoNLL-U format.
 
 - `output/`: canonical public aligned prediction outputs
-- `samples/`: local-only smoke-test outputs (gitignored)
 - `../archive/local/`: local-only historical outputs (gitignored)
 
 Supplementary base-mode outputs are local-only (gitignored).

@@ -21,10 +21,7 @@ pip install -r requirements.txt
 2. Put the local gold file at:
 
 - data/gold/sl_ssj-ud-test.conllu
-
-Gold file hash used for canonical run:
-
-- c14d5d2f4f20a7ad43e0f598a2e18c5e41f08364ab36be1c87d6d9eae7f5c8b0
+- Source: https://github.com/UniversalDependencies/UD_Slovenian-SSJ
 
 ## Rerun (Aligned Canonical Path)
 
@@ -55,6 +52,7 @@ python scripts/verify_canonical_run.py --run-stamp <run-stamp>
 ## Repository Guide
 
 - data/: local inputs and dataset helpers
+- evaluation/: evaluator script provided for scoring
 - scripts/: pipeline, prediction, QA, and verification scripts
 - predictions/: canonical public prediction artifacts
 - results/: canonical public evaluation artifacts
