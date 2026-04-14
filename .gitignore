@@ -44,6 +44,10 @@ cache/
 # Keep transient rerun outputs local
 predictions/reruns/
 
+# Keep supplementary (non-canonical) mode outputs local
+predictions/runs/supplementary/
+results/runs/*/supplementary/
+
 # Local gold dataset files (do not publish in this repository)
 data/gold/
 

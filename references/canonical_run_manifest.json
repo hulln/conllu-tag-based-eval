@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "canonical_run_id": "20260414-1323_sl-ssj-ud-test_full",
+  "run_stamp": "20260414-1323",
+  "dataset_tag": "sl-ssj-ud-test",
+  "run_label": "full",
+  "mode": "aligned",
+  "source_commit": "c8ed4b22d9d0c2f9507e7005684758f4afcec348",
+  "environment": {
+    "python": "3.10.12",
+    "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+    "packages": {
+      "classla": "2.2.1",
+      "trankit": "1.1.2",
+      "torch": "2.0.1+cpu",
+      "numpy": "1.26.4",
+      "transformers": "4.35.2",
+      "adapters": "0.1.1",
+      "huggingface-hub": "0.19.4"
+    }
+  },
+  "file_hashes": {
+    "requirements.txt": "ff536e40114e74618dbc5f5df6423e127e6c1c23238aece0882f1be0aa0c6e8e",
+    "data/gold/sl_ssj-ud-test.conllu": "c14d5d2f4f20a7ad43e0f598a2e18c5e41f08364ab36be1c87d6d9eae7f5c8b0",
+    "evaluation/conll18_ud_eval_tag-based.py": "e7eb23ce69747e5c9176f55fffe47dcddc8c1774c9703c1f2f16e6848f96fa95",
+    "scripts/run_pipeline.py": "09417b60d52fcea60c67fa8f4bc764c1d7a2e2fb9b784f55295b8d7c134ed171",
+    "scripts/predict_classla.py": "b474335d5e2bc124f879423d2381a123b044e5cae2e483878965dfa6b5f0dfef",
+    "scripts/predict_trankit.py": "aa1b0da6769488d8752b00989ee7bd89ef59a2d356a3fab9f154bc4e5228f0c1",
+    "predictions/runs/{run_stamp}_sl-ssj-ud-test_full_classla_aligned_predicted.conllu": "54a368d2821118d25cb30874da2cfff5158bab2ca9def4bc5b1857398b4dd457",
+    "predictions/runs/{run_stamp}_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu": "336695f2060ba0a8c4c9c47b88ff38f007ca79304e4ed40cca06322c5ec52feb",
+    "results/runs/{run_stamp}_sl-ssj-ud-test_full/main/classla_aligned_eval.txt": "9c59e9b999eeaa384b23d3c333afc1ae8e9de88769f71b6749b040db5c0ed67c",
+    "results/runs/{run_stamp}_sl-ssj-ud-test_full/main/trankit_aligned_eval.txt": "f2a84e49c5dabacac57d576ddf3753948531d63e56c3e154d5449c1c2dfdb5e4",
+    "results/runs/{run_stamp}_sl-ssj-ud-test_full/main/classla-vs-trankit_aligned_comparison.md": "d9a75f5e40db476ee2d4583ba6fdd67b439729022e1d174e3f57006fcd8e0093"
+  },
+  "metric_tolerance": 0.0,
+  "expected_metrics": {
+    "results/runs/{run_stamp}_sl-ssj-ud-test_full/main/classla_aligned_eval.txt": {
+      "Sentences": 100.0,
+      "Tokens": 100.0,
+      "Words": 100.0,
+      "LAS": 90.48,
+      "UAS": 92.12,
+      "UPOS": 98.6,
+      "XPOS": 97.08,
+      "Lemmas": 98.94,
+      "MLAS": 84.99
+    },
+    "results/runs/{run_stamp}_sl-ssj-ud-test_full/main/trankit_aligned_eval.txt": {
+      "Sentences": 100.0,
+      "Tokens": 100.0,
+      "Words": 100.0,
+      "LAS": 91.07,
+      "UAS": 92.98,
+      "UPOS": 98.81,
+      "XPOS": 96.52,
+      "Lemmas": 97.41,
+      "MLAS": 83.83
+    }
+  }
+}
