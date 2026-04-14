@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import time
 from pathlib import Path
 from typing import Any, Iterable, Sequence
 
@@ -9,6 +10,10 @@ try:
     import classla
 except ModuleNotFoundError:
     classla = None
+
+
+_LEXICON_CACHE: dict[str, dict[tuple[str, str], str]] = {}
+_CLASSLA_LEXICON_PATCHED = False
 
 
 def iter_nonempty_lines(path: Path) -> Iterable[str]:
@@ -22,13 +27,24 @@ def parse_gold_alignment(path: Path) -> list[dict[str, Any]]:
     entries: list[dict[str, Any]] = []
     tokens: list[str] = []
     sent_text: str | None = None
+    sent_id: str | None = None
+    comment_lines: list[str] = []
 
     def flush() -> None:
-        nonlocal tokens, sent_text
+        nonlocal tokens, sent_text, sent_id, comment_lines
         if tokens:
-            entries.append({"text": sent_text or " ".join(tokens), "tokens": tokens})
+            entries.append(
+                {
+                    "sent_id": sent_id or str(len(entries) + 1),
+                    "text": sent_text or " ".join(tokens),
+                    "tokens": tokens,
+                    "comments": comment_lines,
+                }
+            )
         tokens = []
         sent_text = None
+        sent_id = None
+        comment_lines = []
 
     for raw_line in path.read_text(encoding="utf-8").splitlines():
         line = raw_line.rstrip("\n")
@@ -37,6 +53,9 @@ def parse_gold_alignment(path: Path) -> list[dict[str, Any]]:
             continue
 
         if line.startswith("#"):
+            comment_lines.append(line)
+            if line.startswith("# sent_id = "):
+                sent_id = line[len("# sent_id = ") :].strip()
             if line.startswith("# text = "):
                 sent_text = line[len("# text = ") :].strip()
             continue
@@ -87,7 +106,12 @@ def _infer_text_from_block(block_lines: Sequence[str]) -> str:
     return " ".join(forms)
 
 
-def _normalize_sentence_block(block_text: str, sent_id: int, text_hint: str | None = None) -> str:
+def _normalize_sentence_block(
+    block_text: str,
+    sent_id: str | int,
+    text_hint: str | None = None,
+    extra_comments: Sequence[str] | None = None,
+) -> str:
     raw_lines = [line for line in block_text.splitlines() if line.strip()]
     body_lines: list[str] = []
     existing_text: str | None = None
@@ -96,14 +120,30 @@ def _normalize_sentence_block(block_text: str, sent_id: int, text_hint: str | No
         if line.startswith("# text = "):
             existing_text = line[len("# text = ") :].strip()
             continue
-        if line.startswith("# sent_id = ") or line.startswith("# newpar"):
+        if line.startswith("#"):
             continue
         body_lines.append(line)
 
     sent_text = _safe_val(text_hint, default=_safe_val(existing_text, default=_infer_text_from_block(body_lines)))
 
-    lines = [f"# sent_id = {sent_id}"]
-    if sent_text:
+    lines = []
+    comment_lines = list(extra_comments or [])
+    wrote_sent_id = False
+    wrote_text = False
+    for line in comment_lines:
+        if line.startswith("# sent_id = "):
+            lines.append(f"# sent_id = {sent_id}")
+            wrote_sent_id = True
+        elif line.startswith("# text = "):
+            if sent_text:
+                lines.append(f"# text = {sent_text}")
+                wrote_text = True
+        else:
+            lines.append(line)
+
+    if not wrote_sent_id:
+        lines.append(f"# sent_id = {sent_id}")
+    if sent_text and not wrote_text:
         lines.append(f"# text = {sent_text}")
     lines.extend(body_lines)
     return "\n".join(lines)
@@ -120,6 +160,7 @@ def run_aligned(
         for idx, entry in enumerate(gold_entries, start=1):
             tokenized_sent = entry["tokens"]
             text_fallback = _safe_val(entry.get("text"), default=" ".join(tokenized_sent))
+            sent_id = _safe_val(str(entry.get("sent_id")), default=str(idx))
             doc = nlp([tokenized_sent])
 
             sent_count = len(getattr(doc, "sentences", []) or [])
@@ -128,7 +169,12 @@ def run_aligned(
                     f"Aligned mode expected exactly 1 sentence for gold sentence {idx}, got {sent_count}"
                 )
 
-            block = _normalize_sentence_block(doc.to_conll().rstrip(), sent_id=idx, text_hint=text_fallback)
+            block = _normalize_sentence_block(
+                doc.to_conll().rstrip(),
+                sent_id=sent_id,
+                text_hint=text_fallback,
+                extra_comments=entry.get("comments"),
+            )
             out.write(block + "\n\n")
 
             if idx == 1:
@@ -152,9 +198,70 @@ def run_base(nlp: Any, lines: Iterable[str]) -> str:
     return "\n\n".join(normalized).strip() + "\n\n"
 
 
+def _build_inflectional_lexicon(dict_entries: Sequence[Sequence[Any]] | None) -> dict[tuple[str, str], str]:
+    inf_lexicon: dict[tuple[str, str], str] = {}
+    if dict_entries is None:
+        return inf_lexicon
+
+    for entry in dict_entries:
+        if len(entry) < 5:
+            continue
+        key = (entry[0], entry[1])
+        if key not in inf_lexicon:
+            inf_lexicon[key] = entry[4]
+
+    return inf_lexicon
+
+
+def _patch_classla_lexicon_loading() -> None:
+    global _CLASSLA_LEXICON_PATCHED
+    if _CLASSLA_LEXICON_PATCHED:
+        return
+
+    from classla.models.pos import trainer as pos_trainer
+
+    original_load = pos_trainer.Trainer.load
+    original_load_inflectional_lexicon = pos_trainer.Trainer.load_inflectional_lexicon
+
+    def patched_load(self: Any, filename: str, pretrain: Any) -> None:
+        original_load(self, filename, pretrain)
+        cache_key = str(Path(filename).resolve())
+        cached = _build_inflectional_lexicon(getattr(self, "dict", None))
+        if cached:
+            _LEXICON_CACHE[cache_key] = cached
+
+    @staticmethod
+    def patched_load_inflectional_lexicon(filename: str) -> dict[tuple[str, str], str]:
+        cache_key = str(Path(filename).resolve())
+        cached = _LEXICON_CACHE.get(cache_key)
+        if cached is not None:
+            return cached
+
+        loaded = original_load_inflectional_lexicon(filename)
+        _LEXICON_CACHE[cache_key] = loaded
+        return loaded
+
+    pos_trainer.Trainer.load = patched_load
+    pos_trainer.Trainer.load_inflectional_lexicon = patched_load_inflectional_lexicon
+    _CLASSLA_LEXICON_PATCHED = True
+
+
+def build_pipeline(lang: str, pipeline_kwargs: dict[str, Any], label: str) -> Any:
+    start = time.perf_counter()
+    print(f"[CLASSLA {label}] initializing pipeline", flush=True)
+    nlp = classla.Pipeline(lang, **pipeline_kwargs)
+    elapsed = time.perf_counter() - start
+    print(f"[CLASSLA {label}] pipeline ready in {elapsed:.1f}s", flush=True)
+    return nlp
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run CLASSLA and export CoNLL-U predictions.")
-    parser.add_argument("--input", required=True, help="Path to raw sentence text file.")
+    parser.add_argument(
+        "--input",
+        default=None,
+        help="Path to raw sentence text file. Required for base mode and mode=both.",
+    )
     parser.add_argument("--output", default=None, help="Path to output CoNLL-U file for single-mode runs.")
     parser.add_argument(
         "--output-base",
@@ -203,6 +310,11 @@ def parse_args() -> argparse.Namespace:
         default=100,
         help="Print aligned-mode progress every N sentences (0 disables).",
     )
+    parser.add_argument(
+        "--use-gpu",
+        action="store_true",
+        help="Allow CLASSLA to use GPU if available. Disabled by default for reproducible CPU runs.",
+    )
     return parser.parse_args()
 
 
@@ -215,7 +327,8 @@ def main() -> None:
             "Missing dependency: classla. Install requirements first, e.g. `pip install -r requirements.txt`."
         )
 
-    input_path = Path(args.input)
+    _patch_classla_lexicon_loading()
+
     output_path = Path(args.output) if args.output else None
     output_base_path = Path(args.output_base) if args.output_base else None
     output_aligned_path = Path(args.output_aligned) if args.output_aligned else None
@@ -223,25 +336,33 @@ def main() -> None:
     if args.download_models:
         classla.download(args.lang)
 
-    lines = list(iter_nonempty_lines(input_path))
-    if not lines:
-        raise ValueError(f"No non-empty input lines found in {input_path}")
-
     gold_entries: list[dict[str, Any]] = []
     if mode in {"aligned", "both"}:
         if not args.aligned_gold:
             raise ValueError("Aligned mode requires --aligned-gold for strict alignment.")
 
         gold_entries = parse_gold_alignment(Path(args.aligned_gold))
-        if len(gold_entries) != len(lines):
-            raise ValueError(
-                "Strict aligned mode requires equal sentence counts between input and gold: "
-                f"input={len(lines)} gold={len(gold_entries)}"
-            )
+
+    lines: list[str] = []
+    if mode in {"base", "both"}:
+        if not args.input:
+            raise ValueError("Base mode requires --input.")
+
+        input_path = Path(args.input)
+        lines = list(iter_nonempty_lines(input_path))
+        if not lines:
+            raise ValueError(f"No non-empty input lines found in {input_path}")
+
+    if mode == "both" and len(gold_entries) != len(lines):
+        raise ValueError(
+            "Mode both requires equal sentence counts between input and aligned gold: "
+            f"input={len(lines)} gold={len(gold_entries)}"
+        )
 
     base_pipeline_kwargs = {
         "processors": args.processors,
         "pos_use_lexicon": not args.no_lexicon,
+        "use_gpu": args.use_gpu,
     }
 
     if mode == "both":
@@ -251,7 +372,7 @@ def main() -> None:
         output_base_path.parent.mkdir(parents=True, exist_ok=True)
         output_aligned_path.parent.mkdir(parents=True, exist_ok=True)
 
-        nlp_base = classla.Pipeline(args.lang, **base_pipeline_kwargs)
+        nlp_base = build_pipeline(args.lang, base_pipeline_kwargs, label="base")
         conllu = run_base(nlp_base, lines)
         output_base_path.write_text(conllu, encoding="utf-8")
         print(f"[CLASSLA base] input lines: {len(lines)}")
@@ -261,7 +382,7 @@ def main() -> None:
         aligned_pipeline_kwargs["tokenize_pretokenized"] = True
         aligned_pipeline_kwargs["tokenize_no_ssplit"] = True
 
-        nlp_aligned = classla.Pipeline(args.lang, **aligned_pipeline_kwargs)
+        nlp_aligned = build_pipeline(args.lang, aligned_pipeline_kwargs, label="aligned")
         run_aligned(nlp_aligned, gold_entries, output_aligned_path, args.progress_every)
         print(f"Wrote CLASSLA aligned prediction to {output_aligned_path}")
         return
@@ -272,7 +393,7 @@ def main() -> None:
         pipeline_kwargs["tokenize_pretokenized"] = True
         pipeline_kwargs["tokenize_no_ssplit"] = True
 
-    nlp = classla.Pipeline(args.lang, **pipeline_kwargs)
+    nlp = build_pipeline(args.lang, pipeline_kwargs, label=mode)
 
     if args.mode != mode:
         print(f"[CLASSLA] mode alias '{args.mode}' mapped to canonical mode '{mode}'")

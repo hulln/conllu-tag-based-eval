@@ -234,13 +234,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--input",
         default="data/raw/sl_ssj-ud-test.sentences.txt",
-        help="Path to raw sentence-per-line text file.",
+        help="Path to raw sentence-per-line text file. Required for base mode; ignored for aligned-only runs.",
     )
     parser.add_argument(
         "--sample-lines",
         type=int,
         default=0,
-        help="If >0, run on the first N non-empty lines only.",
+        help="If >0, use the first N gold sentences (and first N input lines when base mode is active).",
     )
     parser.add_argument(
         "--download-classla-models",
@@ -275,6 +275,11 @@ def parse_args() -> argparse.Namespace:
             "Default: current time in YYYYMMDD-HHMM format."
         ),
     )
+    parser.add_argument(
+        "--skip-qa",
+        action="store_true",
+        help="Skip the final QA validation step.",
+    )
     return parser.parse_args()
 
 
@@ -285,24 +290,30 @@ def main() -> None:
     python_bin = sys.executable
 
     gold_path = Path(args.gold)
-    input_path = Path(args.input)
+    input_path = Path(args.input) if args.input else None
+    active_modes = ["aligned", "base"] if args.modes == "both" else [canonical_mode(args.modes)]
 
     if args.sample_lines > 0:
         run_label = f"sample-{args.sample_lines}"
-        sample_input = Path("data/samples") / f"{run_label}.txt"
         sample_gold = Path("data/gold/samples") / f"{run_label}.conllu"
-        build_sample_input(repo_root / input_path, repo_root / sample_input, args.sample_lines)
         build_sample_gold(repo_root / gold_path, repo_root / sample_gold, args.sample_lines)
-        active_input = sample_input
         active_gold = sample_gold
+        active_input = None
+        if "base" in active_modes:
+            if input_path is None:
+                raise ValueError("Base mode sample runs require --input.")
+            sample_input = Path("data/samples") / f"{run_label}.txt"
+            build_sample_input(repo_root / input_path, repo_root / sample_input, args.sample_lines)
+            active_input = sample_input
         pred_root = Path("predictions/runs")
     else:
         run_label = "full"
-        active_input = input_path
         active_gold = gold_path
+        active_input = input_path if "base" in active_modes else None
         pred_root = Path("predictions/runs")
 
-    active_modes = ["aligned", "base"] if args.modes == "both" else [canonical_mode(args.modes)]
+    if "base" in active_modes and active_input is None:
+        raise ValueError("Base mode requires --input.")
 
     dataset_tag = sanitize_label(active_gold.stem)
     run_tag = sanitize_label(run_label)
@@ -378,12 +389,12 @@ def main() -> None:
             classla_cmd = [
                 python_bin,
                 "scripts/predict_classla.py",
-                "--input",
-                str(active_input),
                 "--mode",
                 "both",
                 "--aligned-gold",
                 str(active_gold),
+                "--input",
+                str(active_input),
                 "--output-base",
                 str(classla_preds["base"]),
                 "--output-aligned",
@@ -397,12 +408,12 @@ def main() -> None:
                 [
                     python_bin,
                     "scripts/predict_trankit.py",
-                    "--input",
-                    str(active_input),
                     "--mode",
                     "both",
                     "--aligned-gold",
                     str(active_gold),
+                    "--input",
+                    str(active_input),
                     "--output-base",
                     str(trankit_preds["base"]),
                     "--output-aligned",
@@ -415,8 +426,6 @@ def main() -> None:
             classla_cmd = [
                 python_bin,
                 "scripts/predict_classla.py",
-                "--input",
-                str(active_input),
                 "--mode",
                 mode,
                 "--output",
@@ -424,6 +433,8 @@ def main() -> None:
             ]
             if mode == "aligned":
                 classla_cmd.extend(["--aligned-gold", str(active_gold)])
+            else:
+                classla_cmd.extend(["--input", str(active_input)])
             if args.download_classla_models:
                 classla_cmd.append("--download-models")
 
@@ -432,8 +443,6 @@ def main() -> None:
             trankit_cmd = [
                 python_bin,
                 "scripts/predict_trankit.py",
-                "--input",
-                str(active_input),
                 "--mode",
                 mode,
                 "--output",
@@ -441,6 +450,8 @@ def main() -> None:
             ]
             if mode == "aligned":
                 trankit_cmd.extend(["--aligned-gold", str(active_gold)])
+            else:
+                trankit_cmd.extend(["--input", str(active_input)])
 
             run(trankit_cmd, cwd=repo_root)
 
@@ -487,11 +498,37 @@ def main() -> None:
             cwd=repo_root,
         )
 
+    qa_report_path = main_results_root / "qa_validation.md"
+    if not args.skip_qa:
+        qa_mode = "both" if active_modes == ["aligned", "base"] else active_modes[0]
+        qa_cmd = [
+            python_bin,
+            "scripts/qa_validate_run.py",
+            "--run-stamp",
+            run_stamp,
+            "--gold",
+            str(active_gold),
+            "--run-label",
+            run_label,
+            "--pred-root",
+            str(pred_root),
+            "--results-root",
+            "results/runs",
+            "--modes",
+            qa_mode,
+        ]
+        run(qa_cmd, cwd=repo_root)
+        if active_modes == ["base"]:
+            qa_report_path = supplementary_base_main_root / "qa_validation.md"
+
     print("")
     print("Pipeline completed.")
     print(f"Run label: {run_label}")
     print(f"Gold used: {active_gold}")
-    print(f"Input used: {active_input}")
+    if active_input is not None:
+        print(f"Input used: {active_input}")
+    else:
+        print("Input used: aligned gold CoNLL-U only")
     print(f"Modes: {', '.join(active_modes)}")
     print(f"Run stamp: {run_stamp}")
     print(f"Predictions root: {pred_root}")
@@ -500,6 +537,10 @@ def main() -> None:
     print(f"Diagnostics root (aligned): {diagnostics_root}")
     if "base" in active_modes:
         print(f"Supplementary base results root: {supplementary_base_root}")
+    if args.skip_qa:
+        print("QA report: skipped")
+    else:
+        print(f"QA report: {qa_report_path}")
     for mode in active_modes:
         print(f"Prediction file (CLASSLA {mode}): {classla_preds[mode]}")
         print(f"Prediction file (Trankit {mode}): {trankit_preds[mode]}")

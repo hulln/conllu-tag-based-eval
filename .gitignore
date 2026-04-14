@@ -49,12 +49,16 @@ data/gold/
 
 # Keep archive and sample/test-run artifacts local
 archive/first-run/
+archive/local/
 predictions/archive/
 results/archive/
 data/samples/
 predictions/samples/
 predictions/runs/*sample*/
 results/runs/*sample*/
+
+# Private run comparison notes (local only)
+references/run-comparison-*.md
 
 # Private supervisor/task instruction snapshots (local only)
 references/supervisor-instructions-*.txt

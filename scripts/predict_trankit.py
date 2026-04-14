@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import argparse
+import shutil
+import tempfile
 import zipfile
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Sequence
@@ -13,17 +15,40 @@ except ModuleNotFoundError:
 
 
 def _download_zip(url: str, target_path: Path, timeout_seconds: int = 30) -> None:
-    import requests
+    import ssl
+    from urllib.request import Request, urlopen
 
-    with requests.get(url, stream=True, timeout=timeout_seconds) as response:
-        response.raise_for_status()
+    request = Request(url, headers={"User-Agent": "conllu-tag-based-eval/1.0"})
+    ssl_context = ssl.create_default_context()
+    with urlopen(request, timeout=timeout_seconds, context=ssl_context) as response:
         with target_path.open("wb") as out_f:
-            for chunk in response.iter_content(chunk_size=1024 * 1024):
-                if chunk:
-                    out_f.write(chunk)
+            shutil.copyfileobj(response, out_f, length=1024 * 1024)
 
 
-def ensure_trankit_model(language: str, cache_dir: str | None) -> None:
+def _safe_extract_zip(zip_path: Path, target_dir: Path) -> None:
+    target_root = target_dir.resolve()
+    with zipfile.ZipFile(zip_path) as archive:
+        for member in archive.infolist():
+            member_path = Path(member.filename)
+            if member_path.is_absolute() or ".." in member_path.parts:
+                raise RuntimeError(f"Unsafe zip entry in Trankit model archive: {member.filename}")
+
+            resolved_member = (target_root / member_path).resolve()
+            if resolved_member != target_root and target_root not in resolved_member.parents:
+                raise RuntimeError(f"Zip entry escapes target directory: {member.filename}")
+
+        archive.extractall(target_dir)
+
+
+def _trankit_model_ready(lang_dir: Path, language: str) -> bool:
+    required_files = [
+        lang_dir / f"{language}.tokenizer.mdl",
+        lang_dir / f"{language}.tagger.mdl",
+    ]
+    return all(path.exists() for path in required_files)
+
+
+def ensure_trankit_model(language: str, cache_dir: str | None) -> str:
     from trankit.utils.tbinfo import saved_model_version
 
     embedding_name = "xlm-roberta-base"
@@ -31,31 +56,39 @@ def ensure_trankit_model(language: str, cache_dir: str | None) -> None:
     lang_dir = Path(effective_cache_dir) / embedding_name / language
     marker = lang_dir / f"{language}.downloaded"
 
-    if marker.exists():
-        return
+    if _trankit_model_ready(lang_dir, language):
+        marker.write_text("", encoding="utf-8")
+        return effective_cache_dir
+
+    marker.unlink(missing_ok=True)
 
     lang_dir.mkdir(parents=True, exist_ok=True)
-    zip_path = lang_dir / f"{language}.zip"
 
     urls = [
-        f"http://nlp.uoregon.edu/download/trankit/{saved_model_version}/{embedding_name}/{language}.zip",
+        f"https://nlp.uoregon.edu/download/trankit/{saved_model_version}/{embedding_name}/{language}.zip",
         f"https://huggingface.co/uonlp/trankit/resolve/main/models/{saved_model_version}/{embedding_name}/{language}.zip",
     ]
 
     failures: List[str] = []
     for url in urls:
+        temp_zip_path: Path | None = None
         try:
             print(f"[Trankit] attempting model download: {url}")
-            _download_zip(url, zip_path)
-            with zipfile.ZipFile(zip_path) as archive:
-                archive.extractall(lang_dir)
-            zip_path.unlink(missing_ok=True)
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".zip", dir=str(lang_dir)) as tmp_f:
+                temp_zip_path = Path(tmp_f.name)
+
+            _download_zip(url, temp_zip_path)
+            _safe_extract_zip(temp_zip_path, lang_dir)
+            if not _trankit_model_ready(lang_dir, language):
+                raise RuntimeError(f"Downloaded archive did not produce the expected Trankit model files in {lang_dir}")
             marker.write_text("", encoding="utf-8")
             print(f"[Trankit] model cache ready: {lang_dir}")
-            return
+            temp_zip_path.unlink(missing_ok=True)
+            return effective_cache_dir
         except Exception as exc:
             failures.append(f"{url} -> {exc}")
-            zip_path.unlink(missing_ok=True)
+            if temp_zip_path is not None:
+                temp_zip_path.unlink(missing_ok=True)
 
     raise RuntimeError(
         "Unable to download Trankit language model from configured sources:\n"
@@ -74,13 +107,24 @@ def parse_gold_alignment(path: Path) -> List[Dict[str, Any]]:
     entries: List[Dict[str, Any]] = []
     tokens: List[str] = []
     sent_text: str | None = None
+    sent_id: str | None = None
+    comment_lines: List[str] = []
 
     def flush() -> None:
-        nonlocal tokens, sent_text
+        nonlocal tokens, sent_text, sent_id, comment_lines
         if tokens:
-            entries.append({"text": sent_text or " ".join(tokens), "tokens": tokens})
+            entries.append(
+                {
+                    "sent_id": sent_id or str(len(entries) + 1),
+                    "text": sent_text or " ".join(tokens),
+                    "tokens": tokens,
+                    "comments": comment_lines,
+                }
+            )
         tokens = []
         sent_text = None
+        sent_id = None
+        comment_lines = []
 
     for raw_line in path.read_text(encoding="utf-8").splitlines():
         line = raw_line.rstrip("\n")
@@ -89,6 +133,9 @@ def parse_gold_alignment(path: Path) -> List[Dict[str, Any]]:
             continue
 
         if line.startswith("#"):
+            comment_lines.append(line)
+            if line.startswith("# sent_id = "):
+                sent_id = line[len("# sent_id = ") :].strip()
             if line.startswith("# text = "):
                 sent_text = line[len("# text = ") :].strip()
             continue
@@ -177,12 +224,32 @@ def _word_line(idx: int, token: Dict) -> str:
     )
 
 
-def _sentence_to_conllu(sentence: Dict, sent_id: int, text_fallback: str) -> str:
+def _sentence_to_conllu(
+    sentence: Dict,
+    sent_id: str | int,
+    text_fallback: str,
+    extra_comments: Sequence[str] | None = None,
+) -> str:
     lines: List[str] = []
     sent_text = _safe_val(sentence.get("text"), default=text_fallback)
 
-    lines.append(f"# sent_id = {sent_id}")
-    lines.append(f"# text = {sent_text}")
+    comment_lines = list(extra_comments or [])
+    wrote_sent_id = False
+    wrote_text = False
+    for line in comment_lines:
+        if line.startswith("# sent_id = "):
+            lines.append(f"# sent_id = {sent_id}")
+            wrote_sent_id = True
+        elif line.startswith("# text = "):
+            lines.append(f"# text = {sent_text}")
+            wrote_text = True
+        else:
+            lines.append(line)
+
+    if not wrote_sent_id:
+        lines.append(f"# sent_id = {sent_id}")
+    if not wrote_text:
+        lines.append(f"# text = {sent_text}")
 
     running_id = 1
     tokens = sentence.get("tokens", [])
@@ -267,6 +334,7 @@ def run_aligned(
         for idx, entry in enumerate(gold_entries, start=1):
             tokenized_sent = entry["tokens"]
             text_fallback = _safe_val(entry.get("text"), default=" ".join(tokenized_sent))
+            sent_id = _safe_val(str(entry.get("sent_id")), default=str(idx))
 
             out = pipeline(tokenized_sent, is_sent=True)
             sentences = _normalize_doc_output(out, text_fallback)
@@ -277,8 +345,15 @@ def run_aligned(
                 )
 
             for sent in sentences:
-                out_f.write(_sentence_to_conllu(sent, sent_id, text_fallback) + "\n\n")
-                sent_id += 1
+                out_f.write(
+                    _sentence_to_conllu(
+                        sent,
+                        sent_id,
+                        text_fallback,
+                        extra_comments=entry.get("comments"),
+                    )
+                    + "\n\n"
+                )
 
             if idx == 1:
                 out_f.flush()
@@ -354,7 +429,11 @@ def run_base(pipeline: Any, lines: Sequence[str], progress_every: int) -> str:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run Trankit and export CoNLL-U predictions.")
-    parser.add_argument("--input", required=True, help="Path to raw sentence text file.")
+    parser.add_argument(
+        "--input",
+        default=None,
+        help="Path to raw sentence text file. Required for base mode and mode=both.",
+    )
     parser.add_argument("--output", default=None, help="Path to output CoNLL-U file for single-mode runs.")
     parser.add_argument(
         "--output-base",
@@ -406,14 +485,9 @@ def main() -> None:
             "Missing dependency: trankit. Install requirements first, e.g. `pip install -r requirements.txt`."
         )
 
-    input_path = Path(args.input)
     output_path = Path(args.output) if args.output else None
     output_base_path = Path(args.output_base) if args.output_base else None
     output_aligned_path = Path(args.output_aligned) if args.output_aligned else None
-
-    lines = list(iter_nonempty_lines(input_path))
-    if not lines:
-        raise ValueError(f"No non-empty input lines found in {input_path}")
 
     gold_entries: List[Dict[str, Any]] = []
     if mode in {"aligned", "both"}:
@@ -421,17 +495,28 @@ def main() -> None:
             raise ValueError("Aligned mode requires --aligned-gold for strict alignment.")
 
         gold_entries = parse_gold_alignment(Path(args.aligned_gold))
-        if len(gold_entries) != len(lines):
-            raise ValueError(
-                "Strict aligned mode requires equal sentence counts between input and gold: "
-                f"input={len(lines)} gold={len(gold_entries)}"
-            )
+
+    lines: List[str] = []
+    if mode in {"base", "both"}:
+        if not args.input:
+            raise ValueError("Base mode requires --input.")
+
+        input_path = Path(args.input)
+        lines = list(iter_nonempty_lines(input_path))
+        if not lines:
+            raise ValueError(f"No non-empty input lines found in {input_path}")
+
+    if mode == "both" and len(gold_entries) != len(lines):
+        raise ValueError(
+            "Mode both requires equal sentence counts between input and aligned gold: "
+            f"input={len(lines)} gold={len(gold_entries)}"
+        )
 
     # Ensure language package exists locally before Pipeline init. This avoids
     # hard failures when the default Trankit host is temporarily unreachable.
-    ensure_trankit_model(args.lang, args.cache_dir)
+    effective_cache_dir = ensure_trankit_model(args.lang, args.cache_dir)
 
-    pipeline = Pipeline(lang=args.lang, gpu=args.gpu, cache_dir=args.cache_dir)
+    pipeline = Pipeline(lang=args.lang, gpu=args.gpu, cache_dir=effective_cache_dir)
 
     if mode == "both":
         if output_base_path is None or output_aligned_path is None:

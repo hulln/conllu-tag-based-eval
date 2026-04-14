@@ -1,0 +1,91 @@
+# QA Validation Report: 20260414-1323_sl-ssj-ud-test_full
+
+- Status: **PASS**
+- Modes validated: aligned
+- Gold file: data/gold/sl_ssj-ud-test.conllu
+- Predictions root: predictions/runs
+- Results root: results/runs/20260414-1323_sl-ssj-ud-test_full
+- Aligned results root: results/runs/20260414-1323_sl-ssj-ud-test_full/main
+- Supplementary base results root: results/runs/20260414-1323_sl-ssj-ud-test_full/supplementary/base
+
+## Gold Reference Counts
+- Sentences (evaluator): 1282
+- Tokens (evaluator): 25442
+- Words (evaluator): 25442
+- Sentence blocks (raw split): 1282
+- # sent_id present: 1282/1282
+- # text present: 1282/1282
+- First sent_id values: ['ssj562.2919.10333', 'ssj562.2919.10334', 'ssj562.2919.10335', 'ssj562.2919.10336', 'ssj562.2920.10337']
+
+## Prediction File Checks
+### classla_aligned
+- Path: predictions/runs/20260414-1323_sl-ssj-ud-test_full_classla_aligned_predicted.conllu
+- Exists: True
+- Evaluator parse OK: True
+- Sentences (evaluator): 1282
+- Tokens (evaluator): 25442
+- Words (evaluator): 25442
+- Sentence blocks (raw split): 1282
+- Malformed token rows: 0
+- # sent_id present: 1282/1282
+- # text present: 1282/1282
+- Unique sent_id count: 1282
+- First sent_id values: ['ssj562.2919.10333', 'ssj562.2919.10334', 'ssj562.2919.10335', 'ssj562.2919.10336', 'ssj562.2920.10337']
+- Ends with blank line: True
+
+### trankit_aligned
+- Path: predictions/runs/20260414-1323_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu
+- Exists: True
+- Evaluator parse OK: True
+- Sentences (evaluator): 1282
+- Tokens (evaluator): 25442
+- Words (evaluator): 25442
+- Sentence blocks (raw split): 1282
+- Malformed token rows: 0
+- # sent_id present: 1282/1282
+- # text present: 1282/1282
+- Unique sent_id count: 1282
+- First sent_id values: ['ssj562.2919.10333', 'ssj562.2919.10334', 'ssj562.2919.10335', 'ssj562.2919.10336', 'ssj562.2920.10337']
+- Ends with blank line: True
+
+## Result File Checks
+- Expected main files: 3
+- Expected diagnostics files: 4
+- Missing result files: 0
+- Traceback-leading result files: 0
+
+## Core Metrics (F1 from eval summaries)
+### classla_aligned
+- Sentences: 100.00
+- Tokens: 100.00
+- Words: 100.00
+- LAS: 90.48
+- UAS: 92.12
+- UPOS: 98.60
+- XPOS: 97.08
+- Lemmas: 98.94
+- MLAS: 84.99
+
+### trankit_aligned
+- Sentences: 100.00
+- Tokens: 100.00
+- Words: 100.00
+- LAS: 91.07
+- UAS: 92.98
+- UPOS: 98.81
+- XPOS: 96.52
+- Lemmas: 97.41
+- MLAS: 83.83
+
+## Model-vs-Model LAS Difference Snapshot
+### aligned
+- CLASSLA aligned correct, Trankit aligned wrong: 1195 (4.70%)
+- Trankit aligned correct, CLASSLA aligned wrong: 1345 (5.29%)
+- Both correct: 21826 (85.79%)
+- Both wrong: 1076 (4.23%)
+
+## Failures
+- None
+
+## Warnings
+- None

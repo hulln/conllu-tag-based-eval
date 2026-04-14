@@ -2,21 +2,22 @@
 
 Input datasets used by the pipeline.
 
-- `gold/`: reference CoNLL-U files used for evaluation (local-only, gitignored).
-- `raw/`: plain sentence text used as model input.
-- `samples/`: small extracted subsets for quick smoke tests.
+- `gold/`: authoritative gold CoNLL-U input for aligned evaluation. Local-only and gitignored.
+- `raw/`: optional sentence-per-line text used only for supplementary base-mode runs.
+- `samples/`: local-only small subsets for smoke tests.
 
 Methodology note:
 
-- Primary task uses aligned evaluation: gold segmentation/tokenization with model-predicted remaining layers.
-- Base mode is optional and treated as supplementary analysis.
+- Primary evaluation uses gold sentence segmentation and gold tokenization from `gold/*.conllu`.
+- The models then predict lemma, POS/morphology, and dependency annotation on top of that fixed structure.
+- Base mode is optional supplementary analysis only.
 
 Provenance note:
 
 - SSJ source: https://github.com/UniversalDependencies/UD_Slovenian-SSJ
-- Local copy obtainment date: 2026-04-10
+- Local copy obtainment date used in this project: 2026-04-10
 
 Primary files:
 
 - `gold/sl_ssj-ud-test.conllu`
-- `raw/sl_ssj-ud-test.sentences.txt`
+- `raw/sl_ssj-ud-test.sentences.txt` for optional base mode only
