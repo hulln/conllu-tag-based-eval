@@ -2,7 +2,7 @@
 
 Generated model outputs in CoNLL-U format.
 
-- `runs/`: canonical public aligned prediction outputs
+- `output/`: canonical public aligned prediction outputs
 - `samples/`: local-only smoke-test outputs (gitignored)
 - `../archive/local/`: local-only historical outputs (gitignored)
 
@@ -10,8 +10,8 @@ Supplementary base-mode outputs are local-only (gitignored).
 
 Current active canonical aligned files:
 
-- `runs/20260414-1323_sl-ssj-ud-test_full_classla_aligned_predicted.conllu`
-- `runs/20260414-1323_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu`
+- `output/20260414-1323_sl-ssj-ud-test_full_classla_aligned_predicted.conllu`
+- `output/20260414-1323_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu`
 
 Aligned predictions preserve gold `sent_id` values and sentence-level metadata where available.
 

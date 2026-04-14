@@ -10,6 +10,11 @@ from pathlib import Path
 from typing import List
 
 
+PRED_ROOT_DEFAULT = Path("predictions/output")
+PRED_ROOT_LEGACY = Path("predictions/runs")
+RESULTS_ROOT_DEFAULT = Path("results/output")
+
+
 def canonical_mode(mode: str) -> str:
     if mode in {"base", "raw", "unaligned"}:
         return "base"
@@ -292,6 +297,7 @@ def main() -> None:
     gold_path = Path(args.gold)
     input_path = Path(args.input) if args.input else None
     active_modes = ["aligned", "base"] if args.modes == "both" else [canonical_mode(args.modes)]
+    pred_root = PRED_ROOT_DEFAULT
 
     if args.sample_lines > 0:
         run_label = f"sample-{args.sample_lines}"
@@ -305,12 +311,10 @@ def main() -> None:
             sample_input = Path("data/samples") / f"{run_label}.txt"
             build_sample_input(repo_root / input_path, repo_root / sample_input, args.sample_lines)
             active_input = sample_input
-        pred_root = Path("predictions/runs")
     else:
         run_label = "full"
         active_gold = gold_path
         active_input = input_path if "base" in active_modes else None
-        pred_root = Path("predictions/runs")
 
     if "base" in active_modes and active_input is None:
         raise ValueError("Base mode requires --input.")
@@ -323,6 +327,12 @@ def main() -> None:
     elif args.skip_prediction:
         detected = discover_latest_complete_run_stamp(pred_root, dataset_tag, run_tag, active_modes)
         if detected is None:
+            legacy_detected = discover_latest_complete_run_stamp(PRED_ROOT_LEGACY, dataset_tag, run_tag, active_modes)
+            if legacy_detected is not None:
+                pred_root = PRED_ROOT_LEGACY
+                detected = legacy_detected
+
+        if detected is None:
             raise ValueError(
                 "--skip-prediction could not find a complete prediction set for the selected run/modes. "
                 "Provide --run-stamp explicitly or run prediction first."
@@ -332,7 +342,8 @@ def main() -> None:
     else:
         run_stamp = datetime.now().strftime("%Y%m%d-%H%M")
 
-    result_root = Path("results/runs") / f"{run_stamp}_{dataset_tag}_{run_tag}"
+    results_base_root = RESULTS_ROOT_DEFAULT
+    result_root = results_base_root / f"{run_stamp}_{dataset_tag}_{run_tag}"
     main_results_root = result_root / "main"
     diagnostics_root = result_root / "diagnostics"
     supplementary_base_root = result_root / "supplementary" / "base"
@@ -513,7 +524,7 @@ def main() -> None:
             "--pred-root",
             str(pred_root),
             "--results-root",
-            "results/runs",
+            str(results_base_root),
             "--modes",
             qa_mode,
         ]
