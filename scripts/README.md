@@ -9,6 +9,7 @@ Pipeline and analysis entry points.
 - `predict_trankit.py`: Trankit prediction export with the same aligned-mode contract as CLASSLA.
 - `qa_validate_run.py`: strict mode-aware run validation for aligned-only or aligned+base runs.
 - `verify_canonical_run.py`: strict rerun verifier using canonical hash/metric manifest.
+- `content_comparison_table.py`: Table-style HEAD/DEPREL content comparison (with examples) for Task 2 reporting.
 - `analyze_errors.py`: model-vs-gold HEAD/DEPREL error summaries.
 - `compare_models.py`: token-level CLASSLA-vs-Trankit comparison.
 - `export_raw_sentences.py`: helper for deriving raw sentence input from gold CoNLL-U when base mode is needed.

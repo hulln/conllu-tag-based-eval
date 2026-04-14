@@ -36,6 +36,7 @@ Main outputs:
 - predictions/output/<run-stamp>_sl-ssj-ud-test_full_classla_aligned_predicted.conllu
 - predictions/output/<run-stamp>_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu
 - results/output/<run-stamp>_sl-ssj-ud-test_full/main/
+- results/output/<run-stamp>_sl-ssj-ud-test_full/main/classla-vs-trankit_aligned_content-comparison.md (Table-style content comparison)
 
 ## Verify Rerun
 

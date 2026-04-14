@@ -394,6 +394,10 @@ def main() -> None:
         mode: mode_result_roots(mode)[0] / f"classla-vs-trankit_{mode}_comparison.md"
         for mode in active_modes
     }
+    content_comparison_reports = {
+        mode: mode_result_roots(mode)[0] / f"classla-vs-trankit_{mode}_content-comparison.md"
+        for mode in active_modes
+    }
 
     if not args.skip_prediction:
         if args.modes == "both":
@@ -509,6 +513,24 @@ def main() -> None:
             cwd=repo_root,
         )
 
+        run(
+            [
+                python_bin,
+                "scripts/content_comparison_table.py",
+                str(active_gold),
+                str(classla_preds[mode]),
+                str(trankit_preds[mode]),
+                str(content_comparison_reports[mode]),
+                "--model-a",
+                f"CLASSLA {mode}",
+                "--model-b",
+                f"Trankit {mode}",
+                "--top-n",
+                str(args.top_n),
+            ],
+            cwd=repo_root,
+        )
+
     qa_report_path = main_results_root / "qa_validation.md"
     if not args.skip_qa:
         qa_mode = "both" if active_modes == ["aligned", "base"] else active_modes[0]
@@ -562,6 +584,7 @@ def main() -> None:
         print(f"Result file (Trankit {mode} eval-tagged): {trankit_results[mode]['eval_tagged']}")
         print(f"Result file (Trankit {mode} errors): {trankit_results[mode]['errors']}")
         print(f"Result file (comparison {mode}): {comparison_reports[mode]}")
+        print(f"Result file (content comparison {mode}): {content_comparison_reports[mode]}")
 
 
 if __name__ == "__main__":
