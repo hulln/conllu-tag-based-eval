@@ -13,6 +13,7 @@ from typing import List
 PRED_ROOT_DEFAULT = Path("predictions/output")
 PRED_ROOT_LEGACY = Path("predictions/runs")
 RESULTS_ROOT_DEFAULT = Path("results/output")
+TABLES_ROOT_DEFAULT = Path("tables")
 
 
 def canonical_mode(mode: str) -> str:
@@ -285,6 +286,14 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Skip the final QA validation step.",
     )
+    parser.add_argument(
+        "--publish-interactive-table",
+        action="store_true",
+        help=(
+            "Regenerate tables/comparison_table.html and tables/comparison_table_data.js "
+            "from the aligned run outputs."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -318,6 +327,8 @@ def main() -> None:
 
     if "base" in active_modes and active_input is None:
         raise ValueError("Base mode requires --input.")
+    if args.publish_interactive_table and "aligned" not in active_modes:
+        raise ValueError("--publish-interactive-table requires aligned mode.")
 
     dataset_tag = sanitize_label(active_gold.stem)
     run_tag = sanitize_label(run_label)
@@ -398,6 +409,8 @@ def main() -> None:
         mode: mode_result_roots(mode)[0] / f"classla-vs-trankit_{mode}_content-comparison.md"
         for mode in active_modes
     }
+    interactive_table_html = TABLES_ROOT_DEFAULT / "comparison_table.html"
+    interactive_table_js = TABLES_ROOT_DEFAULT / "comparison_table_data.js"
 
     if not args.skip_prediction:
         if args.modes == "both":
@@ -425,6 +438,8 @@ def main() -> None:
                     "scripts/predict_trankit.py",
                     "--mode",
                     "both",
+                    "--model-source",
+                    "clarin-11356-1997",
                     "--aligned-gold",
                     str(active_gold),
                     "--input",
@@ -460,6 +475,8 @@ def main() -> None:
                 "scripts/predict_trankit.py",
                 "--mode",
                 mode,
+                "--model-source",
+                "clarin-11356-1997",
                 "--output",
                 str(trankit_preds[mode]),
             ]
@@ -531,6 +548,24 @@ def main() -> None:
             cwd=repo_root,
         )
 
+    if args.publish_interactive_table and "aligned" in active_modes:
+        run(
+            [
+                python_bin,
+                "scripts/build_interactive_comparison_table.py",
+                str(active_gold),
+                str(classla_preds["aligned"]),
+                str(trankit_preds["aligned"]),
+                str(classla_results["aligned"]["eval_tagged"]),
+                str(trankit_results["aligned"]["eval_tagged"]),
+                str(interactive_table_html),
+                str(interactive_table_js),
+                "--run-id",
+                f"{run_stamp}_{dataset_tag}_{run_tag}",
+            ],
+            cwd=repo_root,
+        )
+
     qa_report_path = main_results_root / "qa_validation.md"
     if not args.skip_qa:
         qa_mode = "both" if active_modes == ["aligned", "base"] else active_modes[0]
@@ -574,6 +609,9 @@ def main() -> None:
         print("QA report: skipped")
     else:
         print(f"QA report: {qa_report_path}")
+    if args.publish_interactive_table and "aligned" in active_modes:
+        print(f"Interactive comparison table: {interactive_table_html}")
+        print(f"Interactive comparison data: {interactive_table_js}")
     for mode in active_modes:
         print(f"Prediction file (CLASSLA {mode}): {classla_preds[mode]}")
         print(f"Prediction file (Trankit {mode}): {trankit_preds[mode]}")

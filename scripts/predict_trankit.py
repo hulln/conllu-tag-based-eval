@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import shutil
 import tempfile
 import zipfile
@@ -12,6 +13,26 @@ try:
     from trankit import Pipeline
 except ModuleNotFoundError:
     Pipeline = None
+
+
+CLARIN_SLOVENIAN_HANDLE = "11356/1997"
+CLARIN_SLOVENIAN_MODEL_URL = (
+    "https://www.clarin.si/repository/xmlui/bitstream/handle/11356/1997/"
+    "trankit-sl-ssj%2bsst.zip"
+)
+CLARIN_SLOVENIAN_MODEL_MD5 = "0ddfac8d7445f8fa300f59dde1a00352"
+SUPPORTED_EMBEDDINGS = {"xlm-roberta-base", "xlm-roberta-large"}
+
+
+def _file_md5(path: Path) -> str:
+    digest = hashlib.md5()
+    with path.open("rb") as f:
+        while True:
+            chunk = f.read(1024 * 1024)
+            if not chunk:
+                break
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def _download_zip(url: str, target_path: Path, timeout_seconds: int = 30) -> None:
@@ -48,10 +69,111 @@ def _trankit_model_ready(lang_dir: Path, language: str) -> bool:
     return all(path.exists() for path in required_files)
 
 
-def ensure_trankit_model(language: str, cache_dir: str | None) -> str:
+def _customized_model_ready(lang_dir: Path) -> bool:
+    required_files = [
+        lang_dir / "customized.tokenizer.mdl",
+        lang_dir / "customized.tagger.mdl",
+        lang_dir / "customized.vocabs.json",
+        lang_dir / "customized_lemmatizer.pt",
+    ]
+    return all(path.exists() for path in required_files)
+
+
+def ensure_clarin_slovenian_model(
+    cache_dir: str | None,
+    embedding_name: str,
+    clarin_model_url: str,
+    clarin_model_md5: str,
+) -> str:
+    if embedding_name not in SUPPORTED_EMBEDDINGS:
+        raise ValueError(
+            f"Unsupported embedding '{embedding_name}'. Supported embeddings: {sorted(SUPPORTED_EMBEDDINGS)}"
+        )
+
+    effective_cache_dir = cache_dir or "cache/trankit"
+    cache_root = Path(effective_cache_dir)
+    model_dir = cache_root / embedding_name / "customized"
+    marker = model_dir / "customized.downloaded"
+
+    if _customized_model_ready(model_dir):
+        marker.write_text(
+            (
+                f"source=clarin:{CLARIN_SLOVENIAN_HANDLE}\n"
+                f"url={clarin_model_url}\n"
+                f"md5={clarin_model_md5}\n"
+            ),
+            encoding="utf-8",
+        )
+        return effective_cache_dir
+
+    marker.unlink(missing_ok=True)
+    model_dir.mkdir(parents=True, exist_ok=True)
+
+    temp_zip_path: Path | None = None
+    temp_extract_dir: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".zip", dir=str(cache_root)) as tmp_f:
+            temp_zip_path = Path(tmp_f.name)
+
+        temp_extract_dir = Path(
+            tempfile.mkdtemp(prefix="clarin-trankit-extract-", dir=str(cache_root))
+        )
+
+        print(f"[Trankit] downloading Slovenian CLARIN model from handle {CLARIN_SLOVENIAN_HANDLE}")
+        _download_zip(clarin_model_url, temp_zip_path)
+
+        actual_md5 = _file_md5(temp_zip_path)
+        if actual_md5.lower() != clarin_model_md5.lower():
+            raise RuntimeError(
+                "CLARIN model checksum mismatch: "
+                f"expected {clarin_model_md5}, got {actual_md5}"
+            )
+
+        _safe_extract_zip(temp_zip_path, temp_extract_dir)
+
+        # CLARIN zip layout: save_dir_ssj+sst/<embedding>/customized/...
+        source_customized_dir = temp_extract_dir / "save_dir_ssj+sst" / embedding_name / "customized"
+        if not source_customized_dir.exists():
+            candidates = list(temp_extract_dir.rglob(f"{embedding_name}/customized"))
+            if candidates:
+                source_customized_dir = candidates[0]
+
+        if not source_customized_dir.exists():
+            raise RuntimeError(
+                "Unable to locate customized model folder in extracted CLARIN archive for "
+                f"embedding {embedding_name}."
+            )
+
+        shutil.rmtree(model_dir, ignore_errors=True)
+        model_dir.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(source_customized_dir, model_dir)
+
+        if not _customized_model_ready(model_dir):
+            raise RuntimeError(
+                "Downloaded CLARIN archive did not produce expected customized model files in "
+                f"{model_dir}"
+            )
+
+        marker.write_text(
+            (
+                f"source=clarin:{CLARIN_SLOVENIAN_HANDLE}\n"
+                f"url={clarin_model_url}\n"
+                f"md5={clarin_model_md5}\n"
+            ),
+            encoding="utf-8",
+        )
+        print(f"[Trankit] CLARIN Slovenian model cache ready: {model_dir}")
+        return effective_cache_dir
+    finally:
+        if temp_zip_path is not None:
+            temp_zip_path.unlink(missing_ok=True)
+        if temp_extract_dir is not None:
+            shutil.rmtree(temp_extract_dir, ignore_errors=True)
+
+
+def ensure_trankit_model(language: str, cache_dir: str | None, embedding_name: str) -> str:
     from trankit.utils.tbinfo import saved_model_version
 
-    embedding_name = "xlm-roberta-base"
     effective_cache_dir = cache_dir or "cache/trankit"
     lang_dir = Path(effective_cache_dir) / embedding_name / language
     marker = lang_dir / f"{language}.downloaded"
@@ -461,6 +583,32 @@ def parse_args() -> argparse.Namespace:
         help="Gold CoNLL-U file used to enforce strict token and sentence alignment in aligned mode.",
     )
     parser.add_argument("--lang", default="slovenian", help="Trankit language code (default: slovenian).")
+    parser.add_argument(
+        "--model-source",
+        choices=["auto", "clarin-11356-1997", "upstream"],
+        default="auto",
+        help=(
+            "Model source selection. 'auto' (default) uses CLARIN 11356/1997 for Slovenian and upstream for other "
+            "languages; 'clarin-11356-1997' forces the specific Slovenian CLARIN model; 'upstream' uses Trankit "
+            "default model download logic."
+        ),
+    )
+    parser.add_argument(
+        "--embedding",
+        choices=sorted(SUPPORTED_EMBEDDINGS),
+        default="xlm-roberta-base",
+        help="Embedding variant to use for model loading.",
+    )
+    parser.add_argument(
+        "--clarin-model-url",
+        default=CLARIN_SLOVENIAN_MODEL_URL,
+        help="Direct CLARIN download URL for the Slovenian model zip.",
+    )
+    parser.add_argument(
+        "--clarin-model-md5",
+        default=CLARIN_SLOVENIAN_MODEL_MD5,
+        help="Expected MD5 checksum for the CLARIN Slovenian model zip.",
+    )
     parser.add_argument("--cache-dir", default=None, help="Optional model cache directory.")
     parser.add_argument(
         "--gpu",
@@ -512,11 +660,43 @@ def main() -> None:
             f"input={len(lines)} gold={len(gold_entries)}"
         )
 
-    # Ensure language package exists locally before Pipeline init. This avoids
-    # hard failures when the default Trankit host is temporarily unreachable.
-    effective_cache_dir = ensure_trankit_model(args.lang, args.cache_dir)
+    lang_norm = args.lang.strip().lower()
+    is_slovenian = lang_norm in {"sl", "slovenian"}
+    use_clarin = args.model_source == "clarin-11356-1997" or (args.model_source == "auto" and is_slovenian)
 
-    pipeline = Pipeline(lang=args.lang, gpu=args.gpu, cache_dir=effective_cache_dir)
+    if use_clarin and not is_slovenian:
+        raise ValueError(
+            "CLARIN 11356/1997 source is Slovenian-only. Use --lang slovenian (or sl) with this source."
+        )
+
+    if use_clarin:
+        effective_cache_dir = ensure_clarin_slovenian_model(
+            args.cache_dir,
+            args.embedding,
+            args.clarin_model_url,
+            args.clarin_model_md5,
+        )
+        pipeline_lang = "customized"
+        print(
+            f"[Trankit] model source: CLARIN {CLARIN_SLOVENIAN_HANDLE} (lang=customized, embedding={args.embedding})"
+        )
+        pipeline = Pipeline(
+            lang=pipeline_lang,
+            gpu=args.gpu,
+            cache_dir=effective_cache_dir,
+            embedding=args.embedding,
+        )
+    else:
+        # Ensure language package exists locally before Pipeline init. This avoids
+        # hard failures when the default Trankit host is temporarily unreachable.
+        effective_cache_dir = ensure_trankit_model(args.lang, args.cache_dir, args.embedding)
+        print(f"[Trankit] model source: upstream (lang={args.lang}, embedding={args.embedding})")
+        pipeline = Pipeline(
+            lang=args.lang,
+            gpu=args.gpu,
+            cache_dir=effective_cache_dir,
+            embedding=args.embedding,
+        )
 
     if mode == "both":
         if output_base_path is None or output_aligned_path is None:

@@ -9,8 +9,8 @@ Supplementary base-mode outputs are local-only (gitignored).
 
 Current active canonical aligned files:
 
-- `output/20260414-1323_sl-ssj-ud-test_full_classla_aligned_predicted.conllu`
-- `output/20260414-1323_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu`
+- `output/20260414-1819_sl-ssj-ud-test_full_classla_aligned_predicted.conllu`
+- `output/20260414-1819_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu`
 
 Aligned predictions preserve gold `sent_id` values and sentence-level metadata where available.
 
