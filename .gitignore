@@ -45,8 +45,12 @@ cache/
 predictions/reruns/
 
 # Keep supplementary (non-canonical) mode outputs local
-predictions/runs/supplementary/
-results/runs/*/supplementary/
+predictions/output/supplementary/
+results/output/*/supplementary/
+
+# Legacy layout from older versions (local only)
+predictions/runs/
+results/runs/
 
 # Local gold dataset files (do not publish in this repository)
 data/gold/
@@ -58,8 +62,8 @@ predictions/archive/
 results/archive/
 data/samples/
 predictions/samples/
-predictions/runs/*sample*/
-results/runs/*sample*/
+predictions/output/*sample*/
+results/output/*sample*/
 
 # Private run comparison notes (local only)
 references/run-comparison-*.md

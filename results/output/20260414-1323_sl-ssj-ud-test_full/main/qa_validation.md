@@ -3,10 +3,10 @@
 - Status: **PASS**
 - Modes validated: aligned
 - Gold file: data/gold/sl_ssj-ud-test.conllu
-- Predictions root: predictions/runs
-- Results root: results/runs/20260414-1323_sl-ssj-ud-test_full
-- Aligned results root: results/runs/20260414-1323_sl-ssj-ud-test_full/main
-- Supplementary base results root: results/runs/20260414-1323_sl-ssj-ud-test_full/supplementary/base
+- Predictions root: predictions/output
+- Results root: results/output/20260414-1323_sl-ssj-ud-test_full
+- Aligned results root: results/output/20260414-1323_sl-ssj-ud-test_full/main
+- Supplementary base results root: results/output/20260414-1323_sl-ssj-ud-test_full/supplementary/base
 
 ## Gold Reference Counts
 - Sentences (evaluator): 1282
@@ -19,7 +19,7 @@
 
 ## Prediction File Checks
 ### classla_aligned
-- Path: predictions/runs/20260414-1323_sl-ssj-ud-test_full_classla_aligned_predicted.conllu
+- Path: predictions/output/20260414-1323_sl-ssj-ud-test_full_classla_aligned_predicted.conllu
 - Exists: True
 - Evaluator parse OK: True
 - Sentences (evaluator): 1282
@@ -34,7 +34,7 @@
 - Ends with blank line: True
 
 ### trankit_aligned
-- Path: predictions/runs/20260414-1323_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu
+- Path: predictions/output/20260414-1323_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu
 - Exists: True
 - Evaluator parse OK: True
 - Sentences (evaluator): 1282

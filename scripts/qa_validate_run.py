@@ -9,6 +9,12 @@ from pathlib import Path
 from typing import Callable, Dict, List, Sequence
 
 
+PRED_ROOT_DEFAULT = Path("predictions/output")
+PRED_ROOT_LEGACY = Path("predictions/runs")
+RESULTS_ROOT_DEFAULT = Path("results/output")
+RESULTS_ROOT_LEGACY = Path("results/runs")
+
+
 def canonical_mode(mode: str) -> str:
     if mode in {"base", "raw", "unaligned"}:
         return "base"
@@ -246,8 +252,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--run-stamp", required=True, help="Run stamp, e.g. 20260409-2248")
     parser.add_argument("--gold", default="data/gold/sl_ssj-ud-test.conllu", help="Gold CoNLL-U path")
     parser.add_argument("--run-label", default="full", help="Run label used by pipeline (default: full)")
-    parser.add_argument("--pred-root", default="predictions/runs", help="Predictions root")
-    parser.add_argument("--results-root", default="results/runs", help="Results root")
+    parser.add_argument("--pred-root", default="predictions/output", help="Predictions root")
+    parser.add_argument("--results-root", default="results/output", help="Results root")
     parser.add_argument(
         "--modes",
         choices=["both", "aligned", "base", "raw", "unaligned"],
@@ -275,6 +281,17 @@ def main() -> None:
     run_id = f"{run_stamp}_{dataset_tag}_{run_tag}"
     pred_root = resolve_path(repo_root, args.pred_root)
     results_root = resolve_path(repo_root, args.results_root)
+
+    default_pred_root = repo_root / PRED_ROOT_DEFAULT
+    legacy_pred_root = repo_root / PRED_ROOT_LEGACY
+    if pred_root == default_pred_root and not pred_root.exists() and legacy_pred_root.exists():
+        pred_root = legacy_pred_root
+
+    default_results_root = repo_root / RESULTS_ROOT_DEFAULT
+    legacy_results_root = repo_root / RESULTS_ROOT_LEGACY
+    if results_root == default_results_root and not results_root.exists() and legacy_results_root.exists():
+        results_root = legacy_results_root
+
     run_results_root = results_root / run_id
     main_results_root = run_results_root / "main"
     diagnostics_root = run_results_root / "diagnostics"

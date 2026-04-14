@@ -36,9 +36,9 @@ python scripts/run_pipeline.py --modes aligned --run-stamp <run-stamp> --downloa
 
 Main outputs:
 
-- predictions/runs/<run-stamp>_sl-ssj-ud-test_full_classla_aligned_predicted.conllu
-- predictions/runs/<run-stamp>_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu
-- results/runs/<run-stamp>_sl-ssj-ud-test_full/main/
+- predictions/output/<run-stamp>_sl-ssj-ud-test_full_classla_aligned_predicted.conllu
+- predictions/output/<run-stamp>_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu
+- results/output/<run-stamp>_sl-ssj-ud-test_full/main/
 
 ## Verify Rerun
 
@@ -58,7 +58,7 @@ python scripts/verify_canonical_run.py --run-stamp <run-stamp>
 - scripts/: pipeline, prediction, QA, and verification scripts
 - predictions/: canonical public prediction artifacts
 - results/: canonical public evaluation artifacts
-- archive/: local-only historical artifacts
+- archive/: local-only historical artifacts (not public)
 - references/: paper link and canonical verification manifest
 
 ## Optional Non-Canonical Mode
