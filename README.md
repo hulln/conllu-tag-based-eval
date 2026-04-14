@@ -34,6 +34,13 @@ All predictions are evaluated against gold. Aligned outputs are the primary repo
 - `references/` papers, links, and project instructions ([details](references/README.md))
 - `archive/` older or legacy experiment outputs ([details](archive/README.md))
 
+## Run Policy (For Readers)
+
+- Canonical reporting run: `20260409-2248_sl-ssj-ud-test_full` (full aligned inference provenance on this machine).
+- Active run artifacts in `predictions/runs/` and `results/runs/` are kept minimal and canonical-first.
+- Equivalent verification/normalization runs are moved to `archive/runs/` for traceability.
+  - Archived verification run: `archive/runs/20260414-1215_sl-ssj-ud-test_full/`
+
 ## Data Provenance
 
 - Local gold files in `data/gold/` are intentionally gitignored.
@@ -85,11 +92,11 @@ python scripts/run_pipeline.py --modes both --skip-prediction
 
 ## Where To Look First (External Reader)
 
-1. Latest QA summary: `results/runs/<run-id>/main/qa_validation.md`
-2. Main aligned metrics: `results/runs/<run-id>/main/*_aligned_eval.txt`
-3. Main aligned comparison: `results/runs/<run-id>/main/classla-vs-trankit_aligned_comparison.md`
-4. Detailed aligned diagnostics: `results/runs/<run-id>/diagnostics/`
-5. Supplementary base outputs (if enabled): `results/runs/<run-id>/supplementary/base/`
+1. Canonical QA summary: `results/runs/20260409-2248_sl-ssj-ud-test_full/main/qa_validation.md`
+2. Canonical aligned metrics: `results/runs/20260409-2248_sl-ssj-ud-test_full/main/*_aligned_eval.txt`
+3. Canonical aligned comparison: `results/runs/20260409-2248_sl-ssj-ud-test_full/main/classla-vs-trankit_aligned_comparison.md`
+4. Canonical aligned diagnostics: `results/runs/20260409-2248_sl-ssj-ud-test_full/diagnostics/`
+5. Archived verification run (same aligned scores, metadata-preserving normalization): `archive/runs/20260414-1215_sl-ssj-ud-test_full/`
 
 ## Naming Conventions
 
@@ -103,4 +110,5 @@ python scripts/run_pipeline.py --modes both --skip-prediction
 
 - Keep aligned primary outputs and base supplementary outputs separate.
 - Use run-stamped filenames/folders; do not overwrite historical runs.
+- Keep one canonical active reporting run and archive equivalent verification runs.
 - Run `scripts/qa_validate_run.py` before reporting final numbers.

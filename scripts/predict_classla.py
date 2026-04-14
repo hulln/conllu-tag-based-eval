@@ -22,13 +22,24 @@ def parse_gold_alignment(path: Path) -> list[dict[str, Any]]:
     entries: list[dict[str, Any]] = []
     tokens: list[str] = []
     sent_text: str | None = None
+    sent_id: str | None = None
+    comments: list[str] = []
 
     def flush() -> None:
-        nonlocal tokens, sent_text
+        nonlocal tokens, sent_text, sent_id, comments
         if tokens:
-            entries.append({"text": sent_text or " ".join(tokens), "tokens": tokens})
+            entries.append(
+                {
+                    "sent_id": sent_id,
+                    "text": sent_text or " ".join(tokens),
+                    "tokens": tokens,
+                    "comments": comments.copy(),
+                }
+            )
         tokens = []
         sent_text = None
+        sent_id = None
+        comments = []
 
     for raw_line in path.read_text(encoding="utf-8").splitlines():
         line = raw_line.rstrip("\n")
@@ -37,7 +48,10 @@ def parse_gold_alignment(path: Path) -> list[dict[str, Any]]:
             continue
 
         if line.startswith("#"):
-            if line.startswith("# text = "):
+            comments.append(line)
+            if line.startswith("# sent_id = "):
+                sent_id = line[len("# sent_id = ") :].strip()
+            elif line.startswith("# text = "):
                 sent_text = line[len("# text = ") :].strip()
             continue
 
@@ -87,24 +101,38 @@ def _infer_text_from_block(block_lines: Sequence[str]) -> str:
     return " ".join(forms)
 
 
-def _normalize_sentence_block(block_text: str, sent_id: int, text_hint: str | None = None) -> str:
-    raw_lines = [line for line in block_text.splitlines() if line.strip()]
-    body_lines: list[str] = []
-    existing_text: str | None = None
-
-    for line in raw_lines:
-        if line.startswith("# text = "):
-            existing_text = line[len("# text = ") :].strip()
-            continue
-        if line.startswith("# sent_id = ") or line.startswith("# newpar"):
-            continue
-        body_lines.append(line)
-
-    sent_text = _safe_val(text_hint, default=_safe_val(existing_text, default=_infer_text_from_block(body_lines)))
+def _merge_metadata_comments(
+    sent_id: str,
+    sent_text: str,
+    gold_comments: Sequence[str] | None = None,
+) -> list[str]:
+    if gold_comments:
+        lines = [line for line in gold_comments if line.strip()]
+        has_sent_id = any(line.startswith("# sent_id = ") for line in lines)
+        has_text = any(line.startswith("# text = ") for line in lines)
+        if not has_sent_id:
+            lines.insert(0, f"# sent_id = {sent_id}")
+        if sent_text and not has_text:
+            lines.append(f"# text = {sent_text}")
+        return lines
 
     lines = [f"# sent_id = {sent_id}"]
     if sent_text:
         lines.append(f"# text = {sent_text}")
+    return lines
+
+
+def _normalize_sentence_block(
+    block_text: str,
+    sent_id: str,
+    text_hint: str | None = None,
+    gold_comments: Sequence[str] | None = None,
+) -> str:
+    raw_lines = [line for line in block_text.splitlines() if line.strip()]
+    body_lines = [line for line in raw_lines if not line.startswith("#")]
+    sent_text = _safe_val(text_hint, default=_infer_text_from_block(body_lines))
+
+    lines = _merge_metadata_comments(sent_id, sent_text, gold_comments=gold_comments)
     lines.extend(body_lines)
     return "\n".join(lines)
 
@@ -119,6 +147,8 @@ def run_aligned(
     with output_path.open("w", encoding="utf-8") as out:
         for idx, entry in enumerate(gold_entries, start=1):
             tokenized_sent = entry["tokens"]
+            source_sent_id = _safe_val(entry.get("sent_id"), default=str(idx))
+            source_comments = entry.get("comments")
             text_fallback = _safe_val(entry.get("text"), default=" ".join(tokenized_sent))
             doc = nlp([tokenized_sent])
 
@@ -128,7 +158,12 @@ def run_aligned(
                     f"Aligned mode expected exactly 1 sentence for gold sentence {idx}, got {sent_count}"
                 )
 
-            block = _normalize_sentence_block(doc.to_conll().rstrip(), sent_id=idx, text_hint=text_fallback)
+            block = _normalize_sentence_block(
+                doc.to_conll().rstrip(),
+                sent_id=source_sent_id,
+                text_hint=text_fallback,
+                gold_comments=source_comments,
+            )
             out.write(block + "\n\n")
 
             if idx == 1:
@@ -146,7 +181,7 @@ def run_base(nlp: Any, lines: Iterable[str]) -> str:
     doc = nlp(text)
     blocks = [block for block in doc.to_conll().strip().split("\n\n") if block.strip()]
     normalized = [
-        _normalize_sentence_block(block, sent_id=idx)
+        _normalize_sentence_block(block, sent_id=str(idx))
         for idx, block in enumerate(blocks, start=1)
     ]
     return "\n\n".join(normalized).strip() + "\n\n"
