@@ -74,24 +74,13 @@ def parse_gold_alignment(path: Path) -> List[Dict[str, Any]]:
     entries: List[Dict[str, Any]] = []
     tokens: List[str] = []
     sent_text: str | None = None
-    sent_id: str | None = None
-    comments: List[str] = []
 
     def flush() -> None:
-        nonlocal tokens, sent_text, sent_id, comments
+        nonlocal tokens, sent_text
         if tokens:
-            entries.append(
-                {
-                    "sent_id": sent_id,
-                    "text": sent_text or " ".join(tokens),
-                    "tokens": tokens,
-                    "comments": comments.copy(),
-                }
-            )
+            entries.append({"text": sent_text or " ".join(tokens), "tokens": tokens})
         tokens = []
         sent_text = None
-        sent_id = None
-        comments = []
 
     for raw_line in path.read_text(encoding="utf-8").splitlines():
         line = raw_line.rstrip("\n")
@@ -100,10 +89,7 @@ def parse_gold_alignment(path: Path) -> List[Dict[str, Any]]:
             continue
 
         if line.startswith("#"):
-            comments.append(line)
-            if line.startswith("# sent_id = "):
-                sent_id = line[len("# sent_id = ") :].strip()
-            elif line.startswith("# text = "):
+            if line.startswith("# text = "):
                 sent_text = line[len("# text = ") :].strip()
             continue
 
@@ -191,33 +177,12 @@ def _word_line(idx: int, token: Dict) -> str:
     )
 
 
-def _metadata_lines(sent_id: str, sent_text: str, gold_comments: Sequence[str] | None = None) -> List[str]:
-    if gold_comments:
-        lines = [line for line in gold_comments if line.strip()]
-        has_sent_id = any(line.startswith("# sent_id = ") for line in lines)
-        has_text = any(line.startswith("# text = ") for line in lines)
-        if not has_sent_id:
-            lines.insert(0, f"# sent_id = {sent_id}")
-        if sent_text and sent_text != "_" and not has_text:
-            lines.append(f"# text = {sent_text}")
-        return lines
-
-    lines = [f"# sent_id = {sent_id}"]
-    if sent_text and sent_text != "_":
-        lines.append(f"# text = {sent_text}")
-    return lines
-
-
-def _sentence_to_conllu(
-    sentence: Dict,
-    sent_id: str,
-    text_fallback: str,
-    gold_comments: Sequence[str] | None = None,
-) -> str:
+def _sentence_to_conllu(sentence: Dict, sent_id: int, text_fallback: str) -> str:
     lines: List[str] = []
     sent_text = _safe_val(sentence.get("text"), default=text_fallback)
 
-    lines.extend(_metadata_lines(sent_id, sent_text, gold_comments=gold_comments))
+    lines.append(f"# sent_id = {sent_id}")
+    lines.append(f"# text = {sent_text}")
 
     running_id = 1
     tokens = sentence.get("tokens", [])
@@ -297,11 +262,10 @@ def run_aligned(
     progress_every: int,
 ) -> None:
     total = len(gold_entries)
+    sent_id = 1
     with output_path.open("w", encoding="utf-8") as out_f:
         for idx, entry in enumerate(gold_entries, start=1):
             tokenized_sent = entry["tokens"]
-            source_sent_id = _safe_val(entry.get("sent_id"), default=str(idx))
-            source_comments = entry.get("comments")
             text_fallback = _safe_val(entry.get("text"), default=" ".join(tokenized_sent))
 
             out = pipeline(tokenized_sent, is_sent=True)
@@ -313,15 +277,8 @@ def run_aligned(
                 )
 
             for sent in sentences:
-                out_f.write(
-                    _sentence_to_conllu(
-                        sent,
-                        source_sent_id,
-                        text_fallback,
-                        gold_comments=source_comments,
-                    )
-                    + "\n\n"
-                )
+                out_f.write(_sentence_to_conllu(sent, sent_id, text_fallback) + "\n\n")
+                sent_id += 1
 
             if idx == 1:
                 out_f.flush()
@@ -339,7 +296,7 @@ def _run_base_bulk(pipeline: Any, lines: Sequence[str], progress_every: int) -> 
 
     blocks: List[str] = []
     for sent_id, sent in enumerate(sentences, start=1):
-        blocks.append(_sentence_to_conllu(sent, str(sent_id), "_"))
+        blocks.append(_sentence_to_conllu(sent, sent_id, "_"))
 
         if progress_every > 0 and sent_id % progress_every == 0:
             print(f"[Trankit base] built {sent_id} output sentences")
@@ -359,7 +316,7 @@ def _run_base_linewise(pipeline: Any, lines: Sequence[str], progress_every: int)
         out = pipeline(line)
         sentences = _normalize_doc_output(out, line)
         for sent in sentences:
-            blocks.append(_sentence_to_conllu(sent, str(sent_id), line))
+            blocks.append(_sentence_to_conllu(sent, sent_id, line))
             sent_id += 1
 
         if progress_every > 0 and (idx % progress_every == 0 or idx == total):
