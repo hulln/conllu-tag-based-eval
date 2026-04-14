@@ -8,19 +8,22 @@ Compact, reproducible evaluation of two Slovenian UD pipelines on the SSJ test s
 
 ## What This Repo Produces
 
-For each model, the pipeline runs two modes:
+Primary workflow (main task):
 
 - `aligned`: sentence and token boundaries are fixed to gold
+
+Optional supplementary workflow:
+
 - `base`: full-text processing (model sentence splitting/tokenization can differ)
 
-That yields four prediction files per run:
+When `--modes both` is used, you get four prediction files per run:
 
 1. classla aligned
 2. classla base
 3. trankit aligned
 4. trankit base
 
-Each prediction is evaluated against gold, plus error/comparison reports.
+All predictions are evaluated against gold. Aligned outputs are the primary reporting target; base outputs are supplementary.
 
 ## Repository Map
 
@@ -53,10 +56,16 @@ pip install -r requirements.txt
 Small sanity run (fast):
 
 ```bash
-python scripts/run_pipeline.py --sample-lines 20 --modes both --download-classla-models
+python scripts/run_pipeline.py --sample-lines 20 --download-classla-models
 ```
 
 Full run:
+
+```bash
+python scripts/run_pipeline.py --download-classla-models
+```
+
+Full run with supplementary base outputs:
 
 ```bash
 python scripts/run_pipeline.py --modes both --download-classla-models
@@ -65,26 +74,33 @@ python scripts/run_pipeline.py --modes both --download-classla-models
 Evaluation only (reuse existing predictions):
 
 ```bash
+python scripts/run_pipeline.py --skip-prediction
+```
+
+Evaluation only with supplementary base outputs:
+
+```bash
 python scripts/run_pipeline.py --modes both --skip-prediction
 ```
 
 ## Where To Look First (External Reader)
 
 1. Latest QA summary: `results/runs/<run-id>/main/qa_validation.md`
-2. Main metrics: `results/runs/<run-id>/main/*_eval.txt`
-3. Model-vs-model comparison: `results/runs/<run-id>/main/classla-vs-trankit_*_comparison.md`
-4. Detailed diagnostics: `results/runs/<run-id>/diagnostics/`
+2. Main aligned metrics: `results/runs/<run-id>/main/*_aligned_eval.txt`
+3. Main aligned comparison: `results/runs/<run-id>/main/classla-vs-trankit_aligned_comparison.md`
+4. Detailed aligned diagnostics: `results/runs/<run-id>/diagnostics/`
+5. Supplementary base outputs (if enabled): `results/runs/<run-id>/supplementary/base/`
 
 ## Naming Conventions
 
 - Prediction file format:
   `<timestamp>_<dataset>_<run-label>_<model>_<mode>_predicted.conllu`
 - Results are split into:
-  - `main/` for summary outputs
-  - `diagnostics/` for verbose breakdowns
+  - `main/` and `diagnostics/` for aligned primary outputs
+  - `supplementary/base/` for base-mode outputs
 
 ## Reproducibility Notes
 
-- Keep aligned and base outputs separate.
+- Keep aligned primary outputs and base supplementary outputs separate.
 - Use run-stamped filenames/folders; do not overwrite historical runs.
 - Run `scripts/qa_validate_run.py` before reporting final numbers.

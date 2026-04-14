@@ -6,6 +6,11 @@ Input datasets used by the pipeline.
 - `raw/`: plain sentence text used as model input.
 - `samples/`: small extracted subsets for quick smoke tests.
 
+Methodology note:
+
+- Primary task uses aligned evaluation: gold segmentation/tokenization with model-predicted remaining layers.
+- Base mode is optional and treated as supplementary analysis.
+
 Provenance note:
 
 - SSJ source: https://github.com/UniversalDependencies/UD_Slovenian-SSJ

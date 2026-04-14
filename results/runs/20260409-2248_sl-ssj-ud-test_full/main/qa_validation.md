@@ -4,6 +4,8 @@
 - Gold file: data/gold/sl_ssj-ud-test.conllu
 - Predictions root: predictions/runs
 - Results root: results/runs/20260409-2248_sl-ssj-ud-test_full
+- Aligned results root: results/runs/20260409-2248_sl-ssj-ud-test_full/main
+- Supplementary base results root: results/runs/20260409-2248_sl-ssj-ud-test_full/supplementary/base
 
 ## Prediction File Checks
 ### classla_aligned
@@ -22,7 +24,7 @@
 - Ends with blank line: True
 
 ### classla_base
-- Path: predictions/runs/20260409-2248_sl-ssj-ud-test_full_classla_base_predicted.conllu
+- Path: predictions/runs/supplementary/base/20260409-2248_sl-ssj-ud-test_full_classla_base_predicted.conllu
 - Exists: True
 - Evaluator parse OK: True
 - Sentences (evaluator): 1287
@@ -52,7 +54,7 @@
 - Ends with blank line: True
 
 ### trankit_base
-- Path: predictions/runs/20260409-2248_sl-ssj-ud-test_full_trankit_base_predicted.conllu
+- Path: predictions/runs/supplementary/base/20260409-2248_sl-ssj-ud-test_full_trankit_base_predicted.conllu
 - Exists: True
 - Evaluator parse OK: True
 - Sentences (evaluator): 1291
