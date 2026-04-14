@@ -52,7 +52,6 @@ python scripts/verify_canonical_run.py --run-stamp <run-stamp>
 ## Repository Guide
 
 - data/: local inputs and dataset helpers
-- evaluation/: evaluator script provided for scoring
 - scripts/: pipeline, prediction, QA, and verification scripts
 - predictions/: canonical public prediction artifacts
 - results/: canonical public evaluation artifacts
