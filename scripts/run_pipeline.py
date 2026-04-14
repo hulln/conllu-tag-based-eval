@@ -184,7 +184,7 @@ def eval_and_analyze(
     run(
         [
             python_bin,
-            "evaluation/conll18_ud_eval_tag-based.py",
+            "scripts/conll18_ud_eval_tag-based.py",
             str(gold_path),
             str(pred_path),
             "-v",
@@ -196,7 +196,7 @@ def eval_and_analyze(
     run(
         [
             python_bin,
-            "evaluation/conll18_ud_eval_tag-based.py",
+            "scripts/conll18_ud_eval_tag-based.py",
             str(gold_path),
             str(pred_path),
             "-v",

@@ -99,7 +99,7 @@ class PredictionCheck:
 
 
 def load_ud_loader(repo_root: Path) -> Callable[[str], object]:
-    eval_path = repo_root / "evaluation" / "conll18_ud_eval_tag-based.py"
+    eval_path = repo_root / "scripts" / "conll18_ud_eval_tag-based.py"
     spec = importlib.util.spec_from_file_location("ud_eval_tag_based", eval_path)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Unable to load evaluator module from {eval_path}")
