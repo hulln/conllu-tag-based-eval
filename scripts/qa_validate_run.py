@@ -20,6 +20,38 @@ def prediction_filename(run_stamp: str, dataset_tag: str, run_tag: str, model: s
     return f"{run_stamp}_{dataset_tag}_{run_tag}_{model}_{mode}_predicted.conllu"
 
 
+def prediction_output_path(
+    pred_root: Path,
+    run_stamp: str,
+    dataset_tag: str,
+    run_tag: str,
+    model: str,
+    mode: str,
+) -> Path:
+    filename = prediction_filename(run_stamp, dataset_tag, run_tag, model, mode)
+    if mode == "base":
+        return pred_root / "supplementary" / "base" / filename
+    return pred_root / filename
+
+
+def prediction_legacy_path(
+    pred_root: Path,
+    run_stamp: str,
+    dataset_tag: str,
+    run_tag: str,
+    model: str,
+    mode: str,
+) -> Path:
+    return pred_root / prediction_filename(run_stamp, dataset_tag, run_tag, model, mode)
+
+
+def first_existing_path(paths: List[Path]) -> Path:
+    for path in paths:
+        if path.exists():
+            return path
+    return paths[0]
+
+
 @dataclass
 class PredictionCheck:
     path: Path
@@ -220,6 +252,9 @@ def main() -> None:
     run_results_root = results_root / run_id
     main_results_root = run_results_root / "main"
     diagnostics_root = run_results_root / "diagnostics"
+    supplementary_base_root = run_results_root / "supplementary" / "base"
+    supplementary_base_main_root = supplementary_base_root / "main"
+    supplementary_base_diagnostics_root = supplementary_base_root / "diagnostics"
 
     output_path = Path(args.output) if args.output else (main_results_root / "qa_validation.md")
 
@@ -229,44 +264,87 @@ def main() -> None:
     for model in ("classla", "trankit"):
         for mode in ("aligned", "base"):
             key = f"{model}_{mode}"
-            pred_path = pred_root / prediction_filename(run_stamp, dataset_tag, run_tag, model, mode)
+            pred_path = first_existing_path(
+                [
+                    prediction_output_path(pred_root, run_stamp, dataset_tag, run_tag, model, mode),
+                    prediction_legacy_path(pred_root, run_stamp, dataset_tag, run_tag, model, mode),
+                ]
+            )
             checks[key] = inspect_prediction(pred_path, load_ud)
 
-    expected_main = [
-        main_results_root / "classla_aligned_eval.txt",
-        main_results_root / "trankit_aligned_eval.txt",
-        main_results_root / "classla_base_eval.txt",
-        main_results_root / "trankit_base_eval.txt",
-        main_results_root / "classla-vs-trankit_aligned_comparison.md",
-        main_results_root / "classla-vs-trankit_base_comparison.md",
+    expected_main_groups = [
+        [main_results_root / "classla_aligned_eval.txt"],
+        [main_results_root / "trankit_aligned_eval.txt"],
+        [supplementary_base_main_root / "classla_base_eval.txt", main_results_root / "classla_base_eval.txt"],
+        [supplementary_base_main_root / "trankit_base_eval.txt", main_results_root / "trankit_base_eval.txt"],
+        [main_results_root / "classla-vs-trankit_aligned_comparison.md"],
+        [
+            supplementary_base_main_root / "classla-vs-trankit_base_comparison.md",
+            main_results_root / "classla-vs-trankit_base_comparison.md",
+        ],
     ]
 
-    expected_diagnostics = []
+    expected_diagnostics_groups: List[List[Path]] = []
     for model in ("classla", "trankit"):
         for mode in ("aligned", "base"):
-            expected_diagnostics.append(diagnostics_root / f"{model}_{mode}_eval-tagged.txt")
-            expected_diagnostics.append(diagnostics_root / f"{model}_{mode}_errors.md")
+            if mode == "aligned":
+                expected_diagnostics_groups.append([diagnostics_root / f"{model}_{mode}_eval-tagged.txt"])
+                expected_diagnostics_groups.append([diagnostics_root / f"{model}_{mode}_errors.md"])
+            else:
+                expected_diagnostics_groups.append(
+                    [
+                        supplementary_base_diagnostics_root / f"{model}_{mode}_eval-tagged.txt",
+                        diagnostics_root / f"{model}_{mode}_eval-tagged.txt",
+                    ]
+                )
+                expected_diagnostics_groups.append(
+                    [
+                        supplementary_base_diagnostics_root / f"{model}_{mode}_errors.md",
+                        diagnostics_root / f"{model}_{mode}_errors.md",
+                    ]
+                )
 
-    missing_results = [p for p in (expected_main + expected_diagnostics) if not p.exists()]
+    expected_main = [group[0] for group in expected_main_groups]
+    expected_diagnostics = [group[0] for group in expected_diagnostics_groups]
+
+    selected_result_paths: List[Path] = []
+    missing_results: List[Path] = []
+    for group in expected_main_groups + expected_diagnostics_groups:
+        resolved = first_existing_path(group)
+        if resolved.exists():
+            selected_result_paths.append(resolved)
+        else:
+            missing_results.append(group[0])
 
     traceback_files = []
-    for p in expected_main + expected_diagnostics:
-        if not p.exists():
-            continue
+    for p in selected_result_paths:
         first_line = p.read_text(encoding="utf-8").splitlines()[:1]
         if first_line and first_line[0].startswith("Traceback"):
             traceback_files.append(p)
 
+    classla_base_eval_path = first_existing_path(
+        [supplementary_base_main_root / "classla_base_eval.txt", main_results_root / "classla_base_eval.txt"]
+    )
+    trankit_base_eval_path = first_existing_path(
+        [supplementary_base_main_root / "trankit_base_eval.txt", main_results_root / "trankit_base_eval.txt"]
+    )
+    base_comparison_path = first_existing_path(
+        [
+            supplementary_base_main_root / "classla-vs-trankit_base_comparison.md",
+            main_results_root / "classla-vs-trankit_base_comparison.md",
+        ]
+    )
+
     eval_metrics = {
         "classla_aligned": parse_eval_metrics(main_results_root / "classla_aligned_eval.txt"),
         "trankit_aligned": parse_eval_metrics(main_results_root / "trankit_aligned_eval.txt"),
-        "classla_base": parse_eval_metrics(main_results_root / "classla_base_eval.txt"),
-        "trankit_base": parse_eval_metrics(main_results_root / "trankit_base_eval.txt"),
+        "classla_base": parse_eval_metrics(classla_base_eval_path),
+        "trankit_base": parse_eval_metrics(trankit_base_eval_path),
     }
 
     comparison_counts = {
         "aligned": parse_comparison_counts(main_results_root / "classla-vs-trankit_aligned_comparison.md"),
-        "base": parse_comparison_counts(main_results_root / "classla-vs-trankit_base_comparison.md"),
+        "base": parse_comparison_counts(base_comparison_path),
     }
 
     failures: List[str] = []
@@ -306,6 +384,8 @@ def main() -> None:
     lines.append(f"- Gold file: {gold_path}")
     lines.append(f"- Predictions root: {pred_root}")
     lines.append(f"- Results root: {run_results_root}")
+    lines.append(f"- Aligned results root: {main_results_root}")
+    lines.append(f"- Supplementary base results root: {supplementary_base_root}")
     lines.append("")
 
     lines.append("## Prediction File Checks")

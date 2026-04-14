@@ -28,6 +28,51 @@ def prediction_filename(run_stamp: str, dataset_tag: str, run_tag: str, model: s
     return f"{run_stamp}_{dataset_tag}_{run_tag}_{model}_{mode}_predicted.conllu"
 
 
+def prediction_output_path(
+    pred_root: Path,
+    run_stamp: str,
+    dataset_tag: str,
+    run_tag: str,
+    model: str,
+    mode: str,
+) -> Path:
+    filename = prediction_filename(run_stamp, dataset_tag, run_tag, model, mode)
+    if mode == "base":
+        return pred_root / "supplementary" / "base" / filename
+    return pred_root / filename
+
+
+def prediction_legacy_path(
+    pred_root: Path,
+    run_stamp: str,
+    dataset_tag: str,
+    run_tag: str,
+    model: str,
+    mode: str,
+) -> Path:
+    return pred_root / prediction_filename(run_stamp, dataset_tag, run_tag, model, mode)
+
+
+def resolve_prediction_path(
+    pred_root: Path,
+    run_stamp: str,
+    dataset_tag: str,
+    run_tag: str,
+    model: str,
+    mode: str,
+) -> Path:
+    preferred = prediction_output_path(pred_root, run_stamp, dataset_tag, run_tag, model, mode)
+    if preferred.exists():
+        return preferred
+
+    if mode == "base":
+        legacy = prediction_legacy_path(pred_root, run_stamp, dataset_tag, run_tag, model, mode)
+        if legacy.exists():
+            return legacy
+
+    return preferred
+
+
 def result_filename(
     run_stamp: str,
     dataset_tag: str,
@@ -51,7 +96,7 @@ def discover_latest_complete_run_stamp(
     required = {(model, mode) for model in ("classla", "trankit") for mode in active_modes}
     by_stamp: dict[str, set[tuple[str, str]]] = {}
 
-    for path in pred_root.glob(f"*_{dataset_tag}_{run_tag}_*_predicted.conllu"):
+    for path in pred_root.rglob(f"*_{dataset_tag}_{run_tag}_*_predicted.conllu"):
         name = path.name
         if not name.endswith("_predicted.conllu"):
             continue
@@ -216,9 +261,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--modes",
         choices=["both", "aligned", "base", "raw", "unaligned"],
-        default="both",
+        default="aligned",
         help=(
-            "Run both modes (default) or only one mode. "
+            "Run only aligned (default, primary task), both modes, or one specific mode. "
             "Canonical modes are aligned and base; raw/unaligned are aliases of base."
         ),
     )
@@ -279,34 +324,52 @@ def main() -> None:
     result_root = Path("results/runs") / f"{run_stamp}_{dataset_tag}_{run_tag}"
     main_results_root = result_root / "main"
     diagnostics_root = result_root / "diagnostics"
+    supplementary_base_root = result_root / "supplementary" / "base"
+    supplementary_base_main_root = supplementary_base_root / "main"
+    supplementary_base_diagnostics_root = supplementary_base_root / "diagnostics"
 
     classla_preds = {
-        mode: pred_root / prediction_filename(run_stamp, dataset_tag, run_tag, "classla", mode)
+        mode: prediction_output_path(pred_root, run_stamp, dataset_tag, run_tag, "classla", mode)
         for mode in active_modes
     }
     trankit_preds = {
-        mode: pred_root / prediction_filename(run_stamp, dataset_tag, run_tag, "trankit", mode)
+        mode: prediction_output_path(pred_root, run_stamp, dataset_tag, run_tag, "trankit", mode)
         for mode in active_modes
     }
 
+    if args.skip_prediction:
+        classla_preds = {
+            mode: resolve_prediction_path(pred_root, run_stamp, dataset_tag, run_tag, "classla", mode)
+            for mode in active_modes
+        }
+        trankit_preds = {
+            mode: resolve_prediction_path(pred_root, run_stamp, dataset_tag, run_tag, "trankit", mode)
+            for mode in active_modes
+        }
+
+    def mode_result_roots(mode: str) -> tuple[Path, Path]:
+        if mode == "aligned":
+            return main_results_root, diagnostics_root
+        return supplementary_base_main_root, supplementary_base_diagnostics_root
+
     classla_results = {
         mode: {
-            "eval": main_results_root / f"classla_{mode}_eval.txt",
-            "eval_tagged": diagnostics_root / f"classla_{mode}_eval-tagged.txt",
-            "errors": diagnostics_root / f"classla_{mode}_errors.md",
+            "eval": mode_result_roots(mode)[0] / f"classla_{mode}_eval.txt",
+            "eval_tagged": mode_result_roots(mode)[1] / f"classla_{mode}_eval-tagged.txt",
+            "errors": mode_result_roots(mode)[1] / f"classla_{mode}_errors.md",
         }
         for mode in active_modes
     }
     trankit_results = {
         mode: {
-            "eval": main_results_root / f"trankit_{mode}_eval.txt",
-            "eval_tagged": diagnostics_root / f"trankit_{mode}_eval-tagged.txt",
-            "errors": diagnostics_root / f"trankit_{mode}_errors.md",
+            "eval": mode_result_roots(mode)[0] / f"trankit_{mode}_eval.txt",
+            "eval_tagged": mode_result_roots(mode)[1] / f"trankit_{mode}_eval-tagged.txt",
+            "errors": mode_result_roots(mode)[1] / f"trankit_{mode}_errors.md",
         }
         for mode in active_modes
     }
     comparison_reports = {
-        mode: main_results_root / f"classla-vs-trankit_{mode}_comparison.md"
+        mode: mode_result_roots(mode)[0] / f"classla-vs-trankit_{mode}_comparison.md"
         for mode in active_modes
     }
 
@@ -433,8 +496,10 @@ def main() -> None:
     print(f"Run stamp: {run_stamp}")
     print(f"Predictions root: {pred_root}")
     print(f"Results root: {result_root}")
-    print(f"Main results root: {main_results_root}")
-    print(f"Diagnostics root: {diagnostics_root}")
+    print(f"Main results root (aligned): {main_results_root}")
+    print(f"Diagnostics root (aligned): {diagnostics_root}")
+    if "base" in active_modes:
+        print(f"Supplementary base results root: {supplementary_base_root}")
     for mode in active_modes:
         print(f"Prediction file (CLASSLA {mode}): {classla_preds[mode]}")
         print(f"Prediction file (Trankit {mode}): {trankit_preds[mode]}")
