@@ -52,12 +52,14 @@ results/output/*/supplementary/
 predictions/runs/
 results/runs/
 
-# Local gold dataset files (do not publish in this repository)
+# Local SSJ gold dataset files (do not publish in this repository)
 data/gold/
+data/gold/sl_ssj-ud-test.conllu
 
 # Keep archive and sample/test-run artifacts local
 archive/first-run/
 archive/local/
+archive/local/**
 predictions/archive/
 results/archive/
 data/samples/
