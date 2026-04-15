@@ -18,8 +18,8 @@
 - First sent_id values: ['ssj562.2919.10333', 'ssj562.2919.10334', 'ssj562.2919.10335', 'ssj562.2919.10336', 'ssj562.2920.10337']
 
 ## Prediction File Checks
-### classla_aligned
-- Path: predictions/output/20260414-1819_sl-ssj-ud-test_full_classla_aligned_predicted.conllu
+### trankit_aligned
+- Path: predictions/output/20260414-1819_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu
 - Exists: True
 - Evaluator parse OK: True
 - Sentences (evaluator): 1282
@@ -33,8 +33,8 @@
 - First sent_id values: ['ssj562.2919.10333', 'ssj562.2919.10334', 'ssj562.2919.10335', 'ssj562.2919.10336', 'ssj562.2920.10337']
 - Ends with blank line: True
 
-### trankit_aligned
-- Path: predictions/output/20260414-1819_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu
+### classla_aligned
+- Path: predictions/output/20260414-1819_sl-ssj-ud-test_full_classla_aligned_predicted.conllu
 - Exists: True
 - Evaluator parse OK: True
 - Sentences (evaluator): 1282
@@ -55,17 +55,6 @@
 - Traceback-leading result files: 0
 
 ## Core Metrics (F1 from eval summaries)
-### classla_aligned
-- Sentences: 100.00
-- Tokens: 100.00
-- Words: 100.00
-- LAS: 90.48
-- UAS: 92.12
-- UPOS: 98.60
-- XPOS: 97.08
-- Lemmas: 98.94
-- MLAS: 84.99
-
 ### trankit_aligned
 - Sentences: 100.00
 - Tokens: 100.00
@@ -77,10 +66,21 @@
 - Lemmas: 98.05
 - MLAS: 89.52
 
+### classla_aligned
+- Sentences: 100.00
+- Tokens: 100.00
+- Words: 100.00
+- LAS: 90.48
+- UAS: 92.12
+- UPOS: 98.60
+- XPOS: 97.08
+- Lemmas: 98.94
+- MLAS: 84.99
+
 ## Model-vs-Model LAS Difference Snapshot
 ### aligned
-- CLASSLA aligned correct, Trankit aligned wrong: 478 (1.88%)
 - Trankit aligned correct, CLASSLA aligned wrong: 1523 (5.99%)
+- Trankit aligned wrong, CLASSLA aligned correct: 478 (1.88%)
 - Both correct: 22543 (88.61%)
 - Both wrong: 898 (3.53%)
 
