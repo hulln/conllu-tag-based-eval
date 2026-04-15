@@ -99,7 +99,7 @@ def discover_latest_complete_run_stamp(
     run_tag: str,
     active_modes: List[str],
 ) -> str | None:
-    required = {(model, mode) for model in ("classla", "trankit") for mode in active_modes}
+    required = {(model, mode) for model in ("trankit", "classla") for mode in active_modes}
     by_stamp: dict[str, set[tuple[str, str]]] = {}
 
     for path in pred_root.rglob(f"*_{dataset_tag}_{run_tag}_*_predicted.conllu"):
@@ -231,7 +231,7 @@ def eval_and_analyze(
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run the full evaluation pipeline for CLASSLA and Trankit.")
+    parser = argparse.ArgumentParser(description="Run the full evaluation pipeline for Trankit and CLASSLA.")
     parser.add_argument(
         "--gold",
         default="data/gold/sl_ssj-ud-test.conllu",
@@ -414,24 +414,6 @@ def main() -> None:
 
     if not args.skip_prediction:
         if args.modes == "both":
-            classla_cmd = [
-                python_bin,
-                "scripts/predict_classla.py",
-                "--mode",
-                "both",
-                "--aligned-gold",
-                str(active_gold),
-                "--input",
-                str(active_input),
-                "--output-base",
-                str(classla_preds["base"]),
-                "--output-aligned",
-                str(classla_preds["aligned"]),
-            ]
-            if args.download_classla_models:
-                classla_cmd.append("--download-models")
-            run(classla_cmd, cwd=repo_root)
-
             run(
                 [
                     python_bin,
@@ -451,25 +433,26 @@ def main() -> None:
                 ],
                 cwd=repo_root,
             )
-        else:
-            mode = active_modes[0]
+
             classla_cmd = [
                 python_bin,
                 "scripts/predict_classla.py",
                 "--mode",
-                mode,
-                "--output",
-                str(classla_preds[mode]),
+                "both",
+                "--aligned-gold",
+                str(active_gold),
+                "--input",
+                str(active_input),
+                "--output-base",
+                str(classla_preds["base"]),
+                "--output-aligned",
+                str(classla_preds["aligned"]),
             ]
-            if mode == "aligned":
-                classla_cmd.extend(["--aligned-gold", str(active_gold)])
-            else:
-                classla_cmd.extend(["--input", str(active_input)])
             if args.download_classla_models:
                 classla_cmd.append("--download-models")
-
             run(classla_cmd, cwd=repo_root)
-
+        else:
+            mode = active_modes[0]
             trankit_cmd = [
                 python_bin,
                 "scripts/predict_trankit.py",
@@ -487,19 +470,24 @@ def main() -> None:
 
             run(trankit_cmd, cwd=repo_root)
 
-    for mode in active_modes:
-        eval_and_analyze(
-            repo_root,
-            python_bin,
-            active_gold,
-            classla_preds[mode],
-            classla_results[mode]["eval"],
-            classla_results[mode]["eval_tagged"],
-            classla_results[mode]["errors"],
-            f"CLASSLA {mode}",
-            args.top_n,
-        )
+            classla_cmd = [
+                python_bin,
+                "scripts/predict_classla.py",
+                "--mode",
+                mode,
+                "--output",
+                str(classla_preds[mode]),
+            ]
+            if mode == "aligned":
+                classla_cmd.extend(["--aligned-gold", str(active_gold)])
+            else:
+                classla_cmd.extend(["--input", str(active_input)])
+            if args.download_classla_models:
+                classla_cmd.append("--download-models")
 
+            run(classla_cmd, cwd=repo_root)
+
+    for mode in active_modes:
         eval_and_analyze(
             repo_root,
             python_bin,
@@ -512,18 +500,30 @@ def main() -> None:
             args.top_n,
         )
 
+        eval_and_analyze(
+            repo_root,
+            python_bin,
+            active_gold,
+            classla_preds[mode],
+            classla_results[mode]["eval"],
+            classla_results[mode]["eval_tagged"],
+            classla_results[mode]["errors"],
+            f"CLASSLA {mode}",
+            args.top_n,
+        )
+
         run(
             [
                 python_bin,
                 "scripts/compare_models.py",
                 str(active_gold),
-                str(classla_preds[mode]),
                 str(trankit_preds[mode]),
+                str(classla_preds[mode]),
                 str(comparison_reports[mode]),
                 "--model-a",
-                f"CLASSLA {mode}",
-                "--model-b",
                 f"Trankit {mode}",
+                "--model-b",
+                f"CLASSLA {mode}",
                 "--top-n",
                 str(args.top_n),
             ],
@@ -535,13 +535,13 @@ def main() -> None:
                 python_bin,
                 "scripts/content_comparison_table.py",
                 str(active_gold),
-                str(classla_preds[mode]),
                 str(trankit_preds[mode]),
+                str(classla_preds[mode]),
                 str(content_comparison_reports[mode]),
-                "--model-a",
-                f"CLASSLA {mode}",
-                "--model-b",
+                "--trankit-label",
                 f"Trankit {mode}",
+                "--classla-label",
+                f"CLASSLA {mode}",
                 "--top-n",
                 str(args.top_n),
             ],
@@ -554,10 +554,10 @@ def main() -> None:
                 python_bin,
                 "scripts/build_interactive_comparison_table.py",
                 str(active_gold),
-                str(classla_preds["aligned"]),
                 str(trankit_preds["aligned"]),
-                str(classla_results["aligned"]["eval_tagged"]),
+                str(classla_preds["aligned"]),
                 str(trankit_results["aligned"]["eval_tagged"]),
+                str(classla_results["aligned"]["eval_tagged"]),
                 str(interactive_table_html),
                 str(interactive_table_js),
                 "--run-id",
@@ -613,14 +613,14 @@ def main() -> None:
         print(f"Interactive comparison table: {interactive_table_html}")
         print(f"Interactive comparison data: {interactive_table_js}")
     for mode in active_modes:
-        print(f"Prediction file (CLASSLA {mode}): {classla_preds[mode]}")
         print(f"Prediction file (Trankit {mode}): {trankit_preds[mode]}")
-        print(f"Result file (CLASSLA {mode} eval): {classla_results[mode]['eval']}")
-        print(f"Result file (CLASSLA {mode} eval-tagged): {classla_results[mode]['eval_tagged']}")
-        print(f"Result file (CLASSLA {mode} errors): {classla_results[mode]['errors']}")
+        print(f"Prediction file (CLASSLA {mode}): {classla_preds[mode]}")
         print(f"Result file (Trankit {mode} eval): {trankit_results[mode]['eval']}")
         print(f"Result file (Trankit {mode} eval-tagged): {trankit_results[mode]['eval_tagged']}")
         print(f"Result file (Trankit {mode} errors): {trankit_results[mode]['errors']}")
+        print(f"Result file (CLASSLA {mode} eval): {classla_results[mode]['eval']}")
+        print(f"Result file (CLASSLA {mode} eval-tagged): {classla_results[mode]['eval_tagged']}")
+        print(f"Result file (CLASSLA {mode} errors): {classla_results[mode]['errors']}")
         print(f"Result file (comparison {mode}): {comparison_reports[mode]}")
         print(f"Result file (content comparison {mode}): {content_comparison_reports[mode]}")
 

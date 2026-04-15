@@ -1,6 +1,6 @@
-# Slovenian UD Evaluation (CLASSLA vs Trankit)
+# Slovenian UD Evaluation (Trankit vs CLASSLA)
 
-Reproducible evaluation of CLASSLA and Trankit on Slovenian UD SSJ.
+Reproducible evaluation of Trankit and CLASSLA on Slovenian UD SSJ.
 
 Live interactive table with results from SSJ (updated: 2026-04-15) available [here](https://conllu-tag-based-eval-table.netlify.app/comparison_table.html).
 

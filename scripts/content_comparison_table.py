@@ -117,8 +117,8 @@ def _example_line(example: Dict, with_both_models: bool = False) -> str:
 
     if with_both_models:
         tail = (
-            f"; classla=({example['classla_head']},{example['classla_rel']}); "
-            f"trankit=({example['trankit_head']},{example['trankit_rel']})"
+            f"; trankit=({example['trankit_head']},{example['trankit_rel']}); "
+            f"classla=({example['classla_head']},{example['classla_rel']})"
         )
     else:
         tail = f"; pred=({example['pred_head']},{example['pred_rel']})"
@@ -370,14 +370,14 @@ def build_report(
     diff = _model_vs_model_section(gold_sents, classla_sents, trankit_sents, top_n, max_examples)
 
     lines: List[str] = []
-    lines.append(f"# Table-style content comparison ({model_a} vs {model_b})")
+    lines.append(f"# Table-style content comparison ({model_b} vs {model_a})")
     lines.append("")
     lines.append("Columns 7-8 are compared directly (HEAD and DEPREL), with concrete token examples.")
     lines.append("")
     lines.append("## Scope")
     lines.append(f"- Gold sentences: {len(gold_sents)}")
-    lines.append(f"- {model_a} sentences: {len(classla_sents)}")
     lines.append(f"- {model_b} sentences: {len(trankit_sents)}")
+    lines.append(f"- {model_a} sentences: {len(classla_sents)}")
     lines.append("")
 
     def render_model_section(profile: Dict) -> None:
@@ -406,26 +406,26 @@ def build_report(
         lines.extend(_render_bucket_rows(profile["both_wrong"], profile["both_wrong_examples"], compared, "both_wrong", profile["top_n"]))
         lines.append("")
 
-    render_model_section(classla_profile)
     render_model_section(trankit_profile)
+    render_model_section(classla_profile)
 
     compared_diff = diff["totals"]["compared"]
     lines.append("## Direct model comparison (LAS exact)")
     lines.append(f"- Compared tokens: {compared_diff}")
-    lines.append(f"- {model_a} correct, {model_b} wrong: {diff['totals']['classla_wins']} ({_pct(diff['totals']['classla_wins'], compared_diff):.2f}%)")
     lines.append(f"- {model_b} correct, {model_a} wrong: {diff['totals']['trankit_wins']} ({_pct(diff['totals']['trankit_wins'], compared_diff):.2f}%)")
-    lines.append("")
-
-    lines.append(f"### Where {model_a} is better")
-    lines.append("| Rank | Gold DEPREL | Loser error pattern | Count | Example |")
-    lines.append("|---|---|---|---:|---|")
-    lines.extend(_render_win_rows(diff["classla_wins"], diff["classla_win_examples"], compared_diff, diff["top_n"]))
+    lines.append(f"- {model_b} wrong, {model_a} correct: {diff['totals']['classla_wins']} ({_pct(diff['totals']['classla_wins'], compared_diff):.2f}%)")
     lines.append("")
 
     lines.append(f"### Where {model_b} is better")
     lines.append("| Rank | Gold DEPREL | Loser error pattern | Count | Example |")
     lines.append("|---|---|---|---:|---|")
     lines.extend(_render_win_rows(diff["trankit_wins"], diff["trankit_win_examples"], compared_diff, diff["top_n"]))
+    lines.append("")
+
+    lines.append(f"### Where {model_b} loses to {model_a}")
+    lines.append("| Rank | Gold DEPREL | Loser error pattern | Count | Example |")
+    lines.append("|---|---|---|---:|---|")
+    lines.extend(_render_win_rows(diff["classla_wins"], diff["classla_win_examples"], compared_diff, diff["top_n"]))
     lines.append("")
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -436,11 +436,11 @@ def build_report(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build Table-style HEAD/DEPREL content comparison from CoNLL-U files.")
     parser.add_argument("gold", help="Path to gold CoNLL-U file")
-    parser.add_argument("classla_pred", help="Path to CLASSLA prediction CoNLL-U")
     parser.add_argument("trankit_pred", help="Path to Trankit prediction CoNLL-U")
+    parser.add_argument("classla_pred", help="Path to CLASSLA prediction CoNLL-U")
     parser.add_argument("out", help="Path to output Markdown table report")
-    parser.add_argument("--model-a", default="CLASSLA aligned", help="Label for model A")
-    parser.add_argument("--model-b", default="Trankit aligned", help="Label for model B")
+    parser.add_argument("--trankit-label", "--model-b", dest="model_b", default="Trankit aligned", help="Label for Trankit")
+    parser.add_argument("--classla-label", "--model-a", dest="model_a", default="CLASSLA aligned", help="Label for CLASSLA")
     parser.add_argument("--top-n", type=int, default=15, help="Top N rows per table")
     parser.add_argument("--examples-per-item", type=int, default=1, help="Max stored examples per pattern")
     return parser.parse_args()

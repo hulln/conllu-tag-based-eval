@@ -315,7 +315,7 @@ def main() -> None:
 
     checks: Dict[str, PredictionCheck] = {}
     for mode in active_modes:
-        for model in ("classla", "trankit"):
+        for model in ("trankit", "classla"):
             key = f"{model}_{mode}"
             pred_path = first_existing_path(
                 [
@@ -332,32 +332,32 @@ def main() -> None:
     comparison_paths: Dict[str, Path] = {}
 
     if "aligned" in active_modes:
-        eval_paths["classla_aligned"] = main_results_root / "classla_aligned_eval.txt"
         eval_paths["trankit_aligned"] = main_results_root / "trankit_aligned_eval.txt"
+        eval_paths["classla_aligned"] = main_results_root / "classla_aligned_eval.txt"
         comparison_paths["aligned"] = main_results_root / "classla-vs-trankit_aligned_comparison.md"
 
         expected_main_groups.extend(
             [
-                [eval_paths["classla_aligned"]],
                 [eval_paths["trankit_aligned"]],
+                [eval_paths["classla_aligned"]],
                 [comparison_paths["aligned"]],
             ]
         )
         expected_diagnostics_groups.extend(
             [
-                [diagnostics_root / "classla_aligned_eval-tagged.txt"],
-                [diagnostics_root / "classla_aligned_errors.md"],
                 [diagnostics_root / "trankit_aligned_eval-tagged.txt"],
                 [diagnostics_root / "trankit_aligned_errors.md"],
+                [diagnostics_root / "classla_aligned_eval-tagged.txt"],
+                [diagnostics_root / "classla_aligned_errors.md"],
             ]
         )
 
     if "base" in active_modes:
-        eval_paths["classla_base"] = first_existing_path(
-            [supplementary_base_main_root / "classla_base_eval.txt", main_results_root / "classla_base_eval.txt"]
-        )
         eval_paths["trankit_base"] = first_existing_path(
             [supplementary_base_main_root / "trankit_base_eval.txt", main_results_root / "trankit_base_eval.txt"]
+        )
+        eval_paths["classla_base"] = first_existing_path(
+            [supplementary_base_main_root / "classla_base_eval.txt", main_results_root / "classla_base_eval.txt"]
         )
         comparison_paths["base"] = first_existing_path(
             [
@@ -368,8 +368,8 @@ def main() -> None:
 
         expected_main_groups.extend(
             [
-                [supplementary_base_main_root / "classla_base_eval.txt", main_results_root / "classla_base_eval.txt"],
                 [supplementary_base_main_root / "trankit_base_eval.txt", main_results_root / "trankit_base_eval.txt"],
+                [supplementary_base_main_root / "classla_base_eval.txt", main_results_root / "classla_base_eval.txt"],
                 [
                     supplementary_base_main_root / "classla-vs-trankit_base_comparison.md",
                     main_results_root / "classla-vs-trankit_base_comparison.md",
@@ -379,20 +379,20 @@ def main() -> None:
         expected_diagnostics_groups.extend(
             [
                 [
-                    supplementary_base_diagnostics_root / "classla_base_eval-tagged.txt",
-                    diagnostics_root / "classla_base_eval-tagged.txt",
-                ],
-                [
-                    supplementary_base_diagnostics_root / "classla_base_errors.md",
-                    diagnostics_root / "classla_base_errors.md",
-                ],
-                [
                     supplementary_base_diagnostics_root / "trankit_base_eval-tagged.txt",
                     diagnostics_root / "trankit_base_eval-tagged.txt",
                 ],
                 [
                     supplementary_base_diagnostics_root / "trankit_base_errors.md",
                     diagnostics_root / "trankit_base_errors.md",
+                ],
+                [
+                    supplementary_base_diagnostics_root / "classla_base_eval-tagged.txt",
+                    diagnostics_root / "classla_base_eval-tagged.txt",
+                ],
+                [
+                    supplementary_base_diagnostics_root / "classla_base_errors.md",
+                    diagnostics_root / "classla_base_errors.md",
                 ],
             ]
         )
@@ -524,7 +524,7 @@ def main() -> None:
 
     lines.append("## Prediction File Checks")
     for mode in active_modes:
-        for model in ("classla", "trankit"):
+        for model in ("trankit", "classla"):
             key = f"{model}_{mode}"
             chk = checks[key]
             lines.append(f"### {key}")
@@ -554,7 +554,7 @@ def main() -> None:
 
     lines.append("## Core Metrics (F1 from eval summaries)")
     for mode in active_modes:
-        for model in ("classla", "trankit"):
+        for model in ("trankit", "classla"):
             key = f"{model}_{mode}"
             metric_map = eval_metrics.get(key, {})
             lines.append(f"### {key}")

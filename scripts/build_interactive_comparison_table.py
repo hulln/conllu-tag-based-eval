@@ -150,7 +150,7 @@ def bucket_label(bucket: str, key: str) -> str:
 def collect_model_profile(
     gold_sents: Sequence[Dict[str, Any]],
     pred_sents: Sequence[Dict[str, Any]],
-    max_examples: int,
+    max_examples: int | None,
 ) -> Dict[str, Any]:
     counters = {bucket: Counter() for bucket in BUCKETS}
     examples = {bucket: defaultdict(list) for bucket in BUCKETS}
@@ -189,7 +189,7 @@ def collect_model_profile(
             key = bucket_key(bucket, gold_tok["deprel"], pred_tok["deprel"])
             counters[bucket][key] += 1
 
-            if len(examples[bucket][key]) < max_examples:
+            if max_examples is None or len(examples[bucket][key]) < max_examples:
                 examples[bucket][key].append(
                     {
                         "sid": gold_sent.get("sent_id") or str(gold_idx + 1),
@@ -215,8 +215,8 @@ def merge_examples(classla_examples: Dict[str, Dict], trankit_examples: Dict[str
         keys = set(classla_examples.get(bucket, {}).keys()) | set(trankit_examples.get(bucket, {}).keys())
         for key in keys:
             merged[bucket][key] = {
-                "classla": classla_examples.get(bucket, {}).get(key, []),
                 "trankit": trankit_examples.get(bucket, {}).get(key, []),
+                "classla": classla_examples.get(bucket, {}).get(key, []),
             }
     return merged
 
@@ -237,16 +237,16 @@ def build_error_rows(classla_profile: Dict[str, Any], trankit_profile: Dict[str,
                 {
                     "key": key,
                     "label": bucket_label(bucket, key),
-                    "classla_count": classla_count,
                     "trankit_count": trankit_count,
+                    "classla_count": classla_count,
                     "diff": trankit_count - classla_count,
                 }
             )
 
         bucket_rows.sort(
             key=lambda row: (
-                max(row["classla_count"], row["trankit_count"]),
-                row["classla_count"] + row["trankit_count"],
+                row["trankit_count"],
+                row["classla_count"],
                 abs(row["diff"]),
                 row["label"],
             ),
@@ -278,13 +278,13 @@ def build_relation_rows(
             {
                 "rel": rel,
                 "count": count,
-                "classla_las": classla_las,
                 "trankit_las": trankit_las,
+                "classla_las": classla_las,
                 "diff": trankit_las - classla_las,
             }
         )
 
-    rows.sort(key=lambda row: (abs(row["diff"]), row["count"], row["rel"]), reverse=True)
+    rows.sort(key=lambda row: (row["trankit_las"], row["classla_las"], row["count"], row["rel"]), reverse=True)
     return rows
 
 
@@ -295,7 +295,7 @@ def render_html(out_js_name: str) -> str:
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Analiza napak: CLASSLA-Stanza vs. Trankit - SSJ-UD testna množica</title>
+<title>Analiza napak: Trankit vs. CLASSLA-Stanza - SSJ-UD testna množica</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
@@ -309,7 +309,22 @@ def render_html(out_js_name: str) -> str:
     margin: 0 auto;
   }}
   h1 {{ font-size: 17px; font-weight: 600; letter-spacing: .01em; margin-bottom: 4px; }}
-  .subtitle {{ font-size: 12px; color: #666; margin-bottom: 28px; font-weight: 300; line-height: 1.5; }}
+  .subtitle {{ font-size: 12px; color: #666; margin-bottom: 8px; font-weight: 300; line-height: 1.5; }}
+  .provenance {{ font-size: 11px; color: #555; margin-bottom: 28px; line-height: 1.6; }}
+  .provenance strong {{ color: #333; }}
+  .provenance code {{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    background: #efece6;
+    padding: 1px 3px;
+    border-radius: 2px;
+  }}
+  .provenance a {{
+    color: #1f5f8f;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(31, 95, 143, 0.25);
+  }}
+  .provenance a:hover {{ border-bottom-color: rgba(31, 95, 143, 0.75); }}
   h2 {{
     font-size: 12px;
     font-weight: 600;
@@ -407,17 +422,26 @@ def render_html(out_js_name: str) -> str:
 </style>
 </head>
 <body>
-<h1>Analiza napak: CLASSLA-Stanza vs. Trankit - SSJ-UD testna množica</h1>
+<h1>Analiza napak: Trankit vs. CLASSLA-Stanza - SSJ-UD testna množica</h1>
 <div class="subtitle" id="subtitle"></div>
+<div class="provenance">
+  <strong>Verzije/modelski viri:</strong>
+  Trankit <a href="https://www.clarin.si/repository/xmlui/handle/11356/1997">CLARIN 11356/1997</a>
+  (<code>trankit-sl-ssj+sst.zip</code>, MD5 <code>0ddfac8d7445f8fa300f59dde1a00352</code>) z
+  <a href="https://pypi.org/project/trankit/1.1.2/">trankit==1.1.2</a> &nbsp;·&nbsp;
+  CLASSLA <a href="https://pypi.org/project/classla/2.2.1/">classla==2.2.1</a>
+  (<code>classla.Pipeline('sl', pos_use_lexicon=True)</code>).
+</div>
 <div class="overview" id="overview"></div>
 
 <h2>Pregled napak po tipu</h2>
 <div class="note">Nižje število napak je boljše. Klik na vrstico odpre konkretne primere spodaj.</div>
+<div class="note">Privzeto je vsak blok napak razvrščen po stolpcu Trankit, od največ do najmanj napak.</div>
 <div id="error-sections"></div>
 
 <h2>LAS po relacijah</h2>
 <div class="controls">
-  <div class="note" style="margin-top:0">Razlika = Trankit LAS minus CLASSLA LAS.</div>
+  <div class="note" style="margin-top:0">Privzeto razvrščeno po Trankit LAS. Razlika = Trankit LAS minus CLASSLA LAS.</div>
   <div>
     <label class="control-label" for="relation-filter">Iskanje relacij</label>
     <input id="relation-filter" type="search" placeholder="npr. nsubj ali obl">
@@ -428,8 +452,8 @@ def render_html(out_js_name: str) -> str:
     <tr>
       <th>Relacija</th>
       <th class="right">Gold</th>
-      <th class="right">CLASSLA LAS</th>
       <th class="right">Trankit LAS</th>
+      <th class="right">CLASSLA LAS</th>
       <th class="right">Razlika</th>
     </tr>
   </thead>
@@ -441,15 +465,15 @@ def render_html(out_js_name: str) -> str:
 </div>
 
 <h2>Primeri za izbrano vrstico</h2>
-<div class="note" id="examples-meta">Ni izbrane vrstice.</div>
+<div class="note" id="examples-meta">Prikažejo se vsi shranjeni primeri za izbrano vrstico.</div>
 <div class="examples">
-  <div class="example-box">
-    <h3>CLASSLA</h3>
-    <div id="classla-examples" class="note">Ni primerov.</div>
-  </div>
   <div class="example-box">
     <h3>Trankit</h3>
     <div id="trankit-examples" class="note">Ni primerov.</div>
+  </div>
+  <div class="example-box">
+    <h3>CLASSLA</h3>
+    <div id="classla-examples" class="note">Ni primerov.</div>
   </div>
 </div>
 
@@ -468,8 +492,8 @@ def render_html(out_js_name: str) -> str:
     const overview = document.getElementById('overview');
     const delta = data.summary.trankit_las - data.summary.classla_las;
     const overviewItems = [
-      ['CLASSLA LAS', data.summary.classla_las.toFixed(2), `${{data.summary.classla_errors}} LAS napak`],
       ['Trankit LAS', data.summary.trankit_las.toFixed(2), `${{data.summary.trankit_errors}} LAS napak`],
+      ['CLASSLA LAS', data.summary.classla_las.toFixed(2), `${{data.summary.classla_errors}} LAS napak`],
       ['Razlika LAS', `${{delta >= 0 ? '+' : ''}}${{delta.toFixed(2)}}`, 'Trankit minus CLASSLA'],
       ['Primerjani tokeni', String(data.summary.compared_tokens), 'Iz gold poravnane primerjave'],
     ];
@@ -491,7 +515,6 @@ def render_html(out_js_name: str) -> str:
     }};
     const ERROR_ROW_LIMIT = 20;
     const RELATION_ROW_LIMIT = 20;
-    const EXAMPLE_LIMIT = 3;
 
     function deltaClass(value, largerIsBetter) {{
       if (value === 0) return 'neut';
@@ -517,41 +540,17 @@ def render_html(out_js_name: str) -> str:
       target.className = '';
 
       const list = document.createElement('div');
-      const toggle = document.createElement('button');
-      let expanded = false;
-
-      toggle.type = 'button';
-      toggle.className = 'toggle-btn';
-
-      function paintExamples() {{
-        list.innerHTML = '';
-        const visible = expanded ? items : items.slice(0, EXAMPLE_LIMIT);
-        for (const item of visible) {{
-          const div = document.createElement('div');
-          div.className = 'example-item';
-          div.innerHTML = `
-            <div class="example-meta">sid=${{item.sid}} · tok=${{item.token}}#${{item.token_id}} · gold=${{item.gold}} · pred=${{item.pred}}</div>
-            <div class="example-sentence">${{item.sentence_html}}</div>
-          `;
-          list.appendChild(div);
-        }}
-
-        if (items.length <= EXAMPLE_LIMIT) {{
-          toggle.hidden = true;
-        }} else {{
-          toggle.hidden = false;
-          toggle.textContent = expanded ? 'Prikaži manj primerov' : 'Prikaži vse primere';
-        }}
+      for (const item of items) {{
+        const div = document.createElement('div');
+        div.className = 'example-item';
+        div.innerHTML = `
+          <div class="example-meta">sid=${{item.sid}} · tok=${{item.token}}#${{item.token_id}} · gold=${{item.gold}} · pred=${{item.pred}}</div>
+          <div class="example-sentence">${{item.sentence_html}}</div>
+        `;
+        list.appendChild(div);
       }}
 
-      toggle.addEventListener('click', function () {{
-        expanded = !expanded;
-        paintExamples();
-      }});
-
       target.appendChild(list);
-      target.appendChild(toggle);
-      paintExamples();
     }}
 
     const examplesMeta = document.getElementById('examples-meta');
@@ -559,10 +558,13 @@ def render_html(out_js_name: str) -> str:
     const trankitExamples = document.getElementById('trankit-examples');
 
     function showExamples(bucket, key, label) {{
-      const examples = (data.examples[bucket] || {{}})[key] || {{ classla: [], trankit: [] }};
-      examplesMeta.textContent = `${{bucketTitles[bucket]}} · ${{label}}`;
-      renderExampleColumn(classlaExamples, examples.classla);
+      const examples = (data.examples[bucket] || {{}})[key] || {{ trankit: [], classla: [] }};
+      const rowTotals = (data.error_rows[bucket] || []).find(function (row) {{
+        return row.key === key;
+      }}) || {{ trankit_count: 0, classla_count: 0 }};
+      examplesMeta.textContent = `${{bucketTitles[bucket]}} · ${{label}} · primeri: Trankit ${{examples.trankit.length}}/${{rowTotals.trankit_count}}, CLASSLA ${{examples.classla.length}}/${{rowTotals.classla_count}}`;
       renderExampleColumn(trankitExamples, examples.trankit);
+      renderExampleColumn(classlaExamples, examples.classla);
     }}
 
     const errorSections = document.getElementById('error-sections');
@@ -589,8 +591,8 @@ def render_html(out_js_name: str) -> str:
         <thead>
           <tr>
             <th>Vzorec</th>
-            <th class="right">CLASSLA</th>
             <th class="right">Trankit</th>
+            <th class="right">CLASSLA</th>
             <th class="right">Razlika</th>
           </tr>
         </thead>
@@ -609,8 +611,8 @@ def render_html(out_js_name: str) -> str:
           if (row.diff > 0) tr.classList.add('classla-better');
           tr.innerHTML = `
             <td class="label">${{row.label}}</td>
-            <td class="right">${{row.classla_count}}</td>
             <td class="right">${{row.trankit_count}}</td>
+            <td class="right">${{row.classla_count}}</td>
             <td class="right ${{deltaClass(row.diff, false)}}">${{deltaText(row.diff)}}</td>
           `;
           tr.addEventListener('click', function () {{
@@ -661,8 +663,8 @@ def render_html(out_js_name: str) -> str:
         tr.innerHTML = `
           <td class="label">${{row.rel}}</td>
           <td class="right">${{row.count}}</td>
-          <td class="right">${{row.classla_las.toFixed(2)}} ${{relationBar(row.classla_las, 'bar-c')}}</td>
           <td class="right">${{row.trankit_las.toFixed(2)}} ${{relationBar(row.trankit_las, 'bar-t')}}</td>
+          <td class="right">${{row.classla_las.toFixed(2)}} ${{relationBar(row.classla_las, 'bar-c')}}</td>
           <td class="right ${{deltaClass(row.diff, true)}}">${{deltaText(row.diff, 2)}}</td>
         `;
         relationTable.appendChild(tr);
@@ -702,7 +704,7 @@ def build_bundle(
     out_html_path: Path,
     out_js_path: Path,
     run_id: str,
-    max_examples: int,
+    max_examples: int | None,
 ) -> None:
     gold_sents = read_conllu(gold_path)
     classla_sents = read_conllu(classla_pred_path)
@@ -719,10 +721,10 @@ def build_bundle(
         "run_id": run_id,
         "gold_sentences": len(gold_sents),
         "compared_tokens": compared,
-        "classla_las": classla_metrics.get("LAS", 0.0),
         "trankit_las": trankit_metrics.get("LAS", 0.0),
-        "classla_errors": compared - classla_profile["totals"]["las_correct"],
+        "classla_las": classla_metrics.get("LAS", 0.0),
         "trankit_errors": compared - trankit_profile["totals"]["las_correct"],
+        "classla_errors": compared - classla_profile["totals"]["las_correct"],
     }
 
     payload = {
@@ -749,18 +751,18 @@ def build_bundle(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build the interactive comparison table HTML/data bundle.")
     parser.add_argument("gold", help="Path to gold CoNLL-U file.")
-    parser.add_argument("classla_pred", help="Path to CLASSLA aligned prediction file.")
     parser.add_argument("trankit_pred", help="Path to Trankit aligned prediction file.")
-    parser.add_argument("classla_eval_tagged", help="Path to CLASSLA aligned eval-tagged file.")
+    parser.add_argument("classla_pred", help="Path to CLASSLA aligned prediction file.")
     parser.add_argument("trankit_eval_tagged", help="Path to Trankit aligned eval-tagged file.")
+    parser.add_argument("classla_eval_tagged", help="Path to CLASSLA aligned eval-tagged file.")
     parser.add_argument("out_html", help="Path to generated HTML file.")
     parser.add_argument("out_js", help="Path to generated JS data file.")
     parser.add_argument("--run-id", required=True, help="Run id shown in the table header.")
     parser.add_argument(
         "--examples-per-item",
         type=int,
-        default=8,
-        help="Maximum stored examples per model and error pattern.",
+        default=0,
+        help="Maximum stored examples per model and error pattern; 0 stores all examples.",
     )
     return parser.parse_args()
 
@@ -776,7 +778,7 @@ def main() -> None:
         out_html_path=Path(args.out_html),
         out_js_path=Path(args.out_js),
         run_id=args.run_id,
-        max_examples=max(1, args.examples_per_item),
+        max_examples=None if args.examples_per_item <= 0 else args.examples_per_item,
     )
 
 

@@ -219,21 +219,21 @@ def compare(
 
     out.append("## LAS exact differences")
     out.append(f"- {model_a} correct, {model_b} wrong: {totals['las_a_only']} ({_pct(totals['las_a_only'], compared):.2f}%)")
-    out.append(f"- {model_b} correct, {model_a} wrong: {totals['las_b_only']} ({_pct(totals['las_b_only'], compared):.2f}%)")
+    out.append(f"- {model_a} wrong, {model_b} correct: {totals['las_b_only']} ({_pct(totals['las_b_only'], compared):.2f}%)")
     out.append(f"- Both correct: {totals['las_both']} ({_pct(totals['las_both'], compared):.2f}%)")
     out.append(f"- Both wrong: {totals['las_neither']} ({_pct(totals['las_neither'], compared):.2f}%)")
     out.append("")
 
     out.append("## UAS exact differences")
     out.append(f"- {model_a} correct, {model_b} wrong: {totals['uas_a_only']} ({_pct(totals['uas_a_only'], compared):.2f}%)")
-    out.append(f"- {model_b} correct, {model_a} wrong: {totals['uas_b_only']} ({_pct(totals['uas_b_only'], compared):.2f}%)")
+    out.append(f"- {model_a} wrong, {model_b} correct: {totals['uas_b_only']} ({_pct(totals['uas_b_only'], compared):.2f}%)")
     out.append(f"- Both correct: {totals['uas_both']} ({_pct(totals['uas_both'], compared):.2f}%)")
     out.append(f"- Both wrong: {totals['uas_neither']} ({_pct(totals['uas_neither'], compared):.2f}%)")
     out.append("")
 
     out.append("## DEPREL exact differences")
     out.append(f"- {model_a} correct, {model_b} wrong: {totals['rel_a_only']} ({_pct(totals['rel_a_only'], compared):.2f}%)")
-    out.append(f"- {model_b} correct, {model_a} wrong: {totals['rel_b_only']} ({_pct(totals['rel_b_only'], compared):.2f}%)")
+    out.append(f"- {model_a} wrong, {model_b} correct: {totals['rel_b_only']} ({_pct(totals['rel_b_only'], compared):.2f}%)")
     out.append(f"- Both correct: {totals['rel_both']} ({_pct(totals['rel_both'], compared):.2f}%)")
     out.append(f"- Both wrong: {totals['rel_neither']} ({_pct(totals['rel_neither'], compared):.2f}%)")
     out.append("")
@@ -242,7 +242,7 @@ def compare(
     out.extend(_render_counter(b_errors_when_a_las_better, top_n))
     out.append("")
 
-    out.append(f"## Top LAS mistakes where {model_b} wins")
+    out.append(f"## Top LAS mistakes where {model_a} loses to {model_b}")
     out.extend(_render_counter(a_errors_when_b_las_better, top_n))
     out.append("")
 
@@ -250,7 +250,7 @@ def compare(
     out.extend(_render_counter(b_errors_when_a_rel_better, top_n))
     out.append("")
 
-    out.append(f"## Top DEPREL mistakes where {model_b} wins")
+    out.append(f"## Top DEPREL mistakes where {model_a} loses to {model_b}")
     out.extend(_render_counter(a_errors_when_b_rel_better, top_n))
     out.append("")
 
