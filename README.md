@@ -2,7 +2,7 @@
 
 Reproducible evaluation of CLASSLA and Trankit on Slovenian UD SSJ.
 
-Live interactive table with results from SSJ (updated: 15. 4. 2026) available [here](https://conllu-tag-based-eval-table.netlify.app/comparison_table.html).
+Live interactive table with results from SSJ (updated: 2026-04-15) available [here](https://conllu-tag-based-eval-table.netlify.app/comparison_table.html).
 
 ## What Is Canonical
 
