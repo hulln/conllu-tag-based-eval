@@ -11,8 +11,10 @@ from typing import Any, Dict, Iterable, List, Sequence
 
 try:
     from trankit import Pipeline
-except ModuleNotFoundError:
+    PIPELINE_IMPORT_ERROR: Exception | None = None
+except Exception as exc:  # noqa: BLE001
     Pipeline = None
+    PIPELINE_IMPORT_ERROR = exc
 
 
 CLARIN_SLOVENIAN_HANDLE = "11356/1997"
@@ -629,8 +631,13 @@ def main() -> None:
     mode = canonical_mode(args.mode) if args.mode != "both" else "both"
 
     if Pipeline is None:
+        detail = ""
+        if PIPELINE_IMPORT_ERROR is not None:
+            detail = f" Original import error: {type(PIPELINE_IMPORT_ERROR).__name__}: {PIPELINE_IMPORT_ERROR}"
         raise SystemExit(
-            "Missing dependency: trankit. Install requirements first, e.g. `pip install -r requirements.txt`."
+            "Unable to import trankit Pipeline. Install the pinned requirements first, "
+            "e.g. `pip install -r requirements.txt`."
+            + detail
         )
 
     output_path = Path(args.output) if args.output else None

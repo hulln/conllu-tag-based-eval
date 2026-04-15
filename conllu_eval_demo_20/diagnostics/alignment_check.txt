@@ -1,0 +1,61 @@
+Alignment rule used in this demo:
+1. The gold and prediction files must contain the same sentence IDs in the same order.
+2. Each matched sentence must contain the same number of real tokens.
+3. Each matched token must have the same FORM text.
+4. Only then do we compare UPOS, HEAD, and DEPREL values.
+
+CLASSLA
+sentences compared: 20
+tokens compared:    427
+sent_id mismatches: 0
+token mismatches:   0
+form mismatches:    0
+UPOS correct:       425/427 = 99.53%
+UAS correct:        388/427 = 90.87%
+LAS correct:        383/427 = 89.70%
+
+Trankit
+sentences compared: 20
+tokens compared:    427
+sent_id mismatches: 0
+token mismatches:   0
+form mismatches:    0
+UPOS correct:       424/427 = 99.30%
+UAS correct:        406/427 = 95.08%
+LAS correct:        398/427 = 93.21%
+
+Alignment verdict: OK. The files compare the same examples and same token forms.
+
+Concrete token-by-token example
+sent_id: ssj563.2929.10384
+text: Najnovejša transakcija je sicer še sveža, vzorec pa je bržkone vselej isti: Evropi se iz Amerike vrača njena lastna podoba, le povečana do grotesknih razsežnosti.
+ID	FORM	GOLD_HEAD	GOLD_DEPREL	CLASSLA_HEAD	CLASSLA_DEPREL	CLASSLA_LAS_OK	TRANKIT_HEAD	TRANKIT_DEPREL	TRANKIT_LAS_OK
+1	Najnovejša	2	amod	2	amod	True	2	amod	True
+2	transakcija	6	nsubj	6	nsubj	True	6	nsubj	True
+3	je	6	cop	6	cop	True	6	cop	True
+4	sicer	6	advmod	6	advmod	True	6	advmod	True
+5	še	6	advmod	6	advmod	True	6	advmod	True
+6	sveža	0	root	0	root	True	0	root	True
+7	,	13	punct	13	punct	True	13	punct	True
+8	vzorec	13	nsubj	13	nsubj	True	13	nsubj	True
+9	pa	13	advmod	13	advmod	True	13	advmod	True
+10	je	13	cop	13	cop	True	13	cop	True
+11	bržkone	13	advmod	13	advmod	True	13	advmod	True
+12	vselej	13	advmod	13	advmod	True	13	advmod	True
+13	isti	6	parataxis	6	parataxis	True	6	parataxis	True
+14	:	19	punct	19	punct	True	19	punct	True
+15	Evropi	19	obj	19	iobj	False	19	iobj	False
+16	se	19	expl	19	expl	True	19	expl	True
+17	iz	18	case	18	case	True	18	case	True
+18	Amerike	19	obl	19	obl	True	19	obl	True
+19	vrača	6	parataxis	6	parataxis	True	6	parataxis	True
+20	njena	22	det	22	det	True	22	det	True
+21	lastna	22	amod	22	amod	True	22	amod	True
+22	podoba	19	nsubj	19	nsubj	True	19	nsubj	True
+23	,	25	punct	25	punct	True	25	punct	True
+24	le	25	advmod	25	advmod	True	25	advmod	True
+25	povečana	22	amod	22	amod	True	22	amod	True
+26	do	28	case	28	case	True	28	case	True
+27	grotesknih	28	amod	28	amod	True	28	amod	True
+28	razsežnosti	25	nmod	25	nmod	True	25	obl	False
+29	.	6	punct	6	punct	True	6	punct	True
