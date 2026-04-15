@@ -2,6 +2,8 @@
 
 Reproducible evaluation of CLASSLA and Trankit on Slovenian UD SSJ.
 
+Live interactive table with results from SSJ (updated: 15. 4. 2026) available [here](https://conllu-tag-based-eval-table.netlify.app/comparison_table.html).
+
 ## What Is Canonical
 
 - Primary method: aligned mode only (gold sentence/token boundaries are fixed).
