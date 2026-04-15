@@ -493,10 +493,10 @@ def render_html(out_js_name: str) -> str:
     const RELATION_ROW_LIMIT = 20;
     const EXAMPLE_LIMIT = 3;
 
-    function deltaClass(value) {{
-      if (value < 0) return 'pos';
-      if (value > 0) return 'neg';
-      return 'neut';
+    function deltaClass(value, largerIsBetter) {{
+      if (value === 0) return 'neut';
+      const better = largerIsBetter ? value > 0 : value < 0;
+      return better ? 'pos' : 'neg';
     }}
 
     function deltaText(value, digits) {{
@@ -611,7 +611,7 @@ def render_html(out_js_name: str) -> str:
             <td class="label">${{row.label}}</td>
             <td class="right">${{row.classla_count}}</td>
             <td class="right">${{row.trankit_count}}</td>
-            <td class="right ${{deltaClass(row.diff)}}">${{deltaText(row.diff)}}</td>
+            <td class="right ${{deltaClass(row.diff, false)}}">${{deltaText(row.diff)}}</td>
           `;
           tr.addEventListener('click', function () {{
             showExamples(bucket, row.key, row.label);
@@ -663,7 +663,7 @@ def render_html(out_js_name: str) -> str:
           <td class="right">${{row.count}}</td>
           <td class="right">${{row.classla_las.toFixed(2)}} ${{relationBar(row.classla_las, 'bar-c')}}</td>
           <td class="right">${{row.trankit_las.toFixed(2)}} ${{relationBar(row.trankit_las, 'bar-t')}}</td>
-          <td class="right ${{deltaClass(row.diff)}}">${{deltaText(row.diff, 2)}}</td>
+          <td class="right ${{deltaClass(row.diff, true)}}">${{deltaText(row.diff, 2)}}</td>
         `;
         relationTable.appendChild(tr);
       }}

@@ -802,7 +802,10 @@
   </tbody>
 </table>
 <div class="note">
-  <strong>Barvno ozadje:</strong> <span style="background:#f0fbf5;padding:1px 5px;border:1px solid #cce8d8">zelena</span> = Trankit naredi več napak tega tipa &nbsp;·&nbsp; brez ozadja = CLASSLA naredi več ali enako.
+  <strong>Barvno ozadje:</strong>
+  <span style="background:#f0fbf5;padding:1px 5px;border:1px solid #cce8d8">zelena</span> = Trankit naredi manj napak (Trankit boljši) &nbsp;·&nbsp;
+  <span style="background:#f0f4fb;padding:1px 5px;border:1px solid #c8d8ee">modra</span> = CLASSLA naredi manj napak (CLASSLA boljši) &nbsp;·&nbsp;
+  brez ozadja = enako.
   Pozitivna razlika v stolpcu Razlika pomeni, da Trankit naredi <em>več</em> napak; negativna, da <em>manj</em>.
 </div>
 
@@ -967,8 +970,8 @@
 </table>
 <div class="note">
   <strong>Barvno ozadje:</strong>
-  <span style="background:#f0f4fb;padding:1px 5px;border:1px solid #c8d8ee">modra</span> = CLASSLA boljši &nbsp;·&nbsp;
   <span style="background:#f0fbf5;padding:1px 5px;border:1px solid #cce8d8">zelena</span> = Trankit boljši &nbsp;·&nbsp;
+  <span style="background:#f0f4fb;padding:1px 5px;border:1px solid #c8d8ee">modra</span> = CLASSLA boljši &nbsp;·&nbsp;
   Miniaturne vrstice: <span style="color:#4a6fa5">■</span> CLASSLA &nbsp; <span style="color:#2a9d5c">■</span> Trankit. Vrednosti so preproste točnosti (gold count v imenovalcu), ne F1.
 </div>
 
@@ -1054,8 +1057,8 @@
     }
 
     function rowClass(value) {
-      if (value < 0) return 'classla-better clickable-rel';
-      if (value > 0) return 'trankit-better clickable-rel';
+      if (value < 0) return 'trankit-better clickable-rel';
+      if (value > 0) return 'classla-better clickable-rel';
       return 'clickable-rel';
     }
 
