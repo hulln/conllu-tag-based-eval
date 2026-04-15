@@ -2,13 +2,12 @@
 
 Input datasets used by the pipeline.
 
-- `gold/`: authoritative gold CoNLL-U input for aligned evaluation. Local-only and gitignored.
-- `raw/`: optional sentence-per-line text used only for supplementary base-mode runs.
-- `samples/`: local-only small subsets for smoke tests.
+- [gold](gold/): authoritative gold CoNLL-U input for aligned evaluation. Local-only and gitignored.
+- [raw](raw/): optional sentence-per-line text used only for supplementary base-mode runs.
 
 Methodology note:
 
-- Primary evaluation uses gold sentence segmentation and gold tokenization from `gold/*.conllu`.
+- Primary evaluation uses gold sentence segmentation and gold tokenization from [data/gold](gold/).
 - The models then predict lemma, POS/morphology, and dependency annotation on top of that fixed structure.
 - Base mode is optional supplementary analysis only.
 
@@ -19,5 +18,5 @@ Provenance note:
 
 Primary files:
 
-- `gold/sl_ssj-ud-test.conllu`
-- `raw/sl_ssj-ud-test.sentences.txt` for optional base mode only
+- [gold/sl_ssj-ud-test.conllu](gold/sl_ssj-ud-test.conllu)
+- [raw/sl_ssj-ud-test.sentences.txt](raw/sl_ssj-ud-test.sentences.txt) for optional base mode only
