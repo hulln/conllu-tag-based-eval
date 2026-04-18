@@ -93,6 +93,18 @@
   tr.clickable-row:focus { outline: none; }
   tr.clickable-row:focus-visible td { background: #ece9e2; }
   tr.selected-row td { background: #fff7d4 !important; }
+  tr.clickable-row td.label {
+    position: relative;
+    padding-left: 28px;
+  }
+  tr.clickable-row td.label::before {
+    content: '↳';
+    position: absolute;
+    left: 10px;
+    color: #bbb;
+    font-size: 11px;
+  }
+  tr.clickable-row:hover td.label::before { color: #666; }
   .no-data-row td {
     color: #888;
     font-style: italic;
