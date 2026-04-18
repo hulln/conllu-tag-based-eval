@@ -52,6 +52,23 @@
     margin: 18px 0 8px;
   }
   table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-bottom: 4px; }
+  .table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 4px;
+  }
+  .table-wrap-wide table { min-width: 640px; }
+  .table-wrap.expanded-scroll {
+    max-height: min(62vh, 520px);
+    overflow: auto;
+    scrollbar-gutter: stable;
+  }
+  .table-wrap.expanded-scroll thead th {
+    position: sticky;
+    top: 0;
+    z-index: 4;
+  }
   th {
     text-align: left;
     padding: 5px 10px;
@@ -73,7 +90,19 @@
   tr.classla-better:hover td { background: #e6edf7; }
   tr.trankit-better:hover td { background: #e6f7ed; }
   tr.clickable-row td { cursor: pointer; }
+  tr.clickable-row:focus { outline: none; }
+  tr.clickable-row:focus-visible td { background: #ece9e2; }
   tr.selected-row td { background: #fff7d4 !important; }
+  .no-data-row td {
+    color: #888;
+    font-style: italic;
+    background: #faf9f6 !important;
+    text-align: left !important;
+  }
+  .no-data-row td.right {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 12px;
+  }
   .pos { color: #1a7a3a; font-weight: 600; }
   .neg { color: #b83232; font-weight: 600; }
   .neut { color: #888; }
@@ -106,7 +135,29 @@
     line-height: 1.45;
   }
   .example-sentence { line-height: 1.6; color: #333; }
+  .examples-context {
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    background: #f3f0eb;
+    border-radius: 2px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    color: #555;
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
   mark { background: #f7e7a1; padding: 0 2px; }
+  .examples-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(26,26,26,0.14);
+    z-index: 90;
+    transition: opacity .15s;
+  }
+  .examples-backdrop.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
   .examples-panel {
     position: fixed;
     top: 20px;
@@ -175,12 +226,79 @@
     margin: 8px 0 10px;
     flex-wrap: wrap;
   }
-  input[type="search"] { border: 1px solid #d7d2cb; background: #fff; padding: 7px 9px; font: inherit; min-width: 220px; }
-  .toggle-btn { border: 1px solid #d7d2cb; background: #fff; color: #333; padding: 6px 10px; font: inherit; cursor: pointer; }
-  .toggle-btn:hover { background: #f3f0eb; }
+  .count-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .count-meta .note {
+    margin-top: 0;
+  }
+  .scroll-hint {
+    color: #999;
+    white-space: nowrap;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+  }
+  .control-note { flex: 1 1 280px; max-width: 560px; margin: 0; }
+  .control-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  input[type="search"] {
+    border: 1px solid #d7d2cb;
+    background: #fff;
+    padding: 7px 9px;
+    font: inherit;
+    min-width: 220px;
+    transition: border-color .14s ease, box-shadow .14s ease, background .14s ease;
+  }
+  input[type="search"]:focus {
+    outline: none;
+    border-color: #b8b0a4;
+    box-shadow: 0 0 0 2px rgba(31,95,143,0.10);
+  }
+  .toggle-btn {
+    border: 1px solid #d7d2cb;
+    background: #fff;
+    color: #333;
+    padding: 6px 10px;
+    font: inherit;
+    cursor: pointer;
+    transition: background .14s ease, border-color .14s ease, color .14s ease;
+  }
+  .toggle-btn:hover {
+    background: #f3f0eb;
+    border-color: #c8c1b5;
+  }
   .toggle-btn[hidden] { display: none; }
   .toggle-btn.active { background: #1a1a1a; color: #f0ede8; border-color: #1a1a1a; }
-  .control-label { font-size: 11px; color: #666; margin-right: 6px; }
+  .inline-toggle {
+    border: none;
+    background: none;
+    padding: 0;
+    font: inherit;
+    font-size: 11px;
+    color: #888;
+    line-height: 1.6;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color .14s ease;
+  }
+  .inline-toggle:hover {
+    color: #444;
+  }
+  .inline-toggle[hidden] { display: none; }
+  .control-label {
+    font-size: 11px;
+    color: #666;
+    margin-right: 6px;
+  }
   .ack { font-size: 12px; color: #444; line-height: 1.7; margin-top: 8px; }
   /* Column sort — same design as v1 */
   th.sortable { cursor: pointer; user-select: none; }
@@ -205,9 +323,20 @@
     padding: 3px 7px;
     border-radius: 2px;
     letter-spacing: .02em;
+    transition: color .14s ease, background .14s ease;
   }
   .action-btn:hover { color: #222; background: #ede9e3; }
-  .action-btns { display: flex; gap: 2px; align-items: center; margin-left: 6px; }
+  .action-btns {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    margin-left: 6px;
+  }
+  button:focus-visible,
+  input[type="search"]:focus-visible {
+    outline: 2px solid rgba(31,95,143,0.35);
+    outline-offset: 2px;
+  }
   /* Deprel stacked buckets */
   .deprel-bucket .bucket-header {
     display: flex;
@@ -253,11 +382,22 @@
     transition: opacity .12s, transform .12s;
     z-index: 200;
     min-width: 180px;
+    max-width: min(320px, calc(100vw - 48px));
+    white-space: pre-wrap;
   }
-  .has-tip:hover::after { opacity: 1; transform: none; }
+  .has-tip:hover::after,
+  tr.clickable-row:focus .has-tip::after,
+  tr.clickable-row:focus-visible .has-tip::after {
+    opacity: 1;
+    transform: none;
+  }
   @media (max-width: 820px) {
     body { padding: 24px 18px 36px; }
     .overview { grid-template-columns: 1fr 1fr; }
+    .table-wrap-wide table { min-width: 560px; }
+    .control-main {
+      justify-content: flex-start;
+    }
   }
 </style>
 </head>
@@ -266,10 +406,10 @@
 <div class="subtitle" id="subtitle"></div>
 <div class="provenance">
   <strong>Model:</strong>
-  SPOT-Trankit &mdash; <a href="https://www.clarin.si/repository/xmlui/handle/11356/1997">CLARIN 11356/1997</a>
-  (<code>trankit-sl-ssj+sst.zip</code>, MD5 <code>0ddfac8d7445f8fa300f59dde1a00352</code>)
-  with <a href="https://pypi.org/project/trankit/1.1.2/">trankit==1.1.2</a>.
-  CLASSLA-Stanza included for reference: <a href="https://pypi.org/project/classla/2.2.1/">classla==2.2.1</a>
+  SPOT-Trankit &mdash; <a href="https://www.clarin.si/repository/xmlui/handle/11356/1997">CLARIN 11356/1997</a>,
+  run with <a href="https://pypi.org/project/trankit/1.1.2/">trankit==1.1.2</a> using the Slovenian model archive
+  <code>trankit-sl-ssj+sst.zip</code> (MD5 <code>0ddfac8d7445f8fa300f59dde1a00352</code>).
+  CLASSLA-Stanza is included for reference and was run with <a href="https://pypi.org/project/classla/2.2.1/">classla==2.2.1</a>
   (<code>classla.Pipeline('sl', pos_use_lexicon=True)</code>).
   &nbsp;&middot;&nbsp;
   <strong>Data:</strong>
@@ -284,8 +424,8 @@
 
 <h2 id="las-by-relation">LAS by Dependency Relation</h2>
 <div class="controls">
-  <div class="note" style="margin-top:0">Sorted by SPOT-Trankit LAS. Difference = SPOT-Trankit LAS &minus; CLASSLA LAS.</div>
-  <div style="display:flex;align-items:center;gap:8px">
+  <div class="note control-note">Sorted by SPOT-Trankit LAS. Difference = SPOT-Trankit LAS &minus; CLASSLA LAS.</div>
+  <div class="control-main">
     <label class="control-label" for="rel-filter">Search</label>
     <input id="rel-filter" type="search" placeholder="e.g. nsubj or obl">
     <div class="action-btns">
@@ -295,9 +435,12 @@
   </div>
 </div>
 <div class="toolbar">
-  <div class="note" id="rel-count-note"></div>
-  <button id="rel-toggle" class="toggle-btn" type="button" hidden>Show more</button>
+  <div class="count-meta">
+    <div class="note" id="rel-count-note"></div>
+    <button id="rel-toggle" class="inline-toggle" type="button" hidden>Show more</button>
+  </div>
 </div>
+<div class="table-wrap table-wrap-wide">
 <table>
   <thead>
     <tr>
@@ -310,11 +453,12 @@
   </thead>
   <tbody id="rel-table"></tbody>
 </table>
+</div>
 
 <h2 id="upos-accuracy">UPOS Accuracy by Tag</h2>
 <div class="controls">
-  <div class="note" style="margin-top:0">Sorted by SPOT-Trankit accuracy. Difference = SPOT-Trankit &minus; CLASSLA.</div>
-  <div style="display:flex;align-items:center;gap:8px">
+  <div class="note control-note">Sorted by SPOT-Trankit accuracy. Difference = SPOT-Trankit &minus; CLASSLA.</div>
+  <div class="control-main">
     <label class="control-label" for="upos-acc-filter">Search</label>
     <input id="upos-acc-filter" type="search" placeholder="e.g. NOUN or VERB">
     <div class="action-btns">
@@ -324,9 +468,12 @@
   </div>
 </div>
 <div class="toolbar">
-  <div class="note" id="upos-acc-count-note"></div>
-  <button id="upos-acc-toggle" class="toggle-btn" type="button" hidden>Show more</button>
+  <div class="count-meta">
+    <div class="note" id="upos-acc-count-note"></div>
+    <button id="upos-acc-toggle" class="inline-toggle" type="button" hidden>Show more</button>
+  </div>
 </div>
+<div class="table-wrap table-wrap-wide">
 <table>
   <thead>
     <tr>
@@ -339,11 +486,12 @@
   </thead>
   <tbody id="upos-acc-table"></tbody>
 </table>
+</div>
 
 <h2 id="errors-deprel">Most Common Errors &mdash; Dependency Relations</h2>
 <div class="controls">
-  <div class="note" style="margin-top:0">SPOT-Trankit only. Click a row for examples. <kbd>↑↓</kbd> to navigate, <kbd>Esc</kbd> to close.</div>
-  <div>
+  <div class="note control-note">SPOT-Trankit only. Click a row for examples. <kbd>↑↓</kbd> to navigate, <kbd>Esc</kbd> to close.</div>
+  <div class="control-main">
     <label class="control-label" for="deprel-err-filter">Search</label>
     <input id="deprel-err-filter" type="search" placeholder="e.g. nsubj or obl">
   </div>
@@ -352,8 +500,8 @@
 
 <h2 id="errors-upos">Most Common Errors &mdash; UPOS</h2>
 <div class="controls">
-  <div class="note" style="margin-top:0">SPOT-Trankit only. Click a row for examples.</div>
-  <div style="display:flex;gap:8px;align-items:center">
+  <div class="note control-note">SPOT-Trankit only. Click a row for examples.</div>
+  <div class="control-main">
     <label class="control-label" for="upos-err-filter">Search</label>
     <input id="upos-err-filter" type="search" placeholder="e.g. NOUN">
     <button id="upos-merge-btn" class="toggle-btn" type="button">Merge (A&harr;B)</button>
@@ -364,9 +512,12 @@
   </div>
 </div>
 <div class="toolbar">
-  <div class="note" id="upos-err-count-note"></div>
-  <button id="upos-err-toggle" class="toggle-btn" type="button" hidden>Show more</button>
+  <div class="count-meta">
+    <div class="note" id="upos-err-count-note"></div>
+    <button id="upos-err-toggle" class="inline-toggle" type="button" hidden>Show more</button>
+  </div>
 </div>
+<div class="table-wrap">
 <table>
   <thead>
     <tr>
@@ -376,11 +527,12 @@
   </thead>
   <tbody id="upos-err-table"></tbody>
 </table>
+</div>
 
 <h2 id="errors-xpos">Most Common Errors &mdash; XPOS (MSD)</h2>
 <div class="controls">
-  <div class="note" style="margin-top:0">SPOT-Trankit only. Hover a row for MSD decode. Click for examples.</div>
-  <div style="display:flex;gap:8px;align-items:center">
+  <div class="note control-note">SPOT-Trankit only. Hover or focus a row for MSD decode. Click for examples.</div>
+  <div class="control-main">
     <label class="control-label" for="xpos-err-filter">Search</label>
     <input id="xpos-err-filter" type="search" placeholder="e.g. Ncm or Vmpr">
     <button id="xpos-merge-btn" class="toggle-btn" type="button">Merge (A&harr;B)</button>
@@ -391,9 +543,12 @@
   </div>
 </div>
 <div class="toolbar">
-  <div class="note" id="xpos-err-count-note"></div>
-  <button id="xpos-err-toggle" class="toggle-btn" type="button" hidden>Show more</button>
+  <div class="count-meta">
+    <div class="note" id="xpos-err-count-note"></div>
+    <button id="xpos-err-toggle" class="inline-toggle" type="button" hidden>Show more</button>
+  </div>
 </div>
+<div class="table-wrap">
 <table>
   <thead>
     <tr>
@@ -403,11 +558,12 @@
   </thead>
   <tbody id="xpos-err-table"></tbody>
 </table>
+</div>
 
 <h2 id="errors-lemma">Most Common Errors &mdash; Lemma</h2>
 <div class="controls">
-  <div class="note" style="margin-top:0">SPOT-Trankit only. Click a row for examples.</div>
-  <div style="display:flex;gap:8px;align-items:center">
+  <div class="note control-note">SPOT-Trankit only. Click a row for examples.</div>
+  <div class="control-main">
     <label class="control-label" for="lemma-err-filter">Search</label>
     <input id="lemma-err-filter" type="search" placeholder="e.g. biti or &lt;lemma&gt;">
     <button id="lemma-merge-btn" class="toggle-btn" type="button">Merge (A&harr;B)</button>
@@ -418,9 +574,12 @@
   </div>
 </div>
 <div class="toolbar">
-  <div class="note" id="lemma-err-count-note"></div>
-  <button id="lemma-err-toggle" class="toggle-btn" type="button" hidden>Show more</button>
+  <div class="count-meta">
+    <div class="note" id="lemma-err-count-note"></div>
+    <button id="lemma-err-toggle" class="inline-toggle" type="button" hidden>Show more</button>
+  </div>
 </div>
+<div class="table-wrap">
 <table>
   <thead>
     <tr>
@@ -430,7 +589,9 @@
   </thead>
   <tbody id="lemma-err-table"></tbody>
 </table>
+</div>
 
+<div class="examples-backdrop hidden" id="examples-backdrop"></div>
 <div class="examples-panel hidden" id="examples-panel">
   <div class="examples-panel-header">
     <div class="examples-panel-title" id="examples-panel-title">Examples</div>
@@ -544,12 +705,57 @@
     return v > 0 ? '+' + s : s;
   }
 
+  function renderEmptyRow(tbody, colspan, message) {
+    const tr = document.createElement('tr');
+    tr.className = 'no-data-row';
+    tr.innerHTML = `<td colspan="${colspan}">${message}</td>`;
+    tbody.appendChild(tr);
+  }
+
+  function setCountNote(countEl, visibleCount, totalCount, expanded) {
+    countEl.textContent = `Showing ${visibleCount} / ${totalCount}`;
+    if (expanded && totalCount > ROW_LIMIT) {
+      const hint = document.createElement('span');
+      hint.className = 'scroll-hint';
+      hint.textContent = ' · ↓';
+      countEl.appendChild(hint);
+    }
+  }
+
+  function setExpandedScrollState(wrapper, expanded, totalCount) {
+    if (!wrapper) return;
+    const active = expanded && totalCount > ROW_LIMIT;
+    wrapper.classList.toggle('expanded-scroll', active);
+    if (active) wrapper.scrollTop = 0;
+  }
+
+  function wireClickableRow(tr, tbody, onActivate, ariaLabel) {
+    tr.classList.add('clickable-row');
+    tr.tabIndex = 0;
+    if (ariaLabel) tr.setAttribute('aria-label', ariaLabel);
+    tr.addEventListener('focus', function() {
+      activeTbody = tbody;
+    });
+    tr.addEventListener('click', function() {
+      activeTbody = tbody;
+      onActivate();
+    });
+    tr.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        activeTbody = tbody;
+        onActivate();
+      }
+    });
+  }
+
   // Generic accuracy table renderer
   function makeAccTable(tbodyId, countNoteId, toggleId, filterInputId, rows, labelKey) {
     const tbody = document.getElementById(tbodyId);
     const countNote = document.getElementById(countNoteId);
     const toggle = document.getElementById(toggleId);
     const filterInput = filterInputId ? document.getElementById(filterInputId) : null;
+    const tableWrap = tbody.closest('.table-wrap');
     let expanded = false;
 
     function render() {
@@ -557,23 +763,28 @@
       const filtered = q ? rows.filter(r => r[labelKey].toLowerCase().includes(q)) : rows;
       tbody.innerHTML = '';
       const visible = expanded ? filtered : filtered.slice(0, ROW_LIMIT);
-      for (const row of visible) {
-        const tr = document.createElement('tr');
-        if (row.diff < 0) tr.classList.add('classla-better');
-        if (row.diff > 0) tr.classList.add('trankit-better');
-        const bar = v => `<span class="bar-wrap"><span class="bar bar-t" style="width:${Math.max(0,Math.min(100,v))}%"></span></span>`;
-        tr.innerHTML = `
-          <td class="label">${row[labelKey]}</td>
-          <td class="right">${row.count}</td>
-          <td class="right">${row.trankit.toFixed(2)} ${bar(row.trankit)}</td>
-          <td class="right">${row.classla.toFixed(2)} <span class="bar-wrap"><span class="bar bar-c" style="width:${Math.max(0,Math.min(100,row.classla))}%"></span></span></td>
-          <td class="right ${deltaClass(row.diff, true)}">${deltaText(row.diff, 2)}</td>
-        `;
-        tbody.appendChild(tr);
+      if (!filtered.length) {
+        renderEmptyRow(tbody, 5, 'No matching rows.');
+      } else {
+        for (const row of visible) {
+          const tr = document.createElement('tr');
+          if (row.diff < 0) tr.classList.add('classla-better');
+          if (row.diff > 0) tr.classList.add('trankit-better');
+          const bar = v => `<span class="bar-wrap"><span class="bar bar-t" style="width:${Math.max(0,Math.min(100,v))}%"></span></span>`;
+          tr.innerHTML = `
+            <td class="label">${row[labelKey]}</td>
+            <td class="right">${row.count}</td>
+            <td class="right">${row.trankit.toFixed(2)} ${bar(row.trankit)}</td>
+            <td class="right">${row.classla.toFixed(2)} <span class="bar-wrap"><span class="bar bar-c" style="width:${Math.max(0,Math.min(100,row.classla))}%"></span></span></td>
+            <td class="right ${deltaClass(row.diff, true)}">${deltaText(row.diff, 2)}</td>
+          `;
+          tbody.appendChild(tr);
+        }
       }
-      countNote.textContent = `Showing ${visible.length} / ${filtered.length}`;
+      setCountNote(countNote, visible.length, filtered.length, expanded);
+      setExpandedScrollState(tableWrap, expanded, filtered.length);
       if (filtered.length <= ROW_LIMIT) { toggle.hidden = true; }
-      else { toggle.hidden = false; toggle.textContent = expanded ? 'Show less' : `Show more (${filtered.length - ROW_LIMIT})`; }
+      else { toggle.hidden = false; toggle.textContent = expanded ? 'Show less' : 'Show more'; }
     }
 
     if (filterInput) filterInput.addEventListener('input', () => { expanded = false; render(); });
@@ -674,6 +885,7 @@ pred: ${decodeMSD(parts[1].trim())}`;
   }
 
   // Examples panel
+  const examplesBackdrop = document.getElementById('examples-backdrop');
   const examplesPanel = document.getElementById('examples-panel');
   const examplesPanelTitle = document.getElementById('examples-panel-title');
   const examplesPanelBody = document.getElementById('examples-panel-body');
@@ -682,10 +894,12 @@ pred: ${decodeMSD(parts[1].trim())}`;
 
   function closePanel() {
     examplesPanel.classList.add('hidden');
+    examplesBackdrop.classList.add('hidden');
     if (selectedRow) selectedRow.classList.remove('selected-row');
     selectedRow = null;
   }
   examplesPanelClose.addEventListener('click', closePanel);
+  examplesBackdrop.addEventListener('click', closePanel);
 
   let activeTbody = null;
 
@@ -699,15 +913,35 @@ pred: ${decodeMSD(parts[1].trim())}`;
 
   // Keyboard nav: Escape closes, arrows move between rows
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') { closePanel(); return; }
+    if (e.key === 'Escape') {
+      if (!examplesPanel.classList.contains('hidden')) {
+        closePanel();
+        e.preventDefault();
+      }
+      return;
+    }
     if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && activeTbody) {
+      const target = e.target;
+      if (target && target.closest && target.closest('input, textarea, select, button, a') && !target.closest('tr.clickable-row')) {
+        return;
+      }
       const rows = Array.from(activeTbody.querySelectorAll('tr.clickable-row'));
       if (!rows.length) return;
-      const idx = selectedRow ? rows.indexOf(selectedRow) : -1;
+      const focusedRow = document.activeElement && document.activeElement.closest
+        ? document.activeElement.closest('tr.clickable-row')
+        : null;
+      const currentRow = selectedRow && rows.includes(selectedRow)
+        ? selectedRow
+        : (focusedRow && rows.includes(focusedRow) ? focusedRow : null);
+      if (!currentRow && focusedRow == null && document.activeElement && document.activeElement !== document.body && document.activeElement !== document.documentElement) {
+        return;
+      }
+      const idx = currentRow ? rows.indexOf(currentRow) : -1;
       const next = e.key === 'ArrowDown'
         ? Math.min(idx + 1, rows.length - 1)
         : Math.max(idx - 1, 0);
       if (next !== idx) {
+        rows[next].focus({ preventScroll: true });
         rows[next].click();
         rows[next].scrollIntoView({ block: 'nearest' });
         e.preventDefault();
@@ -715,9 +949,15 @@ pred: ${decodeMSD(parts[1].trim())}`;
     }
   });
 
-  function renderExamples(items, titleText) {
+  function renderExamples(items, titleText, contextText) {
     examplesPanelTitle.textContent = titleText || 'Examples';
     examplesPanelBody.innerHTML = '';
+    if (contextText) {
+      const meta = document.createElement('div');
+      meta.className = 'examples-context';
+      meta.textContent = contextText;
+      examplesPanelBody.appendChild(meta);
+    }
     if (!items || items.length === 0) {
       const p = document.createElement('p');
       p.className = 'note';
@@ -735,6 +975,7 @@ pred: ${decodeMSD(parts[1].trim())}`;
         examplesPanelBody.appendChild(div);
       }
     }
+    examplesBackdrop.classList.remove('hidden');
     examplesPanel.classList.remove('hidden');
     examplesPanelBody.scrollTop = 0;
   }
@@ -760,20 +1001,29 @@ pred: ${decodeMSD(parts[1].trim())}`;
     const expanded = allDeprelExpanded[bucket];
     tbody.innerHTML = '';
     const visible = expanded ? filtered : filtered.slice(0, ROW_LIMIT);
-    for (const row of visible) {
-      const tr = document.createElement('tr');
-      tr.className = 'clickable-row';
-      tr.innerHTML = `<td class="label">${row.label}</td><td class="right">${row.count}</td>`;
-      tr.addEventListener('click', function() {
-        selectRow(tr, tbody);
-        const exs = (data.deprel_examples[bucket] || {})[row.key] || [];
-        renderExamples(exs, `${bucketTitles[bucket]} · ${row.label} (${exs.length}/${row.count} examples)`);
-      });
-      tbody.appendChild(tr);
+    if (!filtered.length) {
+      renderEmptyRow(tbody, 2, 'No matching rows.');
+    } else {
+      for (const row of visible) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="label">${row.label}</td><td class="right">${row.count}</td>`;
+        wireClickableRow(
+          tr,
+          tbody,
+          function() {
+            selectRow(tr, tbody);
+            const exs = (data.deprel_examples[bucket] || {})[row.key] || [];
+            renderExamples(exs, `${bucketTitles[bucket]} · ${row.label} (${exs.length}/${row.count} examples)`);
+          },
+          `Show examples for ${row.label}`
+        );
+        tbody.appendChild(tr);
+      }
     }
-    if (tbody._countNote) tbody._countNote.textContent = `Showing ${visible.length} / ${filtered.length}`;
+    if (tbody._countNote) setCountNote(tbody._countNote, visible.length, filtered.length, expanded);
+    setExpandedScrollState(tbody._tableWrap, expanded, filtered.length);
     if (filtered.length <= ROW_LIMIT) { toggle.hidden = true; }
-    else { toggle.hidden = false; toggle.textContent = expanded ? 'Show less' : `Show more (${filtered.length - ROW_LIMIT})`; }
+    else { toggle.hidden = false; toggle.textContent = expanded ? 'Show less' : 'Show more'; }
   }
 
   for (const bucket of ['head_only', 'both_wrong', 'rel_only']) {
@@ -800,29 +1050,36 @@ pred: ${decodeMSD(parts[1].trim())}`;
     // Count + show more above table
     const countBar = document.createElement('div');
     countBar.className = 'toolbar';
+    const countMeta = document.createElement('div');
+    countMeta.className = 'count-meta';
     const countNote = document.createElement('div');
     countNote.className = 'note';
-    countBar.appendChild(countNote);
+    countMeta.appendChild(countNote);
     const toggle = document.createElement('button');
     toggle.type = 'button';
-    toggle.className = 'toggle-btn';
+    toggle.className = 'inline-toggle';
     toggle.hidden = true;
     allDeprelToggles[bucket] = toggle;
     toggle.addEventListener('click', function() {
       allDeprelExpanded[bucket] = !allDeprelExpanded[bucket];
       paintDeprel(bucket);
     });
-    countBar.appendChild(toggle);
+    countMeta.appendChild(toggle);
+    countBar.appendChild(countMeta);
     wrapper.appendChild(countBar);
 
     // Table
+    const tableWrap = document.createElement('div');
+    tableWrap.className = 'table-wrap';
     const table = document.createElement('table');
     table.innerHTML = `<thead><tr><th>Pattern</th><th class="right">Count</th></tr></thead><tbody></tbody>`;
     const tbody = table.querySelector('tbody');
     allDeprelTbodies[bucket] = tbody;
     // store countNote reference for paintDeprel
     tbody._countNote = countNote;
-    wrapper.appendChild(table);
+    tbody._tableWrap = tableWrap;
+    tableWrap.appendChild(table);
+    wrapper.appendChild(tableWrap);
 
     deprelSections.appendChild(wrapper);
     paintDeprel(bucket);
@@ -852,6 +1109,7 @@ pred: ${decodeMSD(parts[1].trim())}`;
     const toggle = document.getElementById(toggleId);
     const mergeBtn = document.getElementById(mergeBtnId);
     const filterInput = filterInputId ? document.getElementById(filterInputId) : null;
+    const tableWrap = tbody.closest('.table-wrap');
     let expanded = false;
     let merged = false;
 
@@ -879,34 +1137,45 @@ pred: ${decodeMSD(parts[1].trim())}`;
       const displayRows = computeRows();
       tbody.innerHTML = '';
       const visible = expanded ? displayRows : displayRows.slice(0, ROW_LIMIT);
-      for (const row of visible) {
-        const tr = document.createElement('tr');
-        tr.className = 'clickable-row';
-        const labelCell = document.createElement('td');
-        labelCell.className = 'label';
-        labelCell.textContent = row.label;
-        if (layer === 'xpos') {
-          labelCell.classList.add('has-tip');
-          labelCell.setAttribute('data-tip', msdTip(row.label));
-        }
-        const countCell = document.createElement('td');
-        countCell.className = 'right';
-        countCell.textContent = row.count;
-        tr.appendChild(labelCell);
-        tr.appendChild(countCell);
-        tr.addEventListener('click', function() {
-          selectRow(tr, tbody);
-          let exs = [];
-          for (const k of (row.keys || [row.key])) {
-            exs = exs.concat((data.tag_examples[layer] || {})[k] || []);
+      if (!displayRows.length) {
+        renderEmptyRow(tbody, 2, 'No matching rows.');
+      } else {
+        for (const row of visible) {
+          const tr = document.createElement('tr');
+          const labelCell = document.createElement('td');
+          labelCell.className = 'label';
+          labelCell.textContent = row.label;
+          let contextText = null;
+          if (layer === 'xpos') {
+            contextText = msdTip(row.label);
+            labelCell.classList.add('has-tip');
+            labelCell.setAttribute('data-tip', contextText);
           }
-          renderExamples(exs, `${layer.toUpperCase()} · ${row.label} (${exs.length} examples)`);
-        });
-        tbody.appendChild(tr);
+          const countCell = document.createElement('td');
+          countCell.className = 'right';
+          countCell.textContent = row.count;
+          tr.appendChild(labelCell);
+          tr.appendChild(countCell);
+          wireClickableRow(
+            tr,
+            tbody,
+            function() {
+              selectRow(tr, tbody);
+              let exs = [];
+              for (const k of (row.keys || [row.key])) {
+                exs = exs.concat((data.tag_examples[layer] || {})[k] || []);
+              }
+              renderExamples(exs, `${layer.toUpperCase()} · ${row.label} (${exs.length} examples)`, contextText);
+            },
+            `Show examples for ${row.label}`
+          );
+          tbody.appendChild(tr);
+        }
       }
-      countNote.textContent = `Showing ${visible.length} / ${displayRows.length}`;
+      setCountNote(countNote, visible.length, displayRows.length, expanded);
+      setExpandedScrollState(tableWrap, expanded, displayRows.length);
       if (displayRows.length <= ROW_LIMIT) { toggle.hidden = true; }
-      else { toggle.hidden = false; toggle.textContent = expanded ? 'Show less' : `Show more (${displayRows.length - ROW_LIMIT})`; }
+      else { toggle.hidden = false; toggle.textContent = expanded ? 'Show less' : 'Show more'; }
     }
 
     mergeBtn.addEventListener('click', function() {
@@ -926,8 +1195,8 @@ pred: ${decodeMSD(parts[1].trim())}`;
     const csvBtn = document.getElementById(tbodyId.replace('-table', '-csv-btn'));
     const mdBtn  = document.getElementById(tbodyId.replace('-table', '-md-btn'));
     if (csvBtn) csvBtn.addEventListener('click', function() {
-      const allRows = (data.tag_error_rows[layer] || []);
-      downloadCSV(['Error pair','Count'], allRows.map(function(r) { return [r.label, r.count]; }), layer + '-errors.csv');
+      const exportRows = computeRows();
+      downloadCSV(['Error pair','Count'], exportRows.map(function(r) { return [r.label, r.count]; }), layer + '-errors.csv');
     });
     if (mdBtn) mdBtn.addEventListener('click', function() { copyMarkdown(tableEl, mdBtn); });
   }
