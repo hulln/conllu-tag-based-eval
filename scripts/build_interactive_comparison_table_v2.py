@@ -531,12 +531,6 @@ def render_html(out_js_name: str) -> str:
   .count-meta .note {{
     margin-top: 0;
   }}
-  .scroll-hint {{
-    color: #999;
-    white-space: nowrap;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-  }}
   .control-note {{ flex: 1 1 280px; max-width: 560px; margin: 0; }}
   .control-main {{
     display: flex;
@@ -1010,12 +1004,6 @@ def render_html(out_js_name: str) -> str:
 
   function setCountNote(countEl, visibleCount, totalCount, expanded) {{
     countEl.textContent = `Showing ${{visibleCount}} / ${{totalCount}}`;
-    if (expanded && totalCount > ROW_LIMIT) {{
-      const hint = document.createElement('span');
-      hint.className = 'scroll-hint';
-      hint.textContent = ' · ↓';
-      countEl.appendChild(hint);
-    }}
   }}
 
   function setExpandedScrollState(wrapper, expanded, totalCount) {{
