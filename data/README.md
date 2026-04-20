@@ -11,12 +11,17 @@ Methodology note:
 - The models then predict lemma, POS/morphology, and dependency annotation on top of that fixed structure.
 - Base mode is optional supplementary analysis only.
 
-Provenance note:
+## Datasets
 
-- SSJ source: https://github.com/UniversalDependencies/UD_Slovenian-SSJ
-- Local copy obtainment date used in this project: 2026-04-10
+### SSJ-UD (written Slovenian)
 
-Primary files:
+- Source: https://github.com/UniversalDependencies/UD_Slovenian-SSJ
+- Version: v2.17 (2025-10-22)
+- Local copy obtained: 2026-04-10
+- Primary file: [gold/sl_ssj-ud-test.conllu](gold/sl_ssj-ud-test.conllu)
 
-- [gold/sl_ssj-ud-test.conllu](gold/sl_ssj-ud-test.conllu)
-- [raw/sl_ssj-ud-test.sentences.txt](raw/sl_ssj-ud-test.sentences.txt) for optional base mode only
+### SST-UD (spoken Slovenian)
+
+- Source: https://github.com/UniversalDependencies/UD_Slovenian-SST
+- Local copy obtained: 2026-04-20
+- Primary file: [gold/sl_sst-ud-test.conllu](gold/sl_sst-ud-test.conllu)
