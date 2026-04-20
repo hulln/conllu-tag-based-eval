@@ -18,6 +18,7 @@ ENV/
 
 # Local tool state and temp files
 .codex
+.claude
 *.log
 *.tmp
 *.swp
