@@ -18,10 +18,11 @@ Methodology note:
 - Source: https://github.com/UniversalDependencies/UD_Slovenian-SSJ
 - Version: v2.17 (2025-10-22)
 - Local copy obtained: 2026-04-10
-- Primary file: [gold/sl_ssj-ud-test.conllu](gold/sl_ssj-ud-test.conllu)
+- Primary file: [gold/sl_ssj-ud-test.conllu](gold/sl_ssj-ud-test.conllu) (local only)
 
 ### SST-UD (spoken Slovenian)
 
 - Source: https://github.com/UniversalDependencies/UD_Slovenian-SST
+- Version: v2.16 (2024-12-20)
 - Local copy obtained: 2026-04-20
-- Primary file: [gold/sl_sst-ud-test.conllu](gold/sl_sst-ud-test.conllu)
+- Primary file: [gold/sl_sst-ud-test.conllu](gold/sl_sst-ud-test.conllu) (local only)
