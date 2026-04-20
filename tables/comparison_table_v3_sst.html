@@ -651,6 +651,7 @@
     document.body.innerHTML = '<p>Table data not available.</p>';
     return;
   }
+  const csvPrefix = (data.summary.run_id.match(/sl-(\w+)-ud/) || ['','unknown'])[1];
 
   const subtitle = document.getElementById('subtitle');
   subtitle.textContent = `Run: ${data.summary.run_id} · Gold sentences: ${data.summary.gold_sentences} · Compared tokens: ${data.summary.compared_tokens}`;
@@ -835,7 +836,7 @@
       downloadCSV(
         ['Relation','Gold','SPOT-Trankit LAS','CLASSLA LAS','Diff'],
         data.deprel_accuracy_rows.map(function(r) { return [r.tag, r.count, r.trankit.toFixed(2), r.classla.toFixed(2), r.diff.toFixed(2)]; }),
-        'las-by-relation.csv'
+        csvPrefix + '_las-by-relation.csv'
       );
     });
     document.getElementById('rel-md-btn').addEventListener('click', function() { copyMarkdown(relTbl, this); });
@@ -846,7 +847,7 @@
       downloadCSV(
         ['UPOS','Gold','SPOT-Trankit','CLASSLA','Diff'],
         data.upos_accuracy_rows.map(function(r) { return [r.tag, r.count, r.trankit.toFixed(2), r.classla.toFixed(2), r.diff.toFixed(2)]; }),
-        'upos-accuracy.csv'
+        csvPrefix + '_upos-accuracy.csv'
       );
     });
     document.getElementById('upos-acc-md-btn').addEventListener('click', function() { copyMarkdown(uposAccTbl, this); });
@@ -1153,7 +1154,7 @@ pred: ${decodeMSD(parts[1].trim())}`;
     (function(b, t, csv, md) {
       csv.addEventListener('click', function() {
         const exportRows = computeDeprelRows(b);
-        downloadCSV(['Pattern','Count'], exportRows.map(function(r) { return [r.label, r.count]; }), 'deprel-errors-' + b + '.csv');
+        downloadCSV(['Pattern','Count'], exportRows.map(function(r) { return [r.label, r.count]; }), csvPrefix + '_deprel-errors-' + b + '.csv');
       });
       md.addEventListener('click', function() { copyMarkdown(t, md); });
     })(bucket, table, csvBtn, mdBtn);
@@ -1275,7 +1276,7 @@ pred: ${decodeMSD(parts[1].trim())}`;
     const mdBtn  = document.getElementById(tbodyId.replace('-table', '-md-btn'));
     if (csvBtn) csvBtn.addEventListener('click', function() {
       const exportRows = computeRows();
-      downloadCSV(['Error pair','Count'], exportRows.map(function(r) { return [r.label, r.count]; }), layer + '-errors.csv');
+      downloadCSV(['Error pair','Count'], exportRows.map(function(r) { return [r.label, r.count]; }), csvPrefix + '_' + layer + '-errors.csv');
     });
     if (mdBtn) mdBtn.addEventListener('click', function() { copyMarkdown(tableEl, mdBtn); });
   }
