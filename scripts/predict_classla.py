@@ -246,10 +246,10 @@ def _patch_classla_lexicon_loading() -> None:
     _CLASSLA_LEXICON_PATCHED = True
 
 
-def build_pipeline(lang: str, pipeline_kwargs: dict[str, Any], label: str) -> Any:
+def build_pipeline(lang: str, model_type: str, pipeline_kwargs: dict[str, Any], label: str) -> Any:
     start = time.perf_counter()
-    print(f"[CLASSLA {label}] initializing pipeline", flush=True)
-    nlp = classla.Pipeline(lang, **pipeline_kwargs)
+    print(f"[CLASSLA {label}] initializing pipeline (type={model_type})", flush=True)
+    nlp = classla.Pipeline(lang, type=model_type, **pipeline_kwargs)
     elapsed = time.perf_counter() - start
     print(f"[CLASSLA {label}] pipeline ready in {elapsed:.1f}s", flush=True)
     return nlp
@@ -290,6 +290,14 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--lang", default="sl", help="CLASSLA language code (default: sl).")
     parser.add_argument(
+        "--model-type",
+        default="default",
+        help=(
+            "CLASSLA package/type to load, e.g. default, standard, spoken, nonstandard, or web "
+            "(default: default)."
+        ),
+    )
+    parser.add_argument(
         "--download-models",
         action="store_true",
         help="Download CLASSLA resources before running.",
@@ -297,7 +305,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--no-lexicon",
         action="store_true",
-        help="Disable lexicon-guided POS tagging (default is enabled).",
+        help=(
+            "Disable lexicon-guided POS tagging. By default it is enabled only for CLASSLA default/standard "
+            "models, because CLASSLA's inflectional lexicon supports Slovenian standard models only."
+        ),
     )
     parser.add_argument(
         "--processors",
@@ -334,7 +345,7 @@ def main() -> None:
     output_aligned_path = Path(args.output_aligned) if args.output_aligned else None
 
     if args.download_models:
-        classla.download(args.lang)
+        classla.download(args.lang, type=args.model_type, processors=args.processors)
 
     gold_entries: list[dict[str, Any]] = []
     if mode in {"aligned", "both"}:
@@ -359,9 +370,12 @@ def main() -> None:
             f"input={len(lines)} gold={len(gold_entries)}"
         )
 
+    model_type = args.model_type.strip().lower()
+    pos_use_lexicon = (not args.no_lexicon) and model_type in {"default", "standard"}
+
     base_pipeline_kwargs = {
         "processors": args.processors,
-        "pos_use_lexicon": not args.no_lexicon,
+        "pos_use_lexicon": pos_use_lexicon,
         "use_gpu": args.use_gpu,
     }
 
@@ -372,7 +386,7 @@ def main() -> None:
         output_base_path.parent.mkdir(parents=True, exist_ok=True)
         output_aligned_path.parent.mkdir(parents=True, exist_ok=True)
 
-        nlp_base = build_pipeline(args.lang, base_pipeline_kwargs, label="base")
+        nlp_base = build_pipeline(args.lang, args.model_type, base_pipeline_kwargs, label="base")
         conllu = run_base(nlp_base, lines)
         output_base_path.write_text(conllu, encoding="utf-8")
         print(f"[CLASSLA base] input lines: {len(lines)}")
@@ -382,7 +396,7 @@ def main() -> None:
         aligned_pipeline_kwargs["tokenize_pretokenized"] = True
         aligned_pipeline_kwargs["tokenize_no_ssplit"] = True
 
-        nlp_aligned = build_pipeline(args.lang, aligned_pipeline_kwargs, label="aligned")
+        nlp_aligned = build_pipeline(args.lang, args.model_type, aligned_pipeline_kwargs, label="aligned")
         run_aligned(nlp_aligned, gold_entries, output_aligned_path, args.progress_every)
         print(f"Wrote CLASSLA aligned prediction to {output_aligned_path}")
         return
@@ -393,7 +407,7 @@ def main() -> None:
         pipeline_kwargs["tokenize_pretokenized"] = True
         pipeline_kwargs["tokenize_no_ssplit"] = True
 
-    nlp = build_pipeline(args.lang, pipeline_kwargs, label=mode)
+    nlp = build_pipeline(args.lang, args.model_type, pipeline_kwargs, label=mode)
 
     if args.mode != mode:
         print(f"[CLASSLA] mode alias '{args.mode}' mapped to canonical mode '{mode}'")

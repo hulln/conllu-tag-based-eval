@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "run_id": "20260420-1105_sl-sst-ud-test_full",
+  "run_stamp": "20260420-1105",
+  "dataset_tag": "sl-sst-ud-test",
+  "run_label": "full",
+  "mode": "aligned",
+  "source_commit": "7bb8d3cd8f28afd1cc4819776e12055ff6b25adb",
+  "source_commit_note": "The run used local script changes after this commit; verify exact executable sources using file_hashes for scripts/run_pipeline.py and scripts/predict_classla.py.",
+  "dataset": {
+    "name": "UD Slovenian SST test",
+    "gold_file": "data/gold/sl_sst-ud-test.conllu",
+    "upstream_url": "https://raw.githubusercontent.com/UniversalDependencies/UD_Slovenian-SST/master/sl_sst-ud-test.conllu",
+    "sentences": 432,
+    "tokens": 11443,
+    "words": 11443
+  },
+  "commands": {
+    "pipeline": ".venv/bin/python scripts/run_pipeline.py --modes aligned --gold data/gold/sl_sst-ud-test.conllu --classla-type spoken --run-stamp 20260420-1105",
+    "trankit_prediction": ".venv/bin/python scripts/predict_trankit.py --mode aligned --model-source clarin-11356-1997 --output predictions/output/20260420-1105_sl-sst-ud-test_full_trankit_aligned_predicted.conllu --aligned-gold data/gold/sl_sst-ud-test.conllu",
+    "classla_prediction": ".venv/bin/python scripts/predict_classla.py --mode aligned --output predictions/output/20260420-1105_sl-sst-ud-test_full_classla_aligned_predicted.conllu --model-type spoken --aligned-gold data/gold/sl_sst-ud-test.conllu"
+  },
+  "model_selection": {
+    "classla": {
+      "language": "sl",
+      "type": "spoken",
+      "processors": "tokenize,pos,lemma,depparse",
+      "evaluated_spoken_processors": [
+        "pos",
+        "lemma",
+        "depparse"
+      ],
+      "aligned_mode_uses_gold_tokenization": true,
+      "pos_use_lexicon": false,
+      "pos_use_lexicon_reason": "CLASSLA Slovenian inflectional lexicon supports default/standard models only; spoken uses sl_sst."
+    },
+    "trankit": {
+      "language": "customized",
+      "model_source": "clarin-11356-1997",
+      "clarin_handle": "11356/1997",
+      "model_archive": "trankit-sl-ssj+sst.zip",
+      "embedding": "xlm-roberta-base",
+      "md5": "0ddfac8d7445f8fa300f59dde1a00352"
+    }
+  },
+  "environment": {
+    "python": "3.10.12",
+    "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+    "packages": {
+      "classla": "2.2.1",
+      "trankit": "1.1.2"
+    }
+  },
+  "file_hashes": {
+    "requirements.txt": "ff536e40114e74618dbc5f5df6423e127e6c1c23238aece0882f1be0aa0c6e8e",
+    "data/gold/sl_sst-ud-test.conllu": "6824234edf98cbbedb2e981644c324a3058c2920ed6cdcd7f467e835cfe25eeb",
+    "scripts/run_pipeline.py": "95ff9e52827512459fb504c61e7e4a13ed8f5f6bb737185e96dc327e849d2c30",
+    "scripts/predict_classla.py": "86775149139225a443c11ef380cc9ed0c3a1697329b0a86413fe9c42712a3e6b",
+    "scripts/predict_trankit.py": "efb658056f4d66f5c08d84136f5169b75e314384d849b1defb68598dabc32eb0",
+    "scripts/conll18_ud_eval_tag-based.py": "e7eb23ce69747e5c9176f55fffe47dcddc8c1774c9703c1f2f16e6848f96fa95",
+    "scripts/qa_validate_run.py": "26f96277c50df5b2f04d74d5863fc9b21bf3eb1665db6f704b458ab1933dd71a",
+    "scripts/compare_models.py": "a66730d8b195b9edd9be136de7aa76abf7bcfe1599158f0ebc5d1a81e551ba29",
+    "scripts/analyze_errors.py": "006ba095e888ac5b99c991478f11fcb5c8250c036875c9f16ea704c588fb9b10",
+    "scripts/content_comparison_table.py": "9e91e9194d2e2a293f0b7f40e968f8da149e685a8d0e9ef0d1177486d75f888f",
+    "predictions/output/20260420-1105_sl-sst-ud-test_full_classla_aligned_predicted.conllu": "46cb0828c914680bea3db321d35a69bb31037cc74d9d1e510bf300b84d726725",
+    "predictions/output/20260420-1105_sl-sst-ud-test_full_trankit_aligned_predicted.conllu": "2acb1a24c36965b95c3998f4718a7460367c0c87c90315b1ccdef04c803cefe0",
+    "results/output/20260420-1105_sl-sst-ud-test_full/main/qa_validation.md": "50f1c8bf40686f154704f65516ce113b0f947592195e63d9586147f94fd4e025",
+    "results/output/20260420-1105_sl-sst-ud-test_full/main/classla_aligned_eval.txt": "27719345051d48c1ffba0e03dca49824a0edac4c95a6d89900cb1cdf4cfa8728",
+    "results/output/20260420-1105_sl-sst-ud-test_full/main/trankit_aligned_eval.txt": "85f1d48215a598eeeb7205a388d645af1dd3d96e70a8370d554181c37a8ef46e",
+    "results/output/20260420-1105_sl-sst-ud-test_full/main/classla-vs-trankit_aligned_comparison.md": "4ede41a5561307794365be9252ea11c5a3559762c21804865512102e61a1bd71",
+    "results/output/20260420-1105_sl-sst-ud-test_full/main/classla-vs-trankit_aligned_content-comparison.md": "036e5d72b8fca13b745bb40734b0727b58a415077cac762fb3d87589a0b3e461",
+    "results/output/20260420-1105_sl-sst-ud-test_full/diagnostics/classla_aligned_eval-tagged.txt": "f865e9643d7e2e44abacd63298c30617ddf22ea8eeed50dce38b1258a548debc",
+    "results/output/20260420-1105_sl-sst-ud-test_full/diagnostics/trankit_aligned_eval-tagged.txt": "d964fdca87512109c2e846532482cda0dabe659193aa509a3ecb3b130a044512",
+    "results/output/20260420-1105_sl-sst-ud-test_full/diagnostics/classla_aligned_errors.md": "e06b257cd348d19749d655d9190db78634d898f8594a45b7e57a22629193b040",
+    "results/output/20260420-1105_sl-sst-ud-test_full/diagnostics/trankit_aligned_errors.md": "0ce3480738a468c2d1d7a314c7dcf72ee106e5ae7c3a68c7756363ce41e65218"
+  },
+  "expected_metrics": {
+    "classla_aligned": {
+      "Sentences": 100.0,
+      "Tokens": 100.0,
+      "Words": 100.0,
+      "LAS": 82.08,
+      "UAS": 85.24,
+      "UPOS": 98.16,
+      "XPOS": 96.75,
+      "Lemmas": 99.23,
+      "MLAS": 73.61
+    },
+    "trankit_aligned": {
+      "Sentences": 100.0,
+      "Tokens": 100.0,
+      "Words": 100.0,
+      "LAS": 86.7,
+      "UAS": 89.05,
+      "UPOS": 98.78,
+      "XPOS": 97.32,
+      "Lemmas": 98.76,
+      "MLAS": 79.87
+    }
+  },
+  "qa_status": "PASS"
+}
