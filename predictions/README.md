@@ -9,8 +9,13 @@ Supplementary base-mode outputs are local-only (gitignored).
 
 Current active canonical aligned files:
 
+SSJ (written, run `20260414-1819`):
 - [output/20260414-1819_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu](output/20260414-1819_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu)
 - [output/20260414-1819_sl-ssj-ud-test_full_classla_aligned_predicted.conllu](output/20260414-1819_sl-ssj-ud-test_full_classla_aligned_predicted.conllu)
+
+SST (spoken, run `20260420-1105`):
+- [output/20260420-1105_sl-sst-ud-test_full_trankit_aligned_predicted.conllu](output/20260420-1105_sl-sst-ud-test_full_trankit_aligned_predicted.conllu)
+- [output/20260420-1105_sl-sst-ud-test_full_classla_aligned_predicted.conllu](output/20260420-1105_sl-sst-ud-test_full_classla_aligned_predicted.conllu)
 
 Aligned predictions preserve gold `sent_id` values and sentence-level metadata where available.
 

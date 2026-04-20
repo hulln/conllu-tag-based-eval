@@ -292,14 +292,25 @@ def build_upos_accuracy_rows(
     return rows
 
 
-def render_html(out_js_name: str) -> str:
+ACK_DEFAULT = (
+    "This work was supported by the research projects"
+    " SPOT (model development, ARIS grant no. Z6-4617)"
+    " and MAPCASE (model evaluation, ARIS grant no. J6-70213)."
+    " The interactive website was developed by Nives H\u00fcll"
+    " under the supervision of Kaja Dobrovoljc Zor."
+)
+
+
+def render_html(out_js_name: str, dataset_label: str = "SSJ-UD", ack_text: str = ACK_DEFAULT) -> str:
     out_js_name = html.escape(out_js_name, quote=True)
+    dataset_label_esc = html.escape(dataset_label)
+    ack_text_esc = html.escape(ack_text)
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Error Analysis: SPOT-Trankit on SSJ-UD test set</title>
+<title>Error Analysis: SPOT-Trankit on {dataset_label_esc} test set</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
@@ -692,7 +703,7 @@ def render_html(out_js_name: str) -> str:
 </style>
 </head>
 <body>
-<h1>Error Analysis: SPOT-Trankit on SSJ-UD test set</h1>
+<h1>Error Analysis: SPOT-Trankit on {dataset_label_esc} test set</h1>
 <div class="subtitle" id="subtitle"></div>
 <div class="provenance">
   <strong>Model:</strong>
@@ -892,7 +903,7 @@ def render_html(out_js_name: str) -> str:
 
 <h2 id="acknowledgement">Acknowledgement</h2>
 <div class="ack" id="ack-text">
-  <em>(Acknowledgement text to be added.)</em>
+  {ack_text_esc}
 </div>
 
 <script src="{out_js_name}"></script>
@@ -1506,6 +1517,8 @@ def build_bundle(
     out_js_path: Path,
     run_id: str,
     max_examples: int | None,
+    dataset_label: str = "SSJ-UD",
+    ack_text: str = ACK_DEFAULT,
 ) -> None:
     gold_sents = read_conllu(gold_path)
     classla_sents = read_conllu(classla_pred_path)
@@ -1553,7 +1566,7 @@ def build_bundle(
         "window.TABLE_DATA = " + json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + ";\n",
         encoding="utf-8",
     )
-    out_html_path.write_text(render_html(out_js_path.name), encoding="utf-8")
+    out_html_path.write_text(render_html(out_js_path.name, dataset_label=dataset_label, ack_text=ack_text), encoding="utf-8")
     print(f"Wrote {out_html_path}")
     print(f"Wrote {out_js_path}")
 
@@ -1568,6 +1581,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("out_html", help="Path to output HTML file.")
     parser.add_argument("out_js", help="Path to output JS data file.")
     parser.add_argument("--run-id", required=True, help="Run ID shown in the table header.")
+    parser.add_argument("--dataset-label", default="SSJ-UD", help="Dataset label used in the page title and heading (e.g. SSJ-UD or SST-UD).")
+    parser.add_argument("--ack-text", default=ACK_DEFAULT, help="Acknowledgement text for the bottom section.")
     parser.add_argument(
         "--examples-per-item",
         type=int,
@@ -1589,6 +1604,8 @@ def main() -> None:
         out_js_path=Path(args.out_js),
         run_id=args.run_id,
         max_examples=None if args.examples_per_item <= 0 else args.examples_per_item,
+        dataset_label=args.dataset_label,
+        ack_text=args.ack_text,
     )
 
 

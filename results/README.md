@@ -8,9 +8,10 @@ Evaluation outputs and analysis reports.
 
 Supplementary base-mode outputs are local-only (gitignored).
 
-Current active canonical run:
+Current active canonical runs:
 
-- [output/20260414-1819_sl-ssj-ud-test_full](output/20260414-1819_sl-ssj-ud-test_full/)
+- SSJ: [output/20260414-1819_sl-ssj-ud-test_full](output/20260414-1819_sl-ssj-ud-test_full/)
+- SST: [output/20260420-1105_sl-sst-ud-test_full](output/20260420-1105_sl-sst-ud-test_full/)
 
 Strict rerun verification:
 
@@ -19,8 +20,10 @@ Strict rerun verification:
 
 First file to open for a run:
 
-- [output/20260414-1819_sl-ssj-ud-test_full/main/qa_validation.md](output/20260414-1819_sl-ssj-ud-test_full/main/qa_validation.md)
+- SSJ: [output/20260414-1819_sl-ssj-ud-test_full/main/qa_validation.md](output/20260414-1819_sl-ssj-ud-test_full/main/qa_validation.md)
+- SST: [output/20260420-1105_sl-sst-ud-test_full/main/qa_validation.md](output/20260420-1105_sl-sst-ud-test_full/main/qa_validation.md)
 
-Public interactive table for the active canonical aligned run:
+Public interactive tables:
 
-- [tables/comparison_table.html](../tables/comparison_table.html)
+- SSJ: [tables/comparison_table_v2_ssj.html](../tables/comparison_table_v2_ssj.html)
+- SST: [tables/comparison_table_v3_sst.html](../tables/comparison_table_v3_sst.html)
