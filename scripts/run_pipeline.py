@@ -298,7 +298,7 @@ def parse_args() -> argparse.Namespace:
         "--publish-interactive-table",
         action="store_true",
         help=(
-            "Regenerate tables/comparison_table.html and tables/comparison_table_data.js "
+            "Regenerate tables/comparison_table_v2_ssj.html and tables/comparison_table_v2_ssj_data.js "
             "from the aligned run outputs."
         ),
     )
@@ -417,8 +417,8 @@ def main() -> None:
         mode: mode_result_roots(mode)[0] / f"classla-vs-trankit_{mode}_content-comparison.md"
         for mode in active_modes
     }
-    interactive_table_html = TABLES_ROOT_DEFAULT / "comparison_table.html"
-    interactive_table_js = TABLES_ROOT_DEFAULT / "comparison_table_data.js"
+    interactive_table_html = TABLES_ROOT_DEFAULT / "comparison_table_v2_ssj.html"
+    interactive_table_js = TABLES_ROOT_DEFAULT / "comparison_table_v2_ssj_data.js"
 
     if not args.skip_prediction:
         if args.modes == "both":
@@ -564,7 +564,7 @@ def main() -> None:
         run(
             [
                 python_bin,
-                "scripts/build_interactive_comparison_table.py",
+                "scripts/build_interactive_comparison_table_v2.py",
                 str(active_gold),
                 str(trankit_preds["aligned"]),
                 str(classla_preds["aligned"]),
