@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Error Analysis: SPOT-Trankit on SSJ-UD test set</title>
+<title>Error Analysis: SPOT-Trankit on SST-UD test set</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -405,10 +405,39 @@
       justify-content: flex-start;
     }
   }
+  .dataset-nav {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+  }
+  .dataset-nav a, .dataset-nav span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    padding: 4px 10px;
+    border-radius: 2px;
+    text-decoration: none;
+  }
+  .dataset-nav a {
+    border: 1px solid #d7d2cb;
+    color: #555;
+    background: #fff;
+  }
+  .dataset-nav a:hover { background: #f3f0eb; border-color: #c8c1b5; }
+  .dataset-nav span {
+    background: #1a1a1a;
+    color: #f0ede8;
+    border: 1px solid #1a1a1a;
+  }
 </style>
 </head>
 <body>
-<h1>Error Analysis: SPOT-Trankit on SSJ-UD test set</h1>
+<nav class="dataset-nav">
+  <a href="comparison_table_v2_ssj.html">SSJ-UD</a>
+  <span>SST-UD</span>
+</nav>
+<h1>Error Analysis: SPOT-Trankit on SST-UD test set</h1>
 <div class="subtitle" id="subtitle"></div>
 <div class="provenance">
   <strong>Model:</strong>
@@ -416,11 +445,11 @@
   run with <a href="https://pypi.org/project/trankit/1.1.2/">trankit==1.1.2</a> using the Slovenian model archive
   <code>trankit-sl-ssj+sst.zip</code> (MD5 <code>0ddfac8d7445f8fa300f59dde1a00352</code>).
   CLASSLA-Stanza is included for reference and was run with <a href="https://pypi.org/project/classla/2.2.1/">classla==2.2.1</a>
-  (<code>classla.Pipeline('sl', pos_use_lexicon=True)</code>).
+  (<code>classla.Pipeline('sl', type='spoken')</code>; lexicon disabled for spoken model).
   &nbsp;&middot;&nbsp;
   <strong>Data:</strong>
-  <a href="https://github.com/UniversalDependencies/UD_Slovenian-SSJ/blob/master/sl_ssj-ud-test.conllu">UD Slovenian SSJ</a>
-  test set, <a href="https://github.com/UniversalDependencies/UD_Slovenian-SSJ/tree/master">v2.17</a> (2025-10-22);
+  <a href="https://github.com/UniversalDependencies/UD_Slovenian-SST/blob/master/sl_sst-ud-test.conllu">UD Slovenian SST</a>
+  test set;
   predictions were run on <em>pre-tokenised</em> text (gold sentence and token boundaries supplied).
 </div>
 
@@ -614,7 +643,7 @@
   The interactive website was developed by Nives Hüll under the supervision of Kaja Dobrovoljc Zor.
 </div>
 
-<script src="comparison_table_v2_data.js"></script>
+<script src="comparison_table_v3_sst_data.js"></script>
 <script>
 (function () {
   const data = window.TABLE_DATA;
