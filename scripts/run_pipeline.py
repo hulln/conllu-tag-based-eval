@@ -254,6 +254,14 @@ def parse_args() -> argparse.Namespace:
         help="Download CLASSLA models before first CLASSLA run.",
     )
     parser.add_argument(
+        "--classla-type",
+        default="default",
+        help=(
+            "CLASSLA package/type to use for prediction, e.g. default, standard, spoken, nonstandard, or web "
+            "(default: default)."
+        ),
+    )
+    parser.add_argument(
         "--skip-prediction",
         action="store_true",
         help="Skip prediction and only run evaluation/analysis on existing prediction files.",
@@ -447,6 +455,8 @@ def main() -> None:
                 str(classla_preds["base"]),
                 "--output-aligned",
                 str(classla_preds["aligned"]),
+                "--model-type",
+                args.classla_type,
             ]
             if args.download_classla_models:
                 classla_cmd.append("--download-models")
@@ -477,6 +487,8 @@ def main() -> None:
                 mode,
                 "--output",
                 str(classla_preds[mode]),
+                "--model-type",
+                args.classla_type,
             ]
             if mode == "aligned":
                 classla_cmd.extend(["--aligned-gold", str(active_gold)])

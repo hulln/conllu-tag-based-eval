@@ -608,7 +608,10 @@
 
 <h2 id="acknowledgement">Acknowledgement</h2>
 <div class="ack" id="ack-text">
-  <em>(Acknowledgement text to be added.)</em>
+  This work was supported by the research projects
+  <a href="https://spot.ff.uni-lj.si/" target="_blank">SPOT</a> (model development, ARIS grant no. Z6-4617)
+  and <a href="https://www.ff.uni-lj.si/mapcase" target="_blank"><em>MAPCASE</em></a> (model evaluation, ARIS grant no. J6-70213).
+  The interactive website was developed by Nives Hüll under the supervision of Kaja Dobrovoljc Zor.
 </div>
 
 <script src="comparison_table_v2_data.js"></script>
@@ -991,17 +994,41 @@ pred: ${decodeMSD(parts[1].trim())}`;
   const allDeprelTbodies = {};
   const allDeprelToggles = {};
   const allDeprelExpanded = { head_only: false, both_wrong: false, rel_only: false };
+  const allDeprelMerged  = { head_only: false, both_wrong: false, rel_only: false };
+  const allDeprelMergeBtns = {};
+
+  function computeDeprelRows(bucket) {
+    const rows = data.deprel_error_rows[bucket] || [];
+    const q = deprelFilter ? deprelFilter.value.trim().toLowerCase() : '';
+    if (!allDeprelMerged[bucket]) {
+      return q ? rows.filter(r => r.label.toLowerCase().includes(q)) : rows;
+    }
+    const map = new Map();
+    for (const row of rows) {
+      const parts = row.key.split('__to__');
+      const k = parts.length === 2 ? parts.slice().sort().join('__sym__') : row.key;
+      const ex = map.get(k);
+      if (ex) { ex.count += row.count; ex.keys.push(row.key); }
+      else {
+        const sorted = parts.slice().sort();
+        const label = parts.length === 2
+          ? (sorted[0] === sorted[1] ? row.label : sorted.join(' ↔ '))
+          : row.label;
+        map.set(k, { key: k, label, count: row.count, keys: [row.key] });
+      }
+    }
+    const merged = Array.from(map.values()).sort((a, b) => b.count - a.count);
+    return q ? merged.filter(r => r.label.toLowerCase().includes(q)) : merged;
+  }
 
   function paintDeprel(bucket) {
-    const rows = data.deprel_error_rows[bucket] || [];
     const tbody = allDeprelTbodies[bucket];
     const toggle = allDeprelToggles[bucket];
-    const q = deprelFilter ? deprelFilter.value.trim().toLowerCase() : '';
-    const filtered = q ? rows.filter(r => r.label.toLowerCase().includes(q)) : rows;
     const expanded = allDeprelExpanded[bucket];
+    const displayRows = computeDeprelRows(bucket);
     tbody.innerHTML = '';
-    const visible = expanded ? filtered : filtered.slice(0, ROW_LIMIT);
-    if (!filtered.length) {
+    const visible = expanded ? displayRows : displayRows.slice(0, ROW_LIMIT);
+    if (!displayRows.length) {
       renderEmptyRow(tbody, 2, 'No matching rows.');
     } else {
       for (const row of visible) {
@@ -1012,17 +1039,20 @@ pred: ${decodeMSD(parts[1].trim())}`;
           tbody,
           function() {
             selectRow(tr, tbody);
-            const exs = (data.deprel_examples[bucket] || {})[row.key] || [];
-            renderExamples(exs, `${bucketTitles[bucket]} · ${row.label} (${exs.length}/${row.count} examples)`);
+            let exs = [];
+            for (const k of (row.keys || [row.key])) {
+              exs = exs.concat((data.deprel_examples[bucket] || {})[k] || []);
+            }
+            renderExamples(exs, `${bucketTitles[bucket]} · ${row.label} (${exs.length} examples)`);
           },
           `Show examples for ${row.label}`
         );
         tbody.appendChild(tr);
       }
     }
-    if (tbody._countNote) setCountNote(tbody._countNote, visible.length, filtered.length, expanded);
-    setExpandedScrollState(tbody._tableWrap, expanded, filtered.length);
-    if (filtered.length <= ROW_LIMIT) { toggle.hidden = true; }
+    if (tbody._countNote) setCountNote(tbody._countNote, visible.length, displayRows.length, expanded);
+    setExpandedScrollState(tbody._tableWrap, expanded, displayRows.length);
+    if (displayRows.length <= ROW_LIMIT) { toggle.hidden = true; }
     else { toggle.hidden = false; toggle.textContent = expanded ? 'Show less' : 'Show more'; }
   }
 
@@ -1038,6 +1068,14 @@ pred: ${decodeMSD(parts[1].trim())}`;
     bucketHeader.appendChild(heading);
     const actionBtns = document.createElement('div');
     actionBtns.className = 'action-btns';
+    if (bucket !== 'head_only') {
+      const mergeBtn = document.createElement('button');
+      mergeBtn.type = 'button';
+      mergeBtn.className = 'toggle-btn';
+      mergeBtn.textContent = 'Merge (A\u21D4B)';
+      allDeprelMergeBtns[bucket] = mergeBtn;
+      actionBtns.appendChild(mergeBtn);
+    }
     const csvBtn = document.createElement('button');
     csvBtn.className = 'action-btn'; csvBtn.title = 'Export all rows as CSV'; csvBtn.textContent = '↓ CSV';
     const mdBtn = document.createElement('button');
@@ -1075,7 +1113,6 @@ pred: ${decodeMSD(parts[1].trim())}`;
     table.innerHTML = `<thead><tr><th>Pattern</th><th class="right">Count</th></tr></thead><tbody></tbody>`;
     const tbody = table.querySelector('tbody');
     allDeprelTbodies[bucket] = tbody;
-    // store countNote reference for paintDeprel
     tbody._countNote = countNote;
     tbody._tableWrap = tableWrap;
     tableWrap.appendChild(table);
@@ -1086,10 +1123,23 @@ pred: ${decodeMSD(parts[1].trim())}`;
     makeSortable(table);
     (function(b, t, csv, md) {
       csv.addEventListener('click', function() {
-        downloadCSV(['Pattern','Count'], (data.deprel_error_rows[b]||[]).map(function(r) { return [r.label, r.count]; }), 'deprel-errors-' + b + '.csv');
+        const exportRows = computeDeprelRows(b);
+        downloadCSV(['Pattern','Count'], exportRows.map(function(r) { return [r.label, r.count]; }), 'deprel-errors-' + b + '.csv');
       });
       md.addEventListener('click', function() { copyMarkdown(t, md); });
     })(bucket, table, csvBtn, mdBtn);
+
+    if (bucket !== 'head_only') {
+      (function(b, btn) {
+        btn.addEventListener('click', function() {
+          allDeprelMerged[b] = !allDeprelMerged[b];
+          allDeprelExpanded[b] = false;
+          btn.classList.toggle('active', allDeprelMerged[b]);
+          btn.textContent = allDeprelMerged[b] ? 'Show (A\u2192B)' : 'Merge (A\u21D4B)';
+          paintDeprel(b);
+        });
+      })(bucket, allDeprelMergeBtns[bucket]);
+    }
   }
 
   if (deprelFilter) {

@@ -64,6 +64,7 @@ predictions/archive/
 results/archive/
 data/samples/
 predictions/samples/
+predictions/output/*sample*
 predictions/output/*sample*/
 results/output/*sample*/
 
