@@ -50,11 +50,13 @@ python scripts/build_interactive_comparison_table_v4.py
 
 ## Reproducibility
 
-The SSJ 1.2 run is hash- and metric-pinned in [references/canonical_run_manifest.json](references/canonical_run_manifest.json):
+Every run writes a `qa_validation.md` integrity report; the canonical run is also
+pinned (file hashes + metrics) in [references/canonical_run_manifest.json](references/canonical_run_manifest.json)
+for exact-match verification:
 
 ```bash
-python scripts/qa_validate_run.py --run-stamp <stamp> --modes aligned
-python scripts/verify_canonical_run.py --run-stamp <stamp>
+python scripts/qa_validate_run.py --run-stamp <stamp> --modes aligned   # any run: integrity
+python scripts/verify_canonical_run.py --run-stamp <stamp>              # canonical: exact match
 ```
 
 ## Repository guide
