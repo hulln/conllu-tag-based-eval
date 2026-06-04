@@ -22,6 +22,19 @@ A legacy Slovenian-language v1 table is also available at [comparison_table_v1_s
 - SST canonical run: `20260420-1105_sl-sst-ud-test_full`
 - Old and non-canonical outputs: local-only under [archive/local](archive/local/) (gitignored).
 
+### Additional evaluation: Trankit 1.3 (non-standard Slovenian)
+
+A supplementary run evaluates the newer Trankit model **CLARIN `11356/2201`**
+(*"Trankit model for linguistic processing of written and spoken Slovenian 1.3"*,
+issued 2026-05-25), which adds non-standard / colloquial spoken transcriptions to
+the SST training data and replaces the canonical 1.2 model (`11356/1997`).
+
+- Run stamp: `20260604-0859-tk13` — SSJ ([results](results/output/20260604-0859-tk13_sl-ssj-ud-test_full/)) and SST ([results](results/output/20260604-0859-tk13_sl-sst-ud-test_full/)).
+- CLASSLA is unchanged (default for SSJ, spoken for SST) and its metrics match the canonical runs exactly; only the Trankit rows differ.
+- On SST, Trankit 1.3 shows small consistent gains over 1.2 (e.g. LAS 86.70→86.86, CLAS 83.72→83.91); SSJ is essentially unchanged.
+- This run does **not** replace the canonical 1.2 results: the [manifest](references/canonical_run_manifest.json) and interactive tables remain anchored to the April runs.
+- Reproduce with the Docker setup in [docker/README.md](docker/README.md) and [scripts/run_trankit13_eval.sh](scripts/run_trankit13_eval.sh).
+
 ## Quick Setup
 
 ```bash

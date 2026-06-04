@@ -17,6 +17,10 @@ SST (spoken, run `20260420-1105`):
 - [output/20260420-1105_sl-sst-ud-test_full_trankit_aligned_predicted.conllu](output/20260420-1105_sl-sst-ud-test_full_trankit_aligned_predicted.conllu)
 - [output/20260420-1105_sl-sst-ud-test_full_classla_aligned_predicted.conllu](output/20260420-1105_sl-sst-ud-test_full_classla_aligned_predicted.conllu)
 
+Additional (supplementary) Trankit 1.3 run, CLARIN `11356/2201`, run `20260604-0859-tk13` (CLASSLA files are identical to the canonical runs above):
+- [output/20260604-0859-tk13_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu](output/20260604-0859-tk13_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu)
+- [output/20260604-0859-tk13_sl-sst-ud-test_full_trankit_aligned_predicted.conllu](output/20260604-0859-tk13_sl-sst-ud-test_full_trankit_aligned_predicted.conllu)
+
 Aligned predictions preserve gold `sent_id` values and sentence-level metadata where available.
 
 Use [scripts/verify_canonical_run.py](../scripts/verify_canonical_run.py) with [references/canonical_run_manifest.json](../references/canonical_run_manifest.json) to check these aligned prediction files against canonical hashes.
