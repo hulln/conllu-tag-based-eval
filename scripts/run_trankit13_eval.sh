@@ -25,7 +25,7 @@ if [[ "${GPU:-0}" == "1" ]]; then
     GPU_FLAG=(--trankit-gpu)
 fi
 
-common_args=(
+trankit_args=(
     --modes aligned
     --run-stamp "$STAMP"
     --trankit-model-source clarin-11356-1997
@@ -42,13 +42,15 @@ echo ""
 echo "=== [1/2] SSJ (standard) ==="
 python scripts/run_pipeline.py \
     --gold data/gold/sl_ssj-ud-test.conllu \
-    "${common_args[@]}"
+    --classla-type default \
+    "${trankit_args[@]}"
 
 echo ""
 echo "=== [2/2] SST (spoken / non-standard) ==="
 python scripts/run_pipeline.py \
     --gold data/gold/sl_sst-ud-test.conllu \
-    "${common_args[@]}"
+    --classla-type spoken \
+    "${trankit_args[@]}"
 
 echo ""
 echo "### Done. Predictions under predictions/output/ (stamp $STAMP), results under results/output/."
