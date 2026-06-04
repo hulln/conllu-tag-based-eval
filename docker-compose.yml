@@ -1,0 +1,30 @@
+services:
+  eval:
+    build:
+      context: .
+    image: conllu-tag-based-eval:latest
+    # The whole project folder -> /project inside the container. Predictions,
+    # results, and the model cache are written back to the host this way, so
+    # outputs survive after the container exits (same pattern as the STARK/SVO run).
+    volumes:
+      - .:/project
+    environment:
+      # Keep matplotlib (pulled in by the analysis scripts) from writing to $HOME.
+      - MPLCONFIGDIR=/tmp/mplconfig
+      # Persist HuggingFace embedding downloads under the mounted cache dir so a
+      # rebuilt container does not re-download XLM-RoBERTa.
+      - HF_HOME=/project/cache/hf
+    # Interactive shell by default; override with `docker compose run` + a command.
+    stdin_open: true
+    tty: true
+
+    # ---- GPU (uncomment if `docker/preflight_check.sh` reports an NVIDIA GPU) ----
+    # Requires nvidia-container-toolkit on the host. Then also pass --trankit-gpu
+    # to run_pipeline.py (the helper script does this when GPU=1).
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]

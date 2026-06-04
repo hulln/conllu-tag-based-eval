@@ -262,6 +262,41 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--trankit-model-source",
+        default="clarin-11356-1997",
+        choices=["auto", "clarin-11356-1997", "upstream"],
+        help=(
+            "Trankit model-source passed through to predict_trankit.py. Keep clarin-11356-1997 (default) "
+            "even when overriding the URL/MD5 to load a different CLARIN Slovenian model build (e.g. 11356/2201)."
+        ),
+    )
+    parser.add_argument(
+        "--trankit-clarin-url",
+        default=None,
+        help=(
+            "Override the CLARIN Slovenian model zip URL for Trankit (e.g. the 11356/2201 'sl-ssj+sststand+sstpog' "
+            "model). When unset, predict_trankit.py uses its built-in 11356/1997 default."
+        ),
+    )
+    parser.add_argument(
+        "--trankit-clarin-md5",
+        default=None,
+        help="Expected MD5 of the CLARIN Slovenian model zip; must be given together with --trankit-clarin-url.",
+    )
+    parser.add_argument(
+        "--trankit-cache-dir",
+        default=None,
+        help=(
+            "Model cache directory for Trankit. Use a fresh dir (e.g. cache/trankit-11356-2201) when switching "
+            "model builds so predict_trankit.py does not reuse an existing customized/ model."
+        ),
+    )
+    parser.add_argument(
+        "--trankit-gpu",
+        action="store_true",
+        help="Enable GPU in the Trankit pipeline (passes --gpu to predict_trankit.py).",
+    )
+    parser.add_argument(
         "--skip-prediction",
         action="store_true",
         help="Skip prediction and only run evaluation/analysis on existing prediction files.",
@@ -305,11 +340,28 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def build_trankit_model_args(args: argparse.Namespace) -> List[str]:
+    """Shared predict_trankit.py flags so both run-mode branches stay in sync."""
+    if (args.trankit_clarin_url is None) != (args.trankit_clarin_md5 is None):
+        raise ValueError("--trankit-clarin-url and --trankit-clarin-md5 must be provided together.")
+
+    extra: List[str] = ["--model-source", args.trankit_model_source]
+    if args.trankit_clarin_url is not None:
+        extra.extend(["--clarin-model-url", args.trankit_clarin_url])
+        extra.extend(["--clarin-model-md5", args.trankit_clarin_md5])
+    if args.trankit_cache_dir is not None:
+        extra.extend(["--cache-dir", args.trankit_cache_dir])
+    if args.trankit_gpu:
+        extra.append("--gpu")
+    return extra
+
+
 def main() -> None:
     args = parse_args()
 
     repo_root = Path(__file__).resolve().parents[1]
     python_bin = sys.executable
+    trankit_model_args = build_trankit_model_args(args)
 
     gold_path = Path(args.gold)
     input_path = Path(args.input) if args.input else None
@@ -428,8 +480,7 @@ def main() -> None:
                     "scripts/predict_trankit.py",
                     "--mode",
                     "both",
-                    "--model-source",
-                    "clarin-11356-1997",
+                    *trankit_model_args,
                     "--aligned-gold",
                     str(active_gold),
                     "--input",
@@ -468,8 +519,7 @@ def main() -> None:
                 "scripts/predict_trankit.py",
                 "--mode",
                 mode,
-                "--model-source",
-                "clarin-11356-1997",
+                *trankit_model_args,
                 "--output",
                 str(trankit_preds[mode]),
             ]
