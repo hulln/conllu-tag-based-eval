@@ -38,10 +38,20 @@ CORPUS_ORDER = ["ssj", "sst"]
 #     even differs by corpus: lexicon on for written, spoken model otherwise);
 #   - a DATA part that switches with the corpus.
 # The page composes "Model: <model part> · Data: <data part>".
-TRANKIT_PROV = (
-    'SPOT-Trankit &mdash; <a href="https://www.clarin.si/repository/xmlui/handle/11356/1997">CLARIN 11356/1997</a>, '
+# Trankit provenance differs by corpus: SSJ (written) uses the 1.2 model, which
+# is marginally better on standard text; SST (spoken) uses the newer 1.3 model
+# (11356/2201, adds non-standard spoken training data), which is better on SST.
+TRANKIT_PROV_12 = (
+    'SPOT-Trankit &mdash; <a href="https://www.clarin.si/repository/xmlui/handle/11356/1997">CLARIN 11356/1997</a> (model 1.2), '
     'run with <a href="https://pypi.org/project/trankit/1.1.2/">trankit==1.1.2</a> using the Slovenian model archive '
     '<code>trankit-sl-ssj+sst.zip</code> (MD5 <code>0ddfac8d7445f8fa300f59dde1a00352</code>).'
+)
+TRANKIT_PROV_13 = (
+    'SPOT-Trankit &mdash; <a href="https://www.clarin.si/repository/xmlui/handle/11356/2201">CLARIN 11356/2201</a> (model 1.3, '
+    'adds non-standard spoken Slovenian), run with <a href="https://pypi.org/project/trankit/1.1.2/">trankit==1.1.2</a> using the '
+    'Slovenian model archive <code>trankit-sl-ssj+sststand+sstpog.zip</code> (MD5 <code>ff1f3b86a4996fd5944db14725c602d8</code>). '
+    'Model 1.3 replaces 1.2 here because it scores higher on SST for every metric except UPOS (unchanged) and lemmatisation '
+    '(&minus;0.05).'
 )
 CLASSLA_PROV_WRITTEN = (
     'CLASSLA-Stanza &mdash; run with <a href="https://pypi.org/project/classla/2.2.1/">classla==2.2.1</a> '
@@ -70,7 +80,7 @@ CORPORA = [
         "run_id": "20260414-1819_sl-ssj-ud-test_full",
         "gold": "data/gold/sl_ssj-ud-test.conllu",
         "provenance": {
-            "models": {"trankit": TRANKIT_PROV, "classla": CLASSLA_PROV_WRITTEN},
+            "models": {"trankit": TRANKIT_PROV_12, "classla": CLASSLA_PROV_WRITTEN},
             "data": DATA_PROV_SSJ,
         },
     },
@@ -78,10 +88,10 @@ CORPORA = [
         "key": "sst",
         "label": "SST-UD",
         "domain": "spoken",
-        "run_id": "20260420-1105_sl-sst-ud-test_full",
+        "run_id": "20260604-0859-tk13_sl-sst-ud-test_full",
         "gold": "data/gold/sl_sst-ud-test.conllu",
         "provenance": {
-            "models": {"trankit": TRANKIT_PROV, "classla": CLASSLA_PROV_SPOKEN},
+            "models": {"trankit": TRANKIT_PROV_13, "classla": CLASSLA_PROV_SPOKEN},
             "data": DATA_PROV_SST,
         },
     },
