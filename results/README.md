@@ -13,7 +13,7 @@ Current active canonical runs:
 - SSJ: [output/20260414-1819_sl-ssj-ud-test_full](output/20260414-1819_sl-ssj-ud-test_full/)
 - SST: [output/20260420-1105_sl-sst-ud-test_full](output/20260420-1105_sl-sst-ud-test_full/)
 
-Additional (supplementary) Trankit 1.3 run (CLARIN `11356/2201`, run `20260604-0859-tk13`) — not canonical, not hash-verified:
+Trankit 1.3 run (CLARIN `11356/2201`, run `20260604-0859-tk13`) — its SST result is the one shown in the recommended v4 table; not part of the hash-pinned canonical anchor:
 
 - SSJ: [output/20260604-0859-tk13_sl-ssj-ud-test_full](output/20260604-0859-tk13_sl-ssj-ud-test_full/)
 - SST: [output/20260604-0859-tk13_sl-sst-ud-test_full](output/20260604-0859-tk13_sl-sst-ud-test_full/)
