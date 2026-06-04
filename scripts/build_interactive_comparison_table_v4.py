@@ -42,16 +42,21 @@ CORPUS_ORDER = ["ssj", "sst"]
 # is marginally better on standard text; SST (spoken) uses the newer 1.3 model
 # (11356/2201, adds non-standard spoken training data), which is better on SST.
 TRANKIT_PROV_12 = (
-    'SPOT-Trankit &mdash; <a href="https://www.clarin.si/repository/xmlui/handle/11356/1997">CLARIN 11356/1997</a> (model 1.2), '
-    'run with <a href="https://pypi.org/project/trankit/1.1.2/">trankit==1.1.2</a> using the Slovenian model archive '
-    '<code>trankit-sl-ssj+sst.zip</code> (MD5 <code>0ddfac8d7445f8fa300f59dde1a00352</code>).'
+    'SPOT-Trankit &mdash; Slovenian model <strong>1.2</strong> '
+    '(<a href="https://www.clarin.si/repository/xmlui/handle/11356/1997">CLARIN 11356/1997</a>, archive '
+    '<a href="https://www.clarin.si/repository/xmlui/bitstream/handle/11356/1997/trankit-sl-ssj%2bsst.zip"><code>trankit-sl-ssj+sst.zip</code></a>, '
+    'MD5 <code>0ddfac8d7445f8fa300f59dde1a00352</code>), run with <a href="https://pypi.org/project/trankit/1.1.2/">trankit==1.1.2</a>. '
+    'Used here for SSJ (written), where it scores marginally higher than '
+    '<a href="https://www.clarin.si/repository/xmlui/handle/11356/2201">model 1.3</a>.'
 )
 TRANKIT_PROV_13 = (
-    'SPOT-Trankit &mdash; <a href="https://www.clarin.si/repository/xmlui/handle/11356/2201">CLARIN 11356/2201</a> (model 1.3, '
-    'adds non-standard spoken Slovenian), run with <a href="https://pypi.org/project/trankit/1.1.2/">trankit==1.1.2</a> using the '
-    'Slovenian model archive <code>trankit-sl-ssj+sststand+sstpog.zip</code> (MD5 <code>ff1f3b86a4996fd5944db14725c602d8</code>). '
-    'Model 1.3 replaces 1.2 here because it scores higher on SST for every metric except UPOS (unchanged) and lemmatisation '
-    '(&minus;0.05).'
+    'SPOT-Trankit &mdash; Slovenian model <strong>1.3</strong> '
+    '(<a href="https://www.clarin.si/repository/xmlui/handle/11356/2201">CLARIN 11356/2201</a>, archive '
+    '<a href="https://www.clarin.si/repository/xmlui/bitstream/handle/11356/2201/trankit-sl-ssj%2bsststand%2bsstpog.zip"><code>trankit-sl-ssj+sststand+sstpog.zip</code></a>, '
+    'MD5 <code>ff1f3b86a4996fd5944db14725c602d8</code>), run with <a href="https://pypi.org/project/trankit/1.1.2/">trankit==1.1.2</a>. '
+    'Version 1.3 adds non-standard spoken Slovenian to the SST training data and supersedes '
+    '<a href="https://www.clarin.si/repository/xmlui/handle/11356/1997">model 1.2</a>; it is used here for SST, where it scores '
+    'higher on every metric except UPOS (unchanged) and lemmatisation (&minus;0.05).'
 )
 CLASSLA_PROV_WRITTEN = (
     'CLASSLA-Stanza &mdash; run with <a href="https://pypi.org/project/classla/2.2.1/">classla==2.2.1</a> '
