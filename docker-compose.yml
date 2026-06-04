@@ -8,6 +8,8 @@ services:
     # outputs survive after the container exits (same pattern as the STARK/SVO run).
     volumes:
       - .:/project
+      # Persist CLASSLA model downloads so they survive container restarts.
+      - ./cache/classla_resources:/root/classla_resources
     environment:
       # Keep matplotlib (pulled in by the analysis scripts) from writing to $HOME.
       - MPLCONFIGDIR=/tmp/mplconfig

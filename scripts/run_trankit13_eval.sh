@@ -32,6 +32,7 @@ common_args=(
     --trankit-clarin-url "$MODEL_URL"
     --trankit-clarin-md5 "$MODEL_MD5"
     --trankit-cache-dir "$CACHE_DIR"
+    --download-classla-models
     "${GPU_FLAG[@]}"
 )
 
