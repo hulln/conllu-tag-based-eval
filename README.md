@@ -4,6 +4,10 @@ Reproducible evaluation of SPOT-Trankit and CLASSLA-Stanza on Slovenian UD test 
 
 ## Interactive Tables
 
+**v4 (combined, recommended):** [comparison_table_v4.html](https://conllu-tag-based-eval-table.netlify.app/comparison_table_v4.html) — a single page with a two-layer selector: pick a **model** (SPOT-Trankit / CLASSLA-Stanza), then a **corpus** (SSJ-UD / SST-UD). Every section then shows that one model's accuracy and errors. The accuracy tables default to a single-model view, with a "Compare with …" toggle that reveals the other model's column and the difference on demand. Deep-linkable via URL hash, e.g. `#classla/sst`.
+
+Per-corpus single-model tables (SPOT-Trankit only) remain available:
+
 | Dataset | Table | Canonical run |
 |---------|-------|---------------|
 | SSJ-UD (written) | [comparison_table_v2_ssj.html](https://conllu-tag-based-eval-table.netlify.app/comparison_table_v2_ssj.html) | `20260414-1819_sl-ssj-ud-test_full` |
@@ -60,6 +64,18 @@ python scripts/build_interactive_comparison_table_v2.py \
   tables/comparison_table_v2_ssj_data.js \
   --run-id <run-id>
 ```
+
+To regenerate the combined two-layer v4 table (the HTML page is static; only its
+data bundle is generated, from the canonical SSJ and SST runs):
+
+```bash
+python scripts/build_interactive_comparison_table_v4.py
+```
+
+This writes [tables/comparison_table_v4_data.js](tables/comparison_table_v4_data.js) (`window.TABLE_DATA_V4`,
+both corpora × both models, with error rows and example sentences for each model).
+The corpora/runs are configured in `CORPORA` at the top of the script. Use
+`--examples-per-item N` to cap stored examples per error pattern (default 25; `0` stores all).
 
 ## Verify Rerun
 
