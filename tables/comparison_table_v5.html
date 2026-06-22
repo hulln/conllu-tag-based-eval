@@ -130,6 +130,13 @@
   }
   .table-wrap-wide { overflow-x: auto; }
   .table-wrap-wide table { min-width: 520px; }
+  /* Pin the label + Gold-count columns so they don't shift left/right when the
+     visible rows change (filtering, sorting, clearing). The remaining columns
+     hold constant-width content (fixed bar + fixed-width numbers). */
+  .table-wrap-wide th:first-child,
+  .table-wrap-wide td:first-child { width: 116px; }
+  .table-wrap-wide th:nth-child(2),
+  .table-wrap-wide td:nth-child(2) { width: 92px; }
   .table-wrap.expanded-scroll {
     max-height: min(62vh, 520px);
     overflow: auto;
@@ -236,6 +243,97 @@
     color: #161616;
     padding: 0 2px;
     box-shadow: inset 0 -1px 0 0 var(--cjvt-accent);
+  }
+  /* The metric's full name acts as a link that opens a small explanatory popover. */
+  .metric-box .sub.info-link {
+    display: inline-block;
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    font-size: 10.5px;
+    color: #666;
+    text-align: left;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: #cfcfcf;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    transition: color .14s ease, text-decoration-color .14s ease;
+  }
+  .metric-box .sub.info-link:hover,
+  .metric-box .sub.info-link:focus-visible {
+    color: var(--cjvt-accent);
+    text-decoration-color: var(--cjvt-accent);
+  }
+  .metric-box .sub.info-link:focus-visible { outline: none; }
+  .info-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(26,26,26,0.14);
+    z-index: 110;
+    transition: opacity .15s;
+  }
+  .info-backdrop.hidden { opacity: 0; pointer-events: none; }
+  .info-popover {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(340px, calc(100vw - 32px));
+    background: #fff;
+    border: 1.5px solid #161616;
+    border-radius: 3px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+    z-index: 120;
+    display: flex;
+    flex-direction: column;
+    transition: opacity .15s, transform .15s;
+  }
+  .info-popover.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(0.97);
+  }
+  .info-popover-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px 7px 12px;
+    background: #161616;
+    border-radius: 2px 2px 0 0;
+  }
+  .info-popover-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: #f5f5f5;
+    line-height: 1.4;
+  }
+  .info-popover-close {
+    background: none;
+    border: none;
+    color: #e0e0e0;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0 2px;
+    flex-shrink: 0;
+  }
+  .info-popover-close:hover { color: #fafafa; }
+  .info-popover-body {
+    padding: 11px 13px 13px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: #161616;
+  }
+  .info-popover-body code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    background: #f5f5f5;
+    padding: 1px 3px;
+    border-radius: 2px;
   }
   .examples-backdrop {
     position: fixed;
@@ -1127,6 +1225,15 @@
   <div class="examples-panel-body" id="examples-panel-body"></div>
 </div>
 
+<div class="info-backdrop hidden" id="info-backdrop"></div>
+<div class="info-popover hidden" id="info-popover" role="dialog" aria-modal="true" aria-labelledby="info-popover-title">
+  <div class="info-popover-header">
+    <span class="info-popover-title" id="info-popover-title"></span>
+    <button class="info-popover-close" id="info-popover-close" title="Close" aria-label="Close">&times;</button>
+  </div>
+  <div class="info-popover-body" id="info-popover-body"></div>
+</div>
+
 <h2 id="acknowledgement">Acknowledgement</h2>
 <div class="ack" id="ack-text">
   This work was partially supported by the research projects
@@ -1346,6 +1453,7 @@
   function renderSortIndicators(tableEl) {
     const state = sortState(tableEl);
     const ths = Array.from(tableEl.querySelectorAll('thead th'));
+    const allowSecondary = ths.length > 2;
     for (let i = state.length - 1; i >= 0; i--) {
       if (!ths[state[i].colIdx]) state.splice(i, 1);
     }
@@ -1355,9 +1463,11 @@
       h.removeAttribute('data-sort-adding');
       const ind = h.querySelector('.sort-ind');
       if (ind) ind.remove();
-      h.title = state.length
-        ? 'Click to make this the primary sort; Shift+click or +2 to add second sort'
-        : 'Click to sort; Shift+click or +2 for second sort';
+      h.title = allowSecondary
+        ? (state.length
+          ? 'Click to make this the primary sort; Shift+click or +2 to add second sort'
+          : 'Click to sort; Shift+click or +2 for second sort')
+        : 'Click to sort';
     });
     state.forEach(function(rule, idx) {
       const th = ths[rule.colIdx];
@@ -1367,16 +1477,18 @@
       th.setAttribute('data-sort-level', String(level));
       th.setAttribute('aria-sort', rule.dir);
       if (isAdding) th.setAttribute('data-sort-adding', 'true');
-      th.title = isAdding
-        ? 'Tap another header to add it as sort 2'
-        : (level === 1
-          ? 'Primary sort. Click to reverse; Shift+click another column or tap +2 for second sort'
-          : 'Secondary sort. Shift+click to reverse; click to make primary');
+      th.title = !allowSecondary
+        ? 'Click to reverse; click another column to sort by it'
+        : (isAdding
+          ? 'Tap another header to add it as sort 2'
+          : (level === 1
+            ? 'Primary sort. Click to reverse; Shift+click another column or tap +2 for second sort'
+            : 'Secondary sort. Shift+click to reverse; click to make primary'));
       const ind = document.createElement('span');
       ind.className = 'sort-ind';
-      ind.innerHTML = '<span class="sort-level">' + level + '</span>' +
+      ind.innerHTML = (allowSecondary ? '<span class="sort-level">' + level + '</span>' : '') +
         '<span class="sort-arrow">' + (rule.dir === 'ascending' ? '↑' : '↓') + '</span>' +
-        (isOnlySort ? '<span class="sort-add" title="Add second sort" aria-label="Add second sort">+2</span>' : '') +
+        (isOnlySort && allowSecondary ? '<span class="sort-add" title="Add second sort" aria-label="Add second sort">+2</span>' : '') +
         '<span class="sort-clear" title="Clear this sort" aria-label="Clear this sort">✕</span>';
       th.appendChild(ind);
     });
@@ -1389,9 +1501,13 @@
   }
 
   function makeSortable(tableEl, restore) {
+    // Two-level sort only makes sense when there is more than one column to sort
+    // beyond the label — i.e. >2 columns. The 2-column error tables get plain
+    // single-column sort (no "+2", no level number).
+    const allowSecondary = tableEl.querySelectorAll('thead th').length > 2;
     tableEl.querySelectorAll('thead th').forEach(function(th, colIdx) {
       th.classList.add('sortable');
-      th.title = 'Click to sort; Shift+click for second sort';
+      th.title = allowSecondary ? 'Click to sort; Shift+click for second sort' : 'Click to sort';
       th.addEventListener('click', function(e) {
         const addBtn = e.target && e.target.closest ? e.target.closest('.sort-add') : null;
         if (addBtn) {
@@ -1420,7 +1536,7 @@
         }
         const state = sortState(tableEl);
         const pos = state.findIndex(function(rule) { return rule.colIdx === colIdx; });
-        const addSecondary = e.shiftKey || tableEl._addSecondarySort;
+        const addSecondary = allowSecondary && (e.shiftKey || tableEl._addSecondarySort);
         if (addSecondary) {
           if (pos !== -1) {
             state[pos].dir = state[pos].dir === 'ascending' ? 'descending' : 'ascending';
@@ -1626,6 +1742,25 @@
   examplesPanelClose.addEventListener('click', closePanel);
   examplesBackdrop.addEventListener('click', closePanel);
 
+  // ---------- small info popover (metric explanations) ----------
+  const infoBackdrop = document.getElementById('info-backdrop');
+  const infoPopover = document.getElementById('info-popover');
+  const infoPopoverTitle = document.getElementById('info-popover-title');
+  const infoPopoverBody = document.getElementById('info-popover-body');
+  const infoPopoverClose = document.getElementById('info-popover-close');
+  function openInfoPopover(title, html) {
+    infoPopoverTitle.textContent = title;
+    infoPopoverBody.innerHTML = html;
+    infoBackdrop.classList.remove('hidden');
+    infoPopover.classList.remove('hidden');
+  }
+  function closeInfoPopover() {
+    infoPopover.classList.add('hidden');
+    infoBackdrop.classList.add('hidden');
+  }
+  infoPopoverClose.addEventListener('click', closeInfoPopover);
+  infoBackdrop.addEventListener('click', closeInfoPopover);
+
   function exampleExportHeaders() {
     return ['Model', 'Corpus', 'Run', 'Pattern', 'Context', 'sid', 'token_id', 'token', 'gold', 'pred', 'sentence'];
   }
@@ -1690,7 +1825,12 @@
     tr.tabIndex = 0;
     if (ariaLabel) tr.setAttribute('aria-label', ariaLabel);
     tr.addEventListener('focus', function() { activeTbody = tbody; });
-    tr.addEventListener('click', function() { activeTbody = tbody; onActivate(); });
+    tr.addEventListener('click', function(e) { activeTbody = tbody; onActivate(e); });
+    // Middle-click opens the example in a new tab (handled in onActivate).
+    tr.addEventListener('mousedown', function(e) { if (e.button === 1) e.preventDefault(); });
+    tr.addEventListener('auxclick', function(e) {
+      if (e.button === 1) { e.preventDefault(); activeTbody = tbody; onActivate(e); }
+    });
     tr.addEventListener('keydown', function(e) {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
@@ -1702,6 +1842,7 @@
 
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
+      if (!infoPopover.classList.contains('hidden')) { closeInfoPopover(); e.preventDefault(); return; }
       if (!examplesPanel.classList.contains('hidden')) { closePanel(); e.preventDefault(); }
       return;
     }
@@ -2018,14 +2159,20 @@
         for (const row of visible) {
           const tr = document.createElement('tr');
           tr.innerHTML = `<td class="label">${row.label}</td><td class="right">${row.count}</td>`;
-          wireClickableRow(tr, tbody, function() {
+          wireClickableRow(tr, tbody, function(e) {
+            const keys = row.keys || [row.key];
+            const ref = makeExampleRef('deprel-' + bucket, keys);
+            if (e && ref && (e.ctrlKey || e.metaKey || e.button === 1)) {
+              if (e.preventDefault) e.preventDefault();
+              window.open(exampleUrlForRef(ref), '_blank', 'noopener');
+              return;
+            }
             selectRow(tr, tbody);
             let exs = [];
-            for (const k of (row.keys || [row.key])) {
+            for (const k of keys) {
               exs = exs.concat((errData().deprel_examples[bucket] || {})[k] || []);
             }
-            const keys = row.keys || [row.key];
-            currentExampleRef = makeExampleRef('deprel-' + bucket, keys);
+            currentExampleRef = ref;
             const contextText = mergedContextText('deprel-' + bucket, row.label, '', keys.length);
             renderExamples(exs, `${modelShort()} · ${bucketTitles[bucket]} · ${row.label} (${exs.length} examples)`, contextText);
             writeHash();
@@ -2135,14 +2282,20 @@
           countCell.textContent = row.count;
           tr.appendChild(labelCell);
           tr.appendChild(countCell);
-          wireClickableRow(tr, tbody, function() {
+          wireClickableRow(tr, tbody, function(e) {
+            const keys = row.keys || [row.key];
+            const ref = makeExampleRef(layer, keys);
+            if (e && ref && (e.ctrlKey || e.metaKey || e.button === 1)) {
+              if (e.preventDefault) e.preventDefault();
+              window.open(exampleUrlForRef(ref), '_blank', 'noopener');
+              return;
+            }
             selectRow(tr, tbody);
             let exs = [];
-            for (const k of (row.keys || [row.key])) {
+            for (const k of keys) {
               exs = exs.concat((errData().tag_examples[layer] || {})[k] || []);
             }
-            const keys = row.keys || [row.key];
-            currentExampleRef = makeExampleRef(layer, keys);
+            currentExampleRef = ref;
             contextText = mergedContextText(layer, row.label, contextText, keys.length);
             renderExamples(exs, `${modelShort()} · ${layer.toUpperCase()} · ${row.label} (${exs.length} examples)`, contextText);
             writeHash();
@@ -2198,11 +2351,16 @@
 
   // ---------- chrome (title, overview, provenance, names) ----------
   const metricsOrder = [
-    ['Lemma', 'lemma', 'Lemmatisation'],
-    ['UPOS', 'upos', 'Part-of-speech tag'],
-    ['XPOS', 'xpos', 'MULTEXT-East morphosyntactic tag'],
-    ['UAS', 'uas', 'Unlabelled attachment score'],
-    ['LAS', 'las', 'Labelled attachment score'],
+    ['Lemma', 'lemma', 'Lemmatisation',
+      'The percentage of tokens assigned the correct <strong>lemma</strong> (dictionary base form). For example, the lemma of <em>delamo</em> is <em>delati</em> and of <em>mizo</em> is <em>miza</em>.'],
+    ['UPOS', 'upos', 'Part-of-speech tag',
+      'The percentage of tokens assigned the correct <strong>universal part-of-speech tag</strong> — one of the 17 Universal Dependencies categories such as <code>NOUN</code>, <code>VERB</code>, <code>ADJ</code>, <code>ADV</code>.'],
+    ['XPOS', 'xpos', 'MULTEXT-East morphosyntactic tag',
+      'The percentage of tokens assigned the correct language-specific <strong>MULTEXT-East / JOS</strong> morphosyntactic description (MSD), which encodes detailed features such as case, number and gender (e.g. <code>Ncmsn</code> = common noun, masculine, singular, nominative).'],
+    ['UAS', 'uas', 'Unlabelled attachment score',
+      'The percentage of tokens attached to the correct <strong>syntactic head</strong>, ignoring the dependency-relation label.'],
+    ['LAS', 'las', 'Labelled attachment score',
+      'The percentage of tokens attached to the correct syntactic head <strong>and</strong> labelled with the correct dependency relation. It is the standard single summary metric for dependency parsing.'],
   ];
 
   function updateNames() {
@@ -2234,11 +2392,15 @@
     const m = corpus().metrics[modelKey()];
     const overview = document.getElementById('overview');
     overview.innerHTML = '';
-    for (const [label, key, desc] of metricsOrder) {
+    for (const [label, key, desc, info] of metricsOrder) {
       const val = m[key];
       const box = document.createElement('div');
       box.className = 'metric-box' + (label === 'LAS' ? ' highlight' : '');
-      box.innerHTML = `<div class="label">${label}</div><div class="val">${val != null ? val.toFixed(2) : '—'}</div><div class="sub">${desc}</div>`;
+      box.innerHTML = `<div class="label">${label}</div><div class="val">${val != null ? val.toFixed(2) : '—'}</div><button type="button" class="sub info-link" title="What is this?">${desc}</button>`;
+      box.querySelector('.info-link').addEventListener('click', function(e) {
+        e.stopPropagation();
+        openInfoPopover(`${label.toUpperCase()} — ${desc}`, info);
+      });
       overview.appendChild(box);
     }
   }
@@ -2450,6 +2612,14 @@
       if (token) h += `/${currentExampleRef.section}/${token}`;
     }
     if (location.hash !== h) history.replaceState(null, '', h);
+  }
+  // Full URL that deep-links straight to a given examples ref (for open-in-new-tab).
+  function exampleUrlForRef(ref) {
+    const base = location.href.replace(/#.*$/, '');
+    let h = `#${state.model}/${state.corpus}`;
+    const token = ref ? exampleRefToken(ref) : '';
+    if (ref && ref.section && token) h += `/${ref.section}/${token}`;
+    return base + h;
   }
   function applyHash() {
     const m = (location.hash || '').replace(/^#/, '').split('/');
