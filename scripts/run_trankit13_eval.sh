@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Additional evaluation on the Trankit 1.3 model (CLARIN 11356/2201, which adds
 # non-standard spoken Slovenian to SST training data), run the SAME way as the
-# previous full runs: aligned mode, Trankit vs CLASSLA, on both the standard SSJ
-# and the spoken/non-standard SST test sets.
+# previous full runs: aligned mode, Trankit vs CLASSLA, on the standard SSJ test
+# set, the normalized spoken SST test set, and the colloquial ('pog') SST set.
 #
 # Designed to run inside the Docker container (see docker/README.md), but works
 # on any host with the project venv active.
@@ -39,16 +39,23 @@ trankit_args=(
 echo "### Trankit 1.3 eval | stamp=$STAMP | cache=$CACHE_DIR | gpu=${GPU:-0}"
 
 echo ""
-echo "=== [1/2] SSJ (standard) ==="
+echo "=== [1/3] SSJ (standard / written) ==="
 python scripts/run_pipeline.py \
     --gold data/gold/sl_ssj-ud-test.conllu \
     --classla-type default \
     "${trankit_args[@]}"
 
 echo ""
-echo "=== [2/2] SST (spoken / non-standard) ==="
+echo "=== [2/3] SST (spoken / normalized transcription) ==="
 python scripts/run_pipeline.py \
     --gold data/gold/sl_sst-ud-test.conllu \
+    --classla-type spoken \
+    "${trankit_args[@]}"
+
+echo ""
+echo "=== [3/3] SST (spoken / colloquial 'pog' transcription) ==="
+python scripts/run_pipeline.py \
+    --gold data/gold/sl_sst-ud-test-pog.conllu \
     --classla-type spoken \
     "${trankit_args[@]}"
 
