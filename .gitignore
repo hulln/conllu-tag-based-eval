@@ -56,6 +56,7 @@ results/runs/
 # Local SSJ gold dataset files (do not publish in this repository)
 data/gold/
 data/gold/sl_ssj-ud-test.conllu
+data/*.zip
 
 # Keep archive and sample/test-run artifacts local
 archive/first-run/
@@ -67,14 +68,19 @@ data/samples/
 predictions/samples/
 predictions/output/*sample*
 predictions/output/*sample*/
+predictions/output/*.multiroot-orig
 results/output/*sample*/
+
+# Superseded local trial run artifacts (not documented as canonical/public)
+predictions/output/20260604-0837-tk13_*
+predictions/output/20260604-0843-tk13_*
+results/output/20260604-0843-tk13_*/
 
 # Private run comparison notes (local only)
 references/run-comparison-*.md
 
-# Private supervisor/task instruction snapshots (local only)
-references/supervisor-instructions-*.txt
-references/instructions-task-mail*.txt
+# Local text notes (not part of the reproducible repository)
+references/*.txt
 
 # Local reference PDFs (keep links in README instead of committing files)
 references/*.pdf

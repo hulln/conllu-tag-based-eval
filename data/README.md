@@ -26,3 +26,17 @@ Methodology note:
 - Version: v2.16 (2024-12-20)
 - Local copy obtained: 2026-04-20
 - Primary file: [gold/sl_sst-ud-test.conllu](gold/sl_sst-ud-test.conllu) (local only)
+- Verified note for v5: this file is byte-identical to the official UD SST
+  `r2.16` and `r2.17` test file. It contains 432 sentence blocks and 11,443
+  tokens.
+
+### SST colloquial / standardised supplied pair
+
+- Source: supplied `sst2.15-dev3-pog.zip`
+- Local files:
+  - [gold/sl_sst-ud-test-pog.conllu](gold/sl_sst-ud-test-pog.conllu) — colloquial `pog` transcription, used in v5.
+  - [gold/sl_sst-ud-test-stan.conllu](gold/sl_sst-ud-test-stan.conllu) — paired standardised `stan` transcription, present but not currently evaluated in v5.
+- Pair check: `stan` and `pog` have the same 420 `sent_id` sequence and the
+  same 11,443 tokens; only token surface forms/text differ. The official SST
+  test file has the same token total but 432 sentence blocks, so it is not the
+  same sentence segmentation as the supplied pair.

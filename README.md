@@ -6,26 +6,32 @@ sentence/token boundaries fixed, predictions on pre-tokenised text).
 
 ## Results
 
-**[comparison_table_v4.html](https://conllu-tag-based-eval-table.netlify.app/comparison_table_v4.html)** —
-interactive table: pick a model, then a corpus; accuracy and errors per model,
-with a toggle to compare. Deep-linkable, e.g. `#classla/sst`.
+**Current table:** [live v5 table](https://conllu-tag-based-eval-table.netlify.app/comparison_table_v5.html)
+([local file](tables/comparison_table_v5.html)) combines SSJ written, SST
+normalised, and supplied SST colloquial (`pog`) evaluation. It provides per-tool
+metric summaries, accuracy/error tables, examples, compare mode, deep links, and
+CSV/Markdown export.
 
-Each corpus uses the most domain-appropriate model:
+v5 uses [SPOT-Trankit 1.3](https://www.clarin.si/repository/xmlui/handle/11356/2201)
+for all test sets and [CLASSLA-Stanza 2.2.1](https://pypi.org/project/classla/2.2.1/).
+Evaluation is aligned: gold sentence and token boundaries are fixed, and the
+models predict lemma, POS/morphology, and dependency annotation.
 
-| Corpus | SPOT-Trankit | CLASSLA-Stanza | Run |
-|--------|--------------|----------------|-----|
-| **SSJ-UD** (written) | 1.2 — [CLARIN 11356/1997](https://www.clarin.si/repository/xmlui/handle/11356/1997) | `default`, `pos_use_lexicon=True` | `20260414-1819_sl-ssj-ud-test_full` |
-| **SST-UD** (spoken) | 1.3 — [CLARIN 11356/2201](https://www.clarin.si/repository/xmlui/handle/11356/2201) (adds non-standard spoken) | `type='spoken'` | `20260604-0859-tk13_sl-sst-ud-test_full` |
+| Test set | Gold data | SPOT-Trankit | CLASSLA-Stanza |
+|---|---|---|---|
+| SSJ written | UD Slovenian SSJ `r2.17` | 1.3 | `classla.Pipeline('sl', pos_use_lexicon=True)` |
+| SST normalised | UD Slovenian SST `r2.16` / `r2.17` | 1.3 | `classla.Pipeline('sl', type='spoken')` |
+| SST colloquial | supplied `pog` test file | 1.3 | `classla.Pipeline('sl', type='spoken')` |
 
-Trankit 1.3 wins on SST (every metric but UPOS and lemmas); 1.2 stays on SSJ, where it is marginally better.
+The supplied paired `stan` file is present locally but is not evaluated in v5.
+See [references/v5_publication_qa_2026-06-22.md](references/v5_publication_qa_2026-06-22.md)
+and [references/sst_vs_pog_comparison_2026-06-22.md](references/sst_vs_pog_comparison_2026-06-22.md)
+for the data audit.
 
-Settings: [trankit==1.1.2](https://pypi.org/project/trankit/1.1.2/) (`xlm-roberta-base`),
-[classla==2.2.1](https://pypi.org/project/classla/2.2.1/), full env in [requirements.txt](requirements.txt).
-Gold: [UD SSJ](https://github.com/UniversalDependencies/UD_Slovenian-SSJ) v2.17, [UD SST](https://github.com/UniversalDependencies/UD_Slovenian-SST) v2.16.
-
-Older per-corpus tables ([v2 SSJ](https://conllu-tag-based-eval-table.netlify.app/comparison_table_v2_ssj.html),
+Previous table versions are kept for traceability: [v4](https://conllu-tag-based-eval-table.netlify.app/comparison_table_v4.html),
 [v3 SST](https://conllu-tag-based-eval-table.netlify.app/comparison_table_v3_sst.html),
-[v1 legacy](https://conllu-tag-based-eval-table.netlify.app/comparison_table_v1_ssj.html)) predate v4 and still show Trankit 1.2.
+[v2 SSJ](https://conllu-tag-based-eval-table.netlify.app/comparison_table_v2_ssj.html),
+and [v1 legacy](https://conllu-tag-based-eval-table.netlify.app/comparison_table_v1_ssj.html).
 
 ## Setup & rerun
 
@@ -33,19 +39,20 @@ Older per-corpus tables ([v2 SSJ](https://conllu-tag-based-eval-table.netlify.ap
 python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
 ```
 
-Add gold files to [data/gold/](data/gold/) (sources above), then:
+Add gold files to [data/gold/](data/gold/) (see [data/README.md](data/README.md)),
+then run the aligned pipeline or the dedicated Trankit 1.3 Docker workflow:
 
 ```bash
-# SSJ (Trankit 1.2)
-python scripts/run_pipeline.py --modes aligned --gold data/gold/sl_ssj-ud-test.conllu --run-stamp <stamp>
-# SST (Trankit 1.3) — both corpora end-to-end via Docker; see docker/README.md
+# General aligned run
+python3 scripts/run_pipeline.py --modes aligned --gold data/gold/sl_ssj-ud-test.conllu --run-stamp <stamp>
+# Trankit 1.3 workflow; see docker/README.md
 bash scripts/run_trankit13_eval.sh        # GPU=1 to use a GPU
 ```
 
-Regenerate the v4 table data bundle (runs configured in `CORPORA` at the top of the script):
+Regenerate the v5 data bundle:
 
 ```bash
-python scripts/build_interactive_comparison_table_v4.py
+python3 scripts/build_interactive_comparison_table_v5.py
 ```
 
 ## Reproducibility
@@ -55,8 +62,8 @@ pinned (file hashes + metrics) in [references/canonical_run_manifest.json](refer
 for exact-match verification:
 
 ```bash
-python scripts/qa_validate_run.py --run-stamp <stamp> --modes aligned   # any run: integrity
-python scripts/verify_canonical_run.py --run-stamp <stamp>              # canonical: exact match
+python3 scripts/qa_validate_run.py --run-stamp <stamp> --modes aligned   # any run: integrity
+python3 scripts/verify_canonical_run.py --run-stamp <stamp>              # canonical: exact match
 ```
 
 ## Repository guide
@@ -65,6 +72,7 @@ python scripts/verify_canonical_run.py --run-stamp <stamp>              # canoni
 - [data/](data/) — gold files and dataset notes
 - [predictions/](predictions/), [results/](results/) — run artifacts
 - [tables/](tables/) — interactive table bundles (HTML + JS)
+- [tables/logos/](tables/logos/) — local logo assets and source URLs
 - [docker/](docker/) — containerised run (used for the Trankit 1.3 SST run)
 - [references/](references/) — paper link and verification manifest
 

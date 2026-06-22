@@ -18,6 +18,15 @@ Trankit 1.3 run (CLARIN `11356/2201`, run `20260604-0859-tk13`) — its SST resu
 - SSJ: [output/20260604-0859-tk13_sl-ssj-ud-test_full](output/20260604-0859-tk13_sl-ssj-ud-test_full/)
 - SST: [output/20260604-0859-tk13_sl-sst-ud-test_full](output/20260604-0859-tk13_sl-sst-ud-test_full/)
 
+v5 run (CLARIN `11356/2201`, run `20260622-0810-tk13`):
+
+- SSJ written: [output/20260622-0810-tk13_sl-ssj-ud-test_full](output/20260622-0810-tk13_sl-ssj-ud-test_full/)
+- SST normalised: [output/20260622-0810-tk13_sl-sst-ud-test_full](output/20260622-0810-tk13_sl-sst-ud-test_full/)
+- SST colloquial: [output/20260622-0810-tk13_sl-sst-ud-test-pog_full](output/20260622-0810-tk13_sl-sst-ud-test-pog_full/)
+
+All three v5 runs have `qa_validation.md` status `PASS`. There is no v5 result
+directory for the supplied paired `stan` test file.
+
 Strict rerun verification:
 
 - Run [scripts/verify_canonical_run.py](../scripts/verify_canonical_run.py) after a rerun.
@@ -32,3 +41,4 @@ Public interactive tables:
 
 - SSJ: [tables/comparison_table_v2_ssj.html](../tables/comparison_table_v2_ssj.html)
 - SST: [tables/comparison_table_v3_sst.html](../tables/comparison_table_v3_sst.html)
+- Combined v5 table: [tables/comparison_table_v5.html](../tables/comparison_table_v5.html)

@@ -1,0 +1,2510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evaluation of Grammatical Annotation Tools for Slovenian</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+  :root {
+    --cjvt-accent: #e12a26;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    background: #f5f5f5;
+    color: #161616;
+    padding: 36px 40px 60px;
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+  .page-head {
+    max-width: 980px;
+    margin-bottom: 26px;
+    padding: 24px 30px 18px 28px;
+    background: #fff;
+    border-radius: 2px;
+    box-shadow: 0 1px 1px 0 #e0e0e0;
+  }
+  h1 { font-size: 22px; line-height: 1.25; font-weight: 600; letter-spacing: .01em; margin-bottom: 6px; }
+  .title-context {
+    color: #161616;
+    font-weight: 600;
+  }
+  .subtitle {
+    max-width: 760px;
+    font-size: 13px;
+    color: #666;
+    font-weight: 400;
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+  .subtitle:empty { display: none; }
+  .subtitle strong {
+    color: #555;
+    font-weight: 500;
+  }
+  .subtitle code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    color: #555;
+  }
+  .noscript-note {
+    max-width: 980px;
+    margin: 0 0 22px;
+    padding: 14px 18px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-left: 3px solid var(--cjvt-accent);
+    border-radius: 2px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: #161616;
+    box-shadow: 0 1px 1px 0 #e0e0e0;
+  }
+  .noscript-note strong { font-weight: 600; }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .provenance { font-size: 11px; color: #666; line-height: 1.6; }
+  .provenance strong { color: #161616; }
+  .provenance-line + .provenance-line { margin-top: 4px; }
+  .provenance code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    background: #f5f5f5;
+    padding: 1px 3px;
+    border-radius: 2px;
+  }
+  .provenance a {
+    color: #161616;
+    text-decoration: none;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  .provenance a:hover { border-bottom-color: var(--cjvt-accent); }
+  h2 {
+    font-size: 15px;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: .01em;
+    color: #161616;
+    margin: 32px 0 8px;
+    padding-bottom: 7px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  h2,
+  .overview,
+  .controls,
+  .toolbar,
+  .table-wrap,
+  #deprel-error-sections,
+  .ack {
+    max-width: 980px;
+  }
+  .page-head + h2 { margin-top: 0; }
+  h3 {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: .01em;
+    color: #161616;
+    margin: 18px 0 8px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-bottom: 4px; }
+  .table-wrap {
+    width: 100%;
+    overflow: visible;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 4px;
+  }
+  .table-wrap-wide { overflow-x: auto; }
+  .table-wrap-wide table { min-width: 520px; }
+  .table-wrap.expanded-scroll {
+    max-height: min(62vh, 520px);
+    overflow: auto;
+    scrollbar-gutter: stable;
+  }
+  .table-wrap.expanded-scroll thead th {
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    box-shadow: 0 1px 0 #e0e0e0;
+  }
+  th {
+    text-align: left;
+    padding: 6px 10px;
+    background: #f5f5f5;
+    color: #161616;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .01em;
+    border-bottom: 1px solid #e0e0e0;
+    white-space: nowrap;
+  }
+  th.right, td.right { text-align: right; }
+  td { padding: 4px 10px; border-bottom: 1px solid #e0e0e0; background: #fff; vertical-align: middle; }
+  td.right { font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+  td.label { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: #161616; }
+  tr:hover td { background: #fafafa; }
+  tr.other-better td { background: #fafafa; }
+  tr.model-better td { background: #f5f5f5; }
+  tr.other-better:hover td { background: #f5f5f5; }
+  tr.model-better:hover td { background: #e0e0e0; }
+  tr.clickable-row td { cursor: pointer; }
+  tr.clickable-row:focus { outline: none; }
+  tr.clickable-row:focus-visible td { background: #f5f5f5; }
+  tr.selected-row td { background: #f5f5f5 !important; }
+  tr.clickable-row td.label {
+    position: relative;
+    padding-left: 28px;
+  }
+  tr.clickable-row td.label::before {
+    content: '↳';
+    position: absolute;
+    left: 10px;
+    color: #666;
+    font-size: 11px;
+  }
+  tr.clickable-row:hover td.label::before { color: #e12a26; }
+  .no-data-row td {
+    color: #666;
+    font-style: italic;
+    background: #fafafa !important;
+    text-align: left !important;
+  }
+  .no-data-row td.right {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 12px;
+  }
+  .pos { color: #161616; font-weight: 600; }
+  .neg { color: #e12a26; font-weight: 600; }
+  .neut { color: #666; }
+  .overview { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
+  .metric-box { background: #fff; border: 1px solid #e0e0e0; padding: 14px 16px; border-radius: 2px; box-shadow: 0 1px 1px 0 rgba(224,224,224,.65); }
+  .metric-box .label { font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: #666; margin-bottom: 3px; }
+  .metric-box .val { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; color: #161616; }
+  .metric-box .sub { font-size: 10.5px; color: #666; margin-top: 2px; }
+  .metric-box.highlight { border-color: #e12a26; background: #fafafa; }
+  .metric-box.highlight .label { color: var(--cjvt-accent); }
+  .bar-wrap {
+    display: inline-block;
+    width: 70px;
+    height: 8px;
+    background: #e0e0e0;
+    vertical-align: middle;
+    margin-left: 6px;
+    border-radius: 1px;
+  }
+  .bar { display: block; height: 8px; border-radius: 1px; }
+  .bar-other { background: #b3b3b3; }
+  .bar-model { background: #393939; }
+  .example-item { border-top: 1px solid #e0e0e0; padding-top: 8px; margin-top: 8px; }
+  .example-item:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
+  .example-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 6px;
+    line-height: 1.45;
+  }
+  .example-sentence { line-height: 1.6; color: #161616; }
+  .examples-context {
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    background: #fafafa;
+    border-radius: 2px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    color: #666;
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+  mark {
+    background: #fbe6e5;
+    color: #161616;
+    padding: 0 2px;
+    box-shadow: inset 0 -1px 0 0 var(--cjvt-accent);
+  }
+  .examples-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(26,26,26,0.14);
+    z-index: 90;
+    transition: opacity .15s;
+  }
+  .examples-backdrop.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .examples-panel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 380px;
+    max-height: calc(100vh - 40px);
+    background: #fff;
+    border: 1.5px solid #161616;
+    border-radius: 3px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    transition: opacity .15s, transform .15s;
+  }
+  .examples-panel.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-6px);
+  }
+  .examples-panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 12px 8px;
+    border-bottom: 1px solid #e0e0e0;
+    background: #161616;
+    border-radius: 2px 2px 0 0;
+    flex-shrink: 0;
+  }
+  .examples-panel-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: #f5f5f5;
+    line-height: 1.4;
+    word-break: break-word;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .examples-panel-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .examples-panel-action {
+    background: none;
+    border: 1px solid #666;
+    border-radius: 2px;
+    color: #e0e0e0;
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    line-height: 1;
+    padding: 3px 5px;
+  }
+  .examples-panel-action:hover:not(:disabled) {
+    border-color: #e0e0e0;
+    color: #fafafa;
+  }
+  .examples-panel-action:disabled {
+    cursor: default;
+    opacity: .35;
+  }
+  .examples-panel-close {
+    background: none;
+    border: none;
+    color: #e0e0e0;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0 2px;
+    flex-shrink: 0;
+    margin-top: -1px;
+  }
+  .examples-panel-close:hover { color: #fafafa; }
+  .examples-panel-body {
+    overflow-y: auto;
+    padding: 10px 12px 12px;
+    flex: 1;
+  }
+  @media (max-width: 820px) {
+    .examples-panel {
+      width: calc(100vw - 24px);
+      top: 50%;
+      left: 50%;
+      right: auto;
+      transform: translate(-50%, -50%);
+      max-height: calc(100vh - 32px);
+    }
+    .examples-panel.hidden {
+      transform: translate(-50%, -50%) scale(0.97);
+    }
+  }
+  .note { font-size: 11px; color: #666666; margin-top: 8px; line-height: 1.6; }
+  .controls, .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px 18px;
+    margin: 8px 0 10px;
+    flex-wrap: wrap;
+  }
+  .count-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .count-meta .note {
+    margin-top: 0;
+  }
+  .control-note { flex: 1 1 360px; max-width: 620px; margin: 0; }
+  .control-main {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    margin-left: auto;
+    max-width: 100%;
+  }
+  .filter-field {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex: 0 1 210px;
+    min-width: 178px;
+  }
+  .filter-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238d8d8d' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-4.2-4.2'/%3E%3C/svg%3E") center / 14px 14px no-repeat;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+  input[type="search"] {
+    -webkit-appearance: none;
+    border-radius: 0;
+    border: 1px solid #e0e0e0;
+    background: #fff;
+    padding: 7px 28px 7px 30px;
+    font: inherit;
+    width: 100%;
+    min-width: 0;
+    transition: border-color .14s ease, box-shadow .14s ease, background .14s ease;
+  }
+  input[type="search"]::-webkit-search-cancel-button,
+  input[type="search"]::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  input[type="search"]:focus {
+    outline: none;
+    border-color: #666666;
+    box-shadow: 0 0 0 2px rgba(102,102,102,0.08);
+  }
+  .filter-clear {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: none;
+    color: #8d8d8d;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: color .14s ease;
+  }
+  .filter-clear:hover { color: var(--cjvt-accent); }
+  .filter-clear[hidden] { display: none; }
+  .toggle-btn {
+    border: 1px solid #e0e0e0;
+    background: #fff;
+    color: #161616;
+    padding: 6px 10px;
+    font: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .14s ease, border-color .14s ease, color .14s ease;
+  }
+  .toggle-btn:hover {
+    background: #f5f5f5;
+    border-color: #e0e0e0;
+  }
+  .toggle-btn[hidden] { display: none; }
+  .toggle-btn.active { background: #161616; color: #fff; border-color: #161616; }
+  .inline-toggle {
+    border: none;
+    background: none;
+    padding: 0;
+    font: inherit;
+    font-size: 11px;
+    color: #666666;
+    line-height: 1.6;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color .14s ease;
+  }
+  .inline-toggle:hover {
+    color: var(--cjvt-accent);
+  }
+  .inline-toggle[hidden] { display: none; }
+  .ack { font-size: 12px; color: #666666; line-height: 1.7; margin-top: 8px; }
+  .ack a { color: #161616; text-decoration: none; border-bottom: 1px solid #e0e0e0; }
+  .ack a:hover { border-bottom-color: var(--cjvt-accent); }
+  .citation-ref { margin: 6px 0 8px; }
+  .bibtex-details {
+    max-width: 980px;
+    margin-top: 6px;
+  }
+  .bibtex-details > summary {
+    cursor: pointer;
+    list-style: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: .04em;
+    color: #666666;
+    padding: 0;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .bibtex-details > summary::-webkit-details-marker { display: none; }
+  .bibtex-details > summary::before { content: '▸ '; color: #666666; }
+  .bibtex-details[open] > summary::before { content: '▾ '; }
+  .bibtex-details > summary:hover { color: #666666; }
+  .bibtex-wrap {
+    position: relative;
+    max-width: 980px;
+    margin-top: 8px;
+  }
+  .bibtex {
+    background: #fafafa;
+    color: #161616;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    line-height: 1.35;
+    padding: 9px 74px 9px 10px;
+    border-radius: 3px;
+    border: 1px solid #e0e0e0;
+    overflow-x: auto;
+    margin-top: 0;
+    white-space: pre;
+  }
+  .bibtex-copy-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    color: #666666;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+  }
+  .bibtex-copy-btn:hover { color: #161616; background: #f5f5f5; }
+  .logos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(48px, 9vw, 96px);
+    flex-wrap: wrap;
+    max-width: 980px;
+    margin: 34px 0 0;
+    padding-top: 22px;
+    border-top: 1px solid #e0e0e0;
+  }
+  .logos img { max-height: 40px; max-width: 100%; opacity: .82; transition: opacity .14s ease; }
+  .logos a:hover img { opacity: 1; }
+  /* Column sort */
+  th.sortable { cursor: pointer; user-select: none; }
+  th.sortable::after {
+    content: '↕';
+    display: inline-block;
+    margin-left: 5px;
+    color: #e0e0e0;
+    font-size: 10px;
+  }
+  /* Active sort UI is rendered as real elements so it can show primary/secondary
+     order and expose an explicit clear control. */
+  th.sortable[data-sort-level]::after { content: ''; margin: 0; }
+  th.sortable[data-sort-level] { color: var(--cjvt-accent); }
+  .sort-ind {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: 5px;
+    white-space: nowrap;
+    vertical-align: baseline;
+  }
+  .sort-level {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: var(--cjvt-accent);
+    color: #fff;
+    font-size: 9px;
+    line-height: 1;
+    font-weight: 700;
+  }
+  th.sortable[data-sort-level="2"] .sort-level {
+    background: #666666;
+  }
+  .sort-arrow { font-size: 10px; color: var(--cjvt-accent); }
+  .sort-add {
+    border: 1px solid #d0d0d0;
+    border-radius: 2px;
+    padding: 0 4px;
+    color: #666666;
+    font-size: 9.5px;
+    line-height: 1.35;
+    cursor: pointer;
+    font-weight: 700;
+  }
+  .sort-add:hover,
+  th.sortable[data-sort-adding] .sort-add {
+    border-color: var(--cjvt-accent);
+    background: var(--cjvt-accent);
+    color: #ffffff;
+  }
+  .sort-clear {
+    font-size: 11px;
+    color: #8d8d8d;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .sort-clear:hover { color: var(--cjvt-accent); }
+  @media (hover: none) {
+    .sort-add {
+      padding: 1px 5px;
+      font-size: 10px;
+    }
+  }
+  /* Action buttons (export/copy) */
+  .action-btn {
+    border: none;
+    background: none;
+    color: #666666;
+    font-size: 10.5px;
+    font-family: 'IBM Plex Mono', monospace;
+    cursor: pointer;
+    padding: 3px 7px;
+    border-radius: 2px;
+    letter-spacing: .02em;
+    transition: color .14s ease, background .14s ease;
+  }
+  .action-btn:hover { color: var(--cjvt-accent); background: #f5f5f5; }
+  .action-btns {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    margin-left: 6px;
+  }
+  button:focus-visible,
+  select:focus-visible,
+  input[type="search"]:focus-visible {
+    outline: 2px solid rgba(22,22,22,0.22);
+    outline-offset: 2px;
+  }
+  /* Deprel stacked buckets */
+  .deprel-bucket .bucket-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    margin-top: 18px;
+  }
+  .deprel-bucket .bucket-header h3 { margin: 0; }
+  .deprel-bucket table { margin-bottom: 0; }
+  /* MSD tooltip */
+  .has-tip { position: relative; cursor: help; }
+  .has-tip::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: 0; top: 100%;
+    margin-top: 4px;
+    background: #161616;
+    color: #f5f5f5;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    line-height: 1.5;
+    padding: 6px 9px;
+    border-radius: 2px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity .12s, transform .12s;
+    z-index: 200;
+    min-width: 180px;
+    max-width: min(320px, calc(100vw - 48px));
+    white-space: pre-wrap;
+  }
+  .has-tip:hover::after,
+  tr.clickable-row:focus .has-tip::after,
+  tr.clickable-row:focus-visible .has-tip::after {
+    opacity: 1;
+    transform: none;
+  }
+  body.examples-open .has-tip::after {
+    display: none;
+  }
+  /* Selectors */
+  .selectors {
+    max-width: 980px;
+    width: 100%;
+    margin: 14px 0 14px;
+  }
+  .selector-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: end;
+  }
+  .selector-field {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+    min-width: 0;
+  }
+  .selector-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: #666;
+    flex-shrink: 0;
+  }
+  .seg {
+    display: inline-flex;
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    overflow: hidden;
+    background: #fff;
+    flex-wrap: nowrap;
+    width: 100%;
+  }
+  .seg-btn {
+    flex: 1 1 0;
+    border: none;
+    background: #fff;
+    color: #666;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .03em;
+    padding: 7px 16px;
+    cursor: pointer;
+    border-right: 1px solid #e0e0e0;
+    transition: background .14s ease, color .14s ease;
+    white-space: nowrap;
+    text-align: center;
+  }
+  .seg-btn:last-child { border-right: none; }
+  .seg-btn:hover { background: #f5f5f5; }
+  .seg-btn.active { background: #161616; color: #fff; }
+  .seg-btn:focus-visible { outline: 2px solid rgba(22,22,22,0.22); outline-offset: -2px; }
+  .testset-combobox {
+    position: relative;
+    width: 100%;
+  }
+  .testset-button {
+    position: relative;
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    background: #fff;
+    color: #161616;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    width: 100%;
+    padding: 7px 30px 7px 10px;
+    cursor: pointer;
+    text-align: left;
+    white-space: nowrap;
+    min-height: 31px;
+    transition: background .14s ease, border-color .14s ease;
+  }
+  .testset-button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-30%);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #666;
+    pointer-events: none;
+  }
+  .testset-button:hover { background-color: #f5f5f5; border-color: #e0e0e0; }
+  .testset-button[aria-expanded="true"] {
+    border-color: #e0e0e0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  .testset-menu {
+    display: none;
+    position: absolute;
+    z-index: 40;
+    top: calc(100% - 1px);
+    left: 0;
+    right: 0;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+    border-radius: 0 0 3px 3px;
+    background: #fff;
+    box-shadow: 0 8px 18px rgba(0,0,0,.16);
+  }
+  .testset-combobox.open .testset-menu {
+    display: block;
+  }
+  .testset-option {
+    display: block;
+    width: 100%;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: #161616;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    text-align: left;
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+  .testset-option:hover,
+  .testset-option.active {
+    background: #f5f5f5;
+  }
+  .testset-option.selected {
+    background: #e0e0e0;
+  }
+  /* Collapsible provenance */
+  .provenance-details {
+    margin: 0;
+  }
+  .provenance-details > summary {
+    cursor: pointer;
+    list-style: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: .04em;
+    color: #666666;
+    padding: 0;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .provenance-details > summary::-webkit-details-marker { display: none; }
+  .provenance-details > summary::before { content: '▸ '; color: #666666; }
+  .provenance-details[open] > summary::before { content: '▾ '; }
+  .provenance-details > summary:hover { color: #666666; }
+  .provenance-details .provenance { margin-top: 8px; }
+  @media (max-width: 980px) {
+    .controls {
+      align-items: flex-start;
+    }
+    .control-note {
+      flex-basis: 100%;
+      max-width: 760px;
+    }
+    .control-main {
+      justify-content: flex-start;
+      margin-left: 0;
+    }
+  }
+  @media (max-width: 820px) {
+    body { padding: 24px 18px 36px; }
+    .page-head {
+      padding: 20px 18px 16px 18px;
+    }
+    h1 {
+      font-size: 20px;
+    }
+    .control-main { justify-content: flex-start; }
+    .filter-field {
+      flex: 1 1 180px;
+    }
+    .selector-row {
+      grid-template-columns: 1fr;
+      gap: 9px;
+    }
+    .selector-field {
+      width: 100%;
+    }
+    .seg,
+    .testset-combobox {
+      width: 100%;
+    }
+  }
+  @media (max-width: 560px) {
+    /* Phones: instead of an uneven 3 + 2 grid (or five tall stacked cards),
+       render the metrics as a compact, connected list — one row each:
+       label · value · name. Rows share borders (negative margin) so it reads as a
+       single list; the highlighted LAS row sits on top (z-index) so its subtle red
+       outline overrides the shared grey borders, matching the desktop card. */
+    .overview {
+      grid-template-columns: 1fr;
+      gap: 0;
+      margin-bottom: 16px;
+    }
+    .metric-box {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 0;
+      box-shadow: none;
+      margin-bottom: -1px;
+      position: relative;
+    }
+    .metric-box:first-child { border-top-left-radius: 2px; border-top-right-radius: 2px; }
+    .metric-box:last-child { border-bottom-left-radius: 2px; border-bottom-right-radius: 2px; margin-bottom: 0; }
+    .metric-box.highlight { z-index: 1; }
+    .metric-box .label { width: 52px; flex-shrink: 0; margin-bottom: 0; }
+    .metric-box .val { font-size: 18px; width: 58px; flex-shrink: 0; text-align: right; }
+    .metric-box .sub { margin-top: 0; flex: 1 1 auto; min-width: 0; }
+  }
+</style>
+<noscript>
+<style>
+  /* No-JS fallback: hide the empty JavaScript-driven sections (selectors,
+     Details, overview, all score/error tables and their controls). The banner,
+     title/subtitle, Acknowledgement, Recommended citation and logos are static
+     and stay visible. */
+  .selectors,
+  .provenance-details,
+  .overview,
+  .controls,
+  .toolbar,
+  .table-wrap,
+  #deprel-error-sections,
+  h2#accuracy,
+  h2#las-by-relation,
+  h2#upos-accuracy,
+  h2#errors-deprel,
+  h2#errors-upos,
+  h2#errors-xpos,
+  h2#errors-lemma {
+    display: none !important;
+  }
+</style>
+</noscript>
+</head>
+<body>
+<noscript>
+  <div class="noscript-note">
+    <strong>JavaScript is required.</strong> This interactive evaluation table loads its results,
+    selectors, and per-label tables with JavaScript. Please enable JavaScript in your browser to
+    view the comparison.
+  </div>
+</noscript>
+<header class="page-head">
+  <h1 id="page-title"><span class="title-context">Evaluation</span> of Grammatical Annotation Tools for Slovenian</h1>
+  <div class="subtitle" id="subtitle">Compare commonly used Slovenian grammatical annotation tools on manually annotated test sets. Select a tool and test set to view detailed per-label results.</div>
+
+  <div class="selectors">
+    <div class="selector-row">
+      <div class="selector-field">
+        <span class="selector-label">Tool</span>
+        <div class="seg" id="seg-model" role="group" aria-label="Tool"></div>
+      </div>
+      <div class="selector-field">
+        <span class="selector-label" id="corpus-label">Test set</span>
+        <div class="testset-combobox" id="corpus-select"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="provenance-details">
+    <summary>Details</summary>
+    <div class="provenance" id="provenance"></div>
+  </details>
+</header>
+
+<h2 id="accuracy">Overall Accuracy &mdash; <span class="model-name"></span></h2>
+<div class="overview" id="overview"></div>
+
+<h2 id="las-by-relation">Dependency relation scores</h2>
+<div class="controls">
+  <div class="note control-note" id="rel-note"></div>
+  <div class="control-main">
+    <label class="filter-field">
+      <span class="filter-icon" aria-hidden="true"></span>
+      <span class="sr-only">Filter rows</span>
+      <input id="rel-filter" type="search" placeholder="e.g. nsubj or obl">
+    </label>
+    <button id="rel-compare-btn" class="toggle-btn" type="button">Compare</button>
+    <div class="action-btns">
+      <button class="action-btn" id="rel-csv-btn" title="Export visible rows as CSV">&darr; CSV</button>
+      <button class="action-btn" id="rel-md-btn" title="Copy visible rows as Markdown">&#x2398; MD</button>
+    </div>
+  </div>
+</div>
+<div class="toolbar">
+  <div class="count-meta">
+    <div class="note" id="rel-count-note"></div>
+    <button id="rel-toggle" class="inline-toggle" type="button" hidden>Show more</button>
+  </div>
+</div>
+<div class="table-wrap table-wrap-wide">
+<table>
+  <thead><tr></tr></thead>
+  <tbody id="rel-table"></tbody>
+</table>
+</div>
+
+<h2 id="upos-accuracy">Part-of-speech tag scores</h2>
+<div class="controls">
+  <div class="note control-note" id="upos-acc-note"></div>
+  <div class="control-main">
+    <label class="filter-field">
+      <span class="filter-icon" aria-hidden="true"></span>
+      <span class="sr-only">Filter rows</span>
+      <input id="upos-acc-filter" type="search" placeholder="e.g. NOUN or VERB">
+    </label>
+    <button id="upos-acc-compare-btn" class="toggle-btn" type="button">Compare</button>
+    <div class="action-btns">
+      <button class="action-btn" id="upos-acc-csv-btn" title="Export visible rows as CSV">&darr; CSV</button>
+      <button class="action-btn" id="upos-acc-md-btn" title="Copy visible rows as Markdown">&#x2398; MD</button>
+    </div>
+  </div>
+</div>
+<div class="toolbar">
+  <div class="count-meta">
+    <div class="note" id="upos-acc-count-note"></div>
+    <button id="upos-acc-toggle" class="inline-toggle" type="button" hidden>Show more</button>
+  </div>
+</div>
+<div class="table-wrap table-wrap-wide">
+<table>
+  <thead><tr></tr></thead>
+  <tbody id="upos-acc-table"></tbody>
+</table>
+</div>
+
+<h2 id="errors-deprel">Most common dependency parsing errors</h2>
+<div class="controls">
+  <div class="note control-note">This table shows the most frequent dependency-relation errors made by the selected tool, compared with the manually annotated test set. Click a row to see examples; use <kbd>↑</kbd>/<kbd>↓</kbd> to navigate and <kbd>Esc</kbd> to close the example view.</div>
+  <div class="control-main">
+    <label class="filter-field">
+      <span class="filter-icon" aria-hidden="true"></span>
+      <span class="sr-only">Filter rows</span>
+      <input id="deprel-err-filter" type="search" placeholder="e.g. nsubj or obl">
+    </label>
+  </div>
+</div>
+<div id="deprel-error-sections"></div>
+
+<h2 id="errors-upos">Most common part-of-speech tagging errors</h2>
+<div class="controls">
+  <div class="note control-note">This table shows the most frequent UPOS tagging errors made by the selected tool, compared with the manually annotated test set. Click a row to see examples.</div>
+  <div class="control-main">
+    <label class="filter-field">
+      <span class="filter-icon" aria-hidden="true"></span>
+      <span class="sr-only">Filter rows</span>
+      <input id="upos-err-filter" type="search" placeholder="e.g. NOUN">
+    </label>
+    <button id="upos-merge-btn" class="toggle-btn" type="button">Merge (A&harr;B)</button>
+    <div class="action-btns">
+      <button class="action-btn" id="upos-err-csv-btn" title="Export visible rows as CSV">&darr; CSV</button>
+      <button class="action-btn" id="upos-err-md-btn" title="Copy visible rows as Markdown">&#x2398; MD</button>
+    </div>
+  </div>
+</div>
+<div class="toolbar">
+  <div class="count-meta">
+    <div class="note" id="upos-err-count-note"></div>
+    <button id="upos-err-toggle" class="inline-toggle" type="button" hidden>Show more</button>
+  </div>
+</div>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr>
+      <th>Error pair</th>
+      <th class="right">Error count</th>
+    </tr>
+  </thead>
+  <tbody id="upos-err-table"></tbody>
+</table>
+</div>
+
+<h2 id="errors-xpos">Most common MULTEXT-East tagging errors</h2>
+<div class="controls">
+  <div class="note control-note">This table shows the most frequent MULTEXT-East / JOS morphosyntactic tagging errors made by the selected tool, compared with the manually annotated test set. Hover over or focus a row to see the MSD tag decoded; click a row to see examples.</div>
+  <div class="control-main">
+    <label class="filter-field">
+      <span class="filter-icon" aria-hidden="true"></span>
+      <span class="sr-only">Filter rows</span>
+      <input id="xpos-err-filter" type="search" placeholder="e.g. Ncm or Vmpr">
+    </label>
+    <button id="xpos-merge-btn" class="toggle-btn" type="button">Merge (A&harr;B)</button>
+    <div class="action-btns">
+      <button class="action-btn" id="xpos-err-csv-btn" title="Export visible rows as CSV">&darr; CSV</button>
+      <button class="action-btn" id="xpos-err-md-btn" title="Copy visible rows as Markdown">&#x2398; MD</button>
+    </div>
+  </div>
+</div>
+<div class="toolbar">
+  <div class="count-meta">
+    <div class="note" id="xpos-err-count-note"></div>
+    <button id="xpos-err-toggle" class="inline-toggle" type="button" hidden>Show more</button>
+  </div>
+</div>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr>
+      <th>Error pair</th>
+      <th class="right">Error count</th>
+    </tr>
+  </thead>
+  <tbody id="xpos-err-table"></tbody>
+</table>
+</div>
+
+<h2 id="errors-lemma">Most common lemmatisation errors</h2>
+<div class="controls">
+  <div class="note control-note">This table shows the most frequent lemmatisation errors made by the selected tool, compared with the manually annotated test set. Click a row to see examples.</div>
+  <div class="control-main">
+    <label class="filter-field">
+      <span class="filter-icon" aria-hidden="true"></span>
+      <span class="sr-only">Filter rows</span>
+      <input id="lemma-err-filter" type="search" placeholder="e.g. biti or &lt;lemma&gt;">
+    </label>
+    <button id="lemma-merge-btn" class="toggle-btn" type="button">Merge (A&harr;B)</button>
+    <div class="action-btns">
+      <button class="action-btn" id="lemma-err-csv-btn" title="Export visible rows as CSV">&darr; CSV</button>
+      <button class="action-btn" id="lemma-err-md-btn" title="Copy visible rows as Markdown">&#x2398; MD</button>
+    </div>
+  </div>
+</div>
+<div class="toolbar">
+  <div class="count-meta">
+    <div class="note" id="lemma-err-count-note"></div>
+    <button id="lemma-err-toggle" class="inline-toggle" type="button" hidden>Show more</button>
+  </div>
+</div>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr>
+      <th>Error pair</th>
+      <th class="right">Error count</th>
+    </tr>
+  </thead>
+  <tbody id="lemma-err-table"></tbody>
+</table>
+</div>
+
+<div class="examples-backdrop hidden" id="examples-backdrop"></div>
+<div class="examples-panel hidden" id="examples-panel">
+  <div class="examples-panel-header">
+    <div class="examples-panel-title" id="examples-panel-title">Examples</div>
+    <div class="examples-panel-actions">
+      <button class="examples-panel-action" id="examples-link-btn" title="Copy direct link to this examples panel">LINK</button>
+      <button class="examples-panel-action" id="examples-csv-btn" title="Export shown examples as CSV">CSV</button>
+      <button class="examples-panel-action" id="examples-md-btn" title="Copy shown examples as Markdown">MD</button>
+      <button class="examples-panel-close" id="examples-panel-close" title="Close">&times;</button>
+    </div>
+  </div>
+  <div class="examples-panel-body" id="examples-panel-body"></div>
+</div>
+
+<h2 id="acknowledgement">Acknowledgement</h2>
+<div class="ack" id="ack-text">
+  This work was partially supported by the research projects
+  <a href="https://spot.ff.uni-lj.si/en/" target="_blank" rel="noopener">SPOT</a>,
+  <a href="https://www.cjvt.si/llm4dh/en/" target="_blank" rel="noopener">LLM4DH</a> and
+  <a href="https://www.ff.uni-lj.si/mapcase" target="_blank" rel="noopener">MAPCASE</a>
+  (ARIS grant nos. Z6-4617, GC-002 and J6-70213), with infrastructural support from the
+  <a href="https://www.cjvt.si/" target="_blank" rel="noopener">Centre for Language Resources and Technologies at the University of Ljubljana (CJVT UL)</a>
+  and the <a href="https://www.clarin.si/" target="_blank" rel="noopener">Common Language Resources and Technology Infrastructure, Slovenia (CLARIN.SI)</a>.
+  The interactive website was developed by Nives Hüll under the supervision of Kaja Dobrovoljc Zor.
+</div>
+
+<h2 id="citation">Recommended citation</h2>
+<div class="ack" id="citation-text">
+  If you use this evaluation table, please cite:
+  <p class="citation-ref">
+    Dobrovoljc, Kaja. 2025. &ldquo;Treebanking Spoken Slovenian: New Data, Models, and Lessons Learned.&rdquo;
+    <em>Contributions to Contemporary History</em> 65(3).
+    <a href="https://doi.org/10.51663/pnz.65.3.01" target="_blank" rel="noopener">https://doi.org/10.51663/pnz.65.3.01</a>
+  </p>
+  <details class="bibtex-details">
+    <summary>BibTeX</summary>
+    <div class="bibtex-wrap">
+      <button class="action-btn bibtex-copy-btn" id="bibtex-copy-btn" title="Copy BibTeX to clipboard">&#x2398; Copy</button>
+      <pre class="bibtex" id="bibtex">@article{dobrovoljc2025treebanking,
+  author  = {Dobrovoljc, Kaja},
+  title   = {Treebanking Spoken Slovenian: New Data, Models, and Lessons Learned},
+  journal = {Contributions to Contemporary History},
+  year    = {2025},
+  volume  = {65},
+  number  = {3},
+  doi     = {10.51663/pnz.65.3.01}
+}</pre>
+    </div>
+  </details>
+</div>
+
+<div class="logos" id="logos" aria-label="Funders and infrastructure">
+  <a href="https://www.aris-rs.si/" target="_blank" rel="noopener"><img src="logos/aris.svg" alt="ARIS — Slovenian Research and Innovation Agency"></a>
+  <a href="https://www.cjvt.si/" target="_blank" rel="noopener"><img src="logos/cjvt.png" alt="CJVT UL — Centre for Language Resources and Technologies"></a>
+  <a href="https://www.clarin.si/" target="_blank" rel="noopener"><img src="logos/clarin-si.png" alt="CLARIN.SI"></a>
+</div>
+
+<script src="comparison_table_v5_data.js"></script>
+<script>
+(function () {
+  const DATA = window.TABLE_DATA_V5;
+  if (!DATA) {
+    document.body.innerHTML = '<p>Table data not available.</p>';
+    return;
+  }
+
+  const ROW_LIMIT = 20;
+
+  // ---------- state + derived selectors ----------
+  const state = { corpus: DATA.corpus_order[0], model: DATA.model_order[0] };
+
+  function corpus() { return DATA.corpora[state.corpus]; }
+  function modelKey() { return state.model; }
+  function otherKey() { return state.model === 'trankit' ? 'classla' : 'trankit'; }
+  function labelOf(k) { return DATA.models[k].label; }
+  function shortOf(k) { return DATA.models[k].short; }
+  function modelLabel() { return labelOf(modelKey()); }
+  function otherLabel() { return labelOf(otherKey()); }
+  function modelShort() { return shortOf(modelKey()); }
+  function otherShort() { return shortOf(otherKey()); }
+  function errData() { return corpus().errors[state.model]; }
+  function csvPrefix() { return state.corpus + '_' + state.model; }
+  function formatInt(v) { return Number(v).toLocaleString('en-US'); }
+
+  // ---------- generic utilities ----------
+  function downloadCSV(headers, rows, filename) {
+    const esc = function(v) { return '"' + String(v).replace(/"/g, '""') + '"'; };
+    const lines = [headers.map(esc).join(',')].concat(rows.map(function(r) { return r.map(esc).join(','); }));
+    const blob = new Blob(['﻿' + lines.join('\n')], {type: 'text/csv;charset=utf-8;'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  }
+
+  function cleanTableText(text) {
+    return String(text || '').replace(/[▲▼↕↑↓✕✖×]/g, '').replace(/\s+/g, ' ').trim();
+  }
+
+  function renderedTableHeaders(tableEl) {
+    return Array.from(tableEl.querySelectorAll('thead th')).map(function(th) {
+      const clone = th.cloneNode(true);
+      clone.querySelectorAll('.sort-ind').forEach(function(ind) { ind.remove(); });
+      return cleanTableText(clone.textContent);
+    });
+  }
+
+  function renderedTableRows(tableEl) {
+    return Array.from(tableEl.querySelectorAll('tbody tr')).filter(function(tr) {
+      return !tr.classList.contains('no-data-row');
+    }).map(function(tr) {
+      return Array.from(tr.cells).map(function(td) {
+        return cleanTableText(td.textContent);
+      });
+    });
+  }
+
+  function downloadRenderedTableCSV(tableEl, filename) {
+    downloadCSV(renderedTableHeaders(tableEl), renderedTableRows(tableEl), filename);
+  }
+
+  function markdownFromRows(headers, rows) {
+    const cell = function(v) { return String(v == null ? '' : v).replace(/\|/g, '\\|').replace(/\s+/g, ' ').trim(); };
+    const sep = headers.map(function() { return '---'; });
+    return ['| ' + headers.map(cell).join(' | ') + ' |', '| ' + sep.join(' | ') + ' |']
+      .concat(rows.map(function(row) { return '| ' + row.map(cell).join(' | ') + ' |'; }))
+      .join('\n');
+  }
+
+  function flashButton(btn, text) {
+    const orig = btn.textContent;
+    btn.textContent = text;
+    setTimeout(function() {
+      btn.textContent = orig;
+    }, 1500);
+  }
+
+  function fallbackCopyText(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try {
+      ok = document.execCommand('copy');
+    } catch (e) {
+      ok = false;
+    }
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  function copyText(text, btn) {
+    const done = function(ok) { flashButton(btn, ok ? '✓' : '!'); };
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      navigator.clipboard.writeText(text)
+        .then(function() { done(true); })
+        .catch(function() { done(fallbackCopyText(text)); });
+      return;
+    }
+    done(fallbackCopyText(text));
+  }
+
+  function copyMarkdown(tableEl, btn) {
+    const ths = renderedTableHeaders(tableEl);
+    copyText(markdownFromRows(ths, renderedTableRows(tableEl)), btn);
+  }
+
+  function plainTextFromHtml(html) {
+    const div = document.createElement('div');
+    div.innerHTML = html || '';
+    return cleanTableText(div.textContent || '');
+  }
+
+  function slugText(text) {
+    return String(text || 'examples')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 80) || 'examples';
+  }
+
+  function sortState(tableEl) {
+    if (!Array.isArray(tableEl._sortState)) tableEl._sortState = [];
+    return tableEl._sortState;
+  }
+
+  function clearSortIndicators(tableEl) {
+    tableEl._sortState = [];
+    tableEl._addSecondarySort = false;
+    tableEl.querySelectorAll('thead th').forEach(function(h) {
+      h.removeAttribute('aria-sort');
+      h.removeAttribute('data-sort-level');
+      h.removeAttribute('data-sort-adding');
+      const ind = h.querySelector('.sort-ind');
+      if (ind) ind.remove();
+      h.title = 'Click to sort; Shift+click for second sort';
+    });
+  }
+
+  function compareTableCells(a, b, colIdx) {
+    const ca = a.cells[colIdx], cb = b.cells[colIdx];
+    const ta = ca ? cleanTableText(ca.textContent) : '';
+    const tb = cb ? cleanTableText(cb.textContent) : '';
+    const na = parseFloat(ta.replace(/[^0-9.\-+]/g, ''));
+    const nb = parseFloat(tb.replace(/[^0-9.\-+]/g, ''));
+    const isNum = !isNaN(na) && !isNaN(nb);
+    return isNum ? (na - nb) : ta.localeCompare(tb);
+  }
+
+  function sortRenderedRows(tableEl) {
+    const state = sortState(tableEl);
+    if (!state.length) return;
+    const tbody = tableEl.querySelector('tbody');
+    if (!tbody) return;
+    const rows = Array.from(tbody.querySelectorAll('tr')).filter(function(r){ return !r.classList.contains('no-data-row'); });
+    rows.sort(function(a, b) {
+      for (const rule of state) {
+        const cmp = compareTableCells(a, b, rule.colIdx);
+        if (cmp !== 0) return rule.dir === 'ascending' ? cmp : -cmp;
+      }
+      return 0;
+    });
+    rows.forEach(function(r) { tbody.appendChild(r); });
+  }
+
+  function renderSortIndicators(tableEl) {
+    const state = sortState(tableEl);
+    const ths = Array.from(tableEl.querySelectorAll('thead th'));
+    for (let i = state.length - 1; i >= 0; i--) {
+      if (!ths[state[i].colIdx]) state.splice(i, 1);
+    }
+    ths.forEach(function(h) {
+      h.removeAttribute('aria-sort');
+      h.removeAttribute('data-sort-level');
+      h.removeAttribute('data-sort-adding');
+      const ind = h.querySelector('.sort-ind');
+      if (ind) ind.remove();
+      h.title = state.length
+        ? 'Click to make this the primary sort; Shift+click or +2 to add second sort'
+        : 'Click to sort; Shift+click or +2 for second sort';
+    });
+    state.forEach(function(rule, idx) {
+      const th = ths[rule.colIdx];
+      const level = idx + 1;
+      const isOnlySort = state.length === 1;
+      const isAdding = isOnlySort && tableEl._addSecondarySort;
+      th.setAttribute('data-sort-level', String(level));
+      th.setAttribute('aria-sort', rule.dir);
+      if (isAdding) th.setAttribute('data-sort-adding', 'true');
+      th.title = isAdding
+        ? 'Tap another header to add it as sort 2'
+        : (level === 1
+          ? 'Primary sort. Click to reverse; Shift+click another column or tap +2 for second sort'
+          : 'Secondary sort. Shift+click to reverse; click to make primary');
+      const ind = document.createElement('span');
+      ind.className = 'sort-ind';
+      ind.innerHTML = '<span class="sort-level">' + level + '</span>' +
+        '<span class="sort-arrow">' + (rule.dir === 'ascending' ? '↑' : '↓') + '</span>' +
+        (isOnlySort ? '<span class="sort-add" title="Add second sort" aria-label="Add second sort">+2</span>' : '') +
+        '<span class="sort-clear" title="Clear this sort" aria-label="Clear this sort">✕</span>';
+      th.appendChild(ind);
+    });
+  }
+
+  function applySortState(tableEl, restore) {
+    if (restore) restore();
+    renderSortIndicators(tableEl);
+    sortRenderedRows(tableEl);
+  }
+
+  function makeSortable(tableEl, restore) {
+    tableEl.querySelectorAll('thead th').forEach(function(th, colIdx) {
+      th.classList.add('sortable');
+      th.title = 'Click to sort; Shift+click for second sort';
+      th.addEventListener('click', function(e) {
+        const addBtn = e.target && e.target.closest ? e.target.closest('.sort-add') : null;
+        if (addBtn) {
+          e.stopPropagation();
+          const state = sortState(tableEl);
+          if (state.length === 1) {
+            tableEl._addSecondarySort = !tableEl._addSecondarySort;
+            renderSortIndicators(tableEl);
+          }
+          return;
+        }
+        const clearBtn = e.target && e.target.closest ? e.target.closest('.sort-clear') : null;
+        if (clearBtn) {
+          e.stopPropagation();
+          tableEl._addSecondarySort = false;
+          const state = sortState(tableEl);
+          const pos = state.findIndex(function(rule) { return rule.colIdx === colIdx; });
+          if (pos !== -1) state.splice(pos, 1);
+          if (!state.length) {
+            clearSortIndicators(tableEl);
+            if (restore) restore();
+          } else {
+            applySortState(tableEl, restore);
+          }
+          return;
+        }
+        const state = sortState(tableEl);
+        const pos = state.findIndex(function(rule) { return rule.colIdx === colIdx; });
+        const addSecondary = e.shiftKey || tableEl._addSecondarySort;
+        if (addSecondary) {
+          if (pos !== -1) {
+            state[pos].dir = state[pos].dir === 'ascending' ? 'descending' : 'ascending';
+          } else if (!state.length) {
+            state.push({ colIdx: colIdx, dir: 'ascending' });
+          } else {
+            if (state.length > 1) state.splice(1, 1);
+            state.push({ colIdx: colIdx, dir: 'ascending' });
+          }
+        } else if (state.length === 1 && pos === 0) {
+          state[0].dir = state[0].dir === 'ascending' ? 'descending' : 'ascending';
+        } else {
+          state.splice(0, state.length, { colIdx: colIdx, dir: pos === 0 ? (state[0].dir === 'ascending' ? 'descending' : 'ascending') : 'ascending' });
+        }
+        tableEl._addSecondarySort = false;
+        applySortState(tableEl, restore);
+      });
+    });
+    renderSortIndicators(tableEl);
+    sortRenderedRows(tableEl);
+  }
+
+  function deltaClass(v, largerBetter) {
+    if (v === 0) return 'neut';
+    return (largerBetter ? v > 0 : v < 0) ? 'pos' : 'neg';
+  }
+  function deltaText(v, digits) {
+    const s = digits != null ? v.toFixed(digits) : String(v);
+    return v > 0 ? '+' + s : s;
+  }
+  function bar(cls, v) {
+    return `<span class="bar-wrap"><span class="bar ${cls}" style="width:${Math.max(0,Math.min(100,v))}%"></span></span>`;
+  }
+
+  function renderEmptyRow(tbody, colspan, message) {
+    const tr = document.createElement('tr');
+    tr.className = 'no-data-row';
+    tr.innerHTML = `<td colspan="${colspan}">${message}</td>`;
+    tbody.appendChild(tr);
+  }
+  function setCountNote(countEl, visibleCount, totalCount) {
+    if (countEl) countEl.textContent = `Showing ${visibleCount} / ${totalCount}`;
+  }
+  function setExpandedScrollState(wrapper, expanded, totalCount) {
+    if (!wrapper) return;
+    const active = expanded && totalCount > ROW_LIMIT;
+    wrapper.classList.toggle('expanded-scroll', active);
+    wrapper.scrollTop = 0;
+  }
+
+  // ---------- MSD decoder (MULTEXT-East categories + JOS-style codes) ----------
+  function decodeMSD(tag) {
+    if (!tag || tag === '_') return tag;
+    const CAT = {
+      N:'Noun', V:'Verb', A:'Adjective', P:'Pronoun',
+      R:'Adverb', S:'Adposition', C:'Conjunction', M:'Numeral',
+      Q:'Particle', I:'Interjection', X:'Residual', Z:'Punct',
+      G:'Verb', K:'Numeral', L:'Particle', D:'Adposition', O:'Residual',
+    };
+    const GEND = {m:'masc', f:'fem', n:'neut'};
+    const NUM  = {s:'sing', d:'dual', p:'plur'};
+    const CASE = {n:'nom', g:'gen', d:'dat', a:'acc', l:'loc', i:'ins'};
+    const DEG  = {p:'pos', c:'comp', s:'sup'};
+    const cat  = tag[0].toUpperCase();
+    const f    = tag.slice(1).toLowerCase().split('');
+    const out  = [CAT[cat] || cat];
+    if (cat === 'N' || (cat === 'S' && tag.length > 3)) {
+      const TYPE = {c:'common', p:'proper', o:'common'};
+      if (f[0]) out.push(TYPE[f[0]] || f[0]);
+      if (f[1]) out.push(GEND[f[1]] || f[1]);
+      if (f[2]) out.push(NUM[f[2]]  || f[2]);
+      if (f[3]) out.push(CASE[f[3]] || f[3]);
+      if (f[4] === 'y') out.push('animate');
+    } else if (cat === 'A') {
+      const TYPE = {g:'general', s:'possessive', p:'participial'};
+      if (f[0]) out.push(TYPE[f[0]] || f[0]);
+      if (f[2]) out.push(GEND[f[2]] || f[2]);
+      if (f[3]) out.push(NUM[f[3]]  || f[3]);
+      if (f[4]) out.push(CASE[f[4]] || f[4]);
+    } else if (cat === 'R') {
+      if (f[1]) out.push(DEG[f[1]] || f[1]);
+    } else if (cat === 'V' || cat === 'G') {
+      const TYPE = {m:'main', a:'aux', c:'cop', o:'modal'};
+      const TENSE = {p:'pres', f:'fut', i:'past', s:'cond'};
+      const ASP   = {d:'perf', r:'imperf', b:'bi'};
+      if (f[0]) out.push(TYPE[f[0]]  || f[0]);
+      if (f[1]) out.push(TENSE[f[1]] || f[1]);
+      if (f[2]) out.push(ASP[f[2]]   || f[2]);
+      if (f[3] && /[123]/.test(f[3])) out.push(f[3]+'p');
+      if (f[4] && NUM[f[4]]) out.push(NUM[f[4]]);
+    } else if (cat === 'C') {
+      const TYPE = {c:'coord', s:'subord'};
+      if (f[0]) out.push(TYPE[f[0]] || f[0]);
+    } else if (cat === 'P' || cat === 'Z') {
+      if (f.length) out.push(f.slice(0,4).join('-'));
+    } else if (cat === 'M' || cat === 'K') {
+      if (f.length) out.push(f.join('-'));
+    }
+    return out.join(' · ');
+  }
+  function msdTip(pair) {
+    const parts = pair.split(' → ');
+    if (parts.length === 2) {
+      return `gold: ${decodeMSD(parts[0].trim())}\npred: ${decodeMSD(parts[1].trim())}`;
+    }
+    const sym = pair.split(' ↔ ');
+    if (sym.length === 2) {
+      return `${decodeMSD(sym[0].trim())} ↔ ${decodeMSD(sym[1].trim())}`;
+    }
+    return decodeMSD(pair);
+  }
+
+  // ---------- examples panel ----------
+  const examplesBackdrop = document.getElementById('examples-backdrop');
+  const examplesPanel = document.getElementById('examples-panel');
+  const examplesPanelTitle = document.getElementById('examples-panel-title');
+  const examplesPanelBody = document.getElementById('examples-panel-body');
+  const examplesLinkBtn = document.getElementById('examples-link-btn');
+  const examplesCsvBtn = document.getElementById('examples-csv-btn');
+  const examplesMdBtn = document.getElementById('examples-md-btn');
+  const examplesPanelClose = document.getElementById('examples-panel-close');
+  let selectedRow = null;
+  let activeTbody = null;
+  let currentExamples = [];
+  let currentExamplesTitle = 'Examples';
+  let currentExamplesContext = '';
+  // Deep-linking: which examples panel is open ({section, keys}), so it can be
+  // encoded in the URL hash and reopened on load. pendingExampleRef holds a ref
+  // parsed from the URL that should open after the next render.
+  let currentExampleRef = null;
+  let pendingExampleRef = null;
+
+  function makeExampleRef(section, keys) {
+    const cleaned = (Array.isArray(keys) ? keys : [keys]).filter(function(k) {
+      return k != null && String(k) !== '';
+    }).map(String);
+    return section && cleaned.length ? { section: section, keys: cleaned } : null;
+  }
+
+  function exampleRefKeys(ref) {
+    if (!ref) return [];
+    if (Array.isArray(ref.keys)) return ref.keys;
+    if (ref.key != null) return [ref.key];
+    return [];
+  }
+
+  function exampleRefToken(ref) {
+    const keys = exampleRefKeys(ref);
+    if (!keys.length) return '';
+    if (keys.length === 1) return encodeURIComponent(keys[0]);
+    return 'merged|' + keys.map(encodeURIComponent).join('|');
+  }
+
+  function parseExampleRef(section, token) {
+    if (!section || !token) return null;
+    if (token.indexOf('merged|') === 0) {
+      return makeExampleRef(section, token.slice('merged|'.length).split('|').map(decodeURIComponent));
+    }
+    if (token.indexOf('merged~') === 0) {
+      return makeExampleRef(section, token.slice('merged~'.length).split('~').map(decodeURIComponent));
+    }
+    return makeExampleRef(section, decodeURIComponent(token));
+  }
+
+  function findRowsByKeys(rows, keys) {
+    const byKey = new Map((rows || []).map(function(row) { return [row.key, row]; }));
+    const found = keys.map(function(k) { return byKey.get(k); });
+    return found.every(Boolean) ? found : null;
+  }
+
+  function labelFromKeyParts(key, fallback) {
+    const parts = String(key || '').split('__to__');
+    if (parts.length === 2) {
+      const sorted = parts.slice().sort();
+      return sorted[0] === sorted[1] ? sorted[0] : sorted.join(' ↔ ');
+    }
+    return fallback || String(key || '');
+  }
+
+  function tagMergedLabel(rows) {
+    if (!rows || !rows.length) return '';
+    if (rows.length === 1) return rows[0].label;
+    const pair = [rows[0].gold, rows[0].pred].sort();
+    return pair[0] === pair[1] ? pair[0] : pair.join(' ↔ ');
+  }
+
+  function mergedContextText(section, label, baseContext, keyCount) {
+    if (keyCount <= 1) return baseContext || '';
+    const mergeNote = 'Merged A↔B view: examples from both error directions.';
+    if (section === 'xpos' && baseContext) return baseContext + '\n' + mergeNote;
+    return mergeNote;
+  }
+
+  function closePanel() {
+    examplesPanel.classList.add('hidden');
+    examplesBackdrop.classList.add('hidden');
+    document.body.classList.remove('examples-open');
+    if (selectedRow) selectedRow.classList.remove('selected-row');
+    selectedRow = null;
+    currentExampleRef = null;
+    if (typeof writeHash === 'function') writeHash();
+  }
+  examplesPanelClose.addEventListener('click', closePanel);
+  examplesBackdrop.addEventListener('click', closePanel);
+
+  function exampleExportHeaders() {
+    return ['Model', 'Corpus', 'Run', 'Pattern', 'Context', 'sid', 'token_id', 'token', 'gold', 'pred', 'sentence'];
+  }
+
+  function exampleExportRows() {
+    const c = corpus();
+    const pattern = currentExamplesTitle.replace(/\s*\(\d+ examples\)\s*$/, '');
+    return (currentExamples || []).map(function(item) {
+      return [
+        modelLabel(),
+        c.label,
+        c.run_id,
+        pattern,
+        currentExamplesContext,
+        item.sid,
+        item.token_id,
+        item.token,
+        item.gold,
+        item.pred,
+        plainTextFromHtml(item.sentence_html),
+      ];
+    });
+  }
+
+  function setExampleExportState() {
+    const disabled = !currentExamples || currentExamples.length === 0;
+    examplesLinkBtn.disabled = !currentExampleRef;
+    examplesCsvBtn.disabled = disabled;
+    examplesMdBtn.disabled = disabled;
+  }
+
+  examplesLinkBtn.addEventListener('click', function() {
+    if (!currentExampleRef) return;
+    writeHash();
+    copyText(location.href, examplesLinkBtn);
+  });
+
+  examplesCsvBtn.addEventListener('click', function() {
+    if (!currentExamples.length) return;
+    downloadCSV(
+      exampleExportHeaders(),
+      exampleExportRows(),
+      csvPrefix() + '_' + slugText(currentExamplesTitle) + '_examples.csv'
+    );
+  });
+  examplesMdBtn.addEventListener('click', function() {
+    if (!currentExamples.length) return;
+    copyText(markdownFromRows(exampleExportHeaders(), exampleExportRows()), examplesMdBtn);
+  });
+  setExampleExportState();
+
+  function selectRow(tr, tbody) {
+    if (selectedRow) selectedRow.classList.remove('selected-row');
+    selectedRow = tr;
+    tr.classList.add('selected-row');
+    if (tbody) activeTbody = tbody;
+    tr.addEventListener('dblclick', closePanel, { once: true });
+  }
+
+  function wireClickableRow(tr, tbody, onActivate, ariaLabel) {
+    tr.classList.add('clickable-row');
+    tr.tabIndex = 0;
+    if (ariaLabel) tr.setAttribute('aria-label', ariaLabel);
+    tr.addEventListener('focus', function() { activeTbody = tbody; });
+    tr.addEventListener('click', function() { activeTbody = tbody; onActivate(); });
+    tr.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        activeTbody = tbody;
+        onActivate();
+      }
+    });
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      if (!examplesPanel.classList.contains('hidden')) { closePanel(); e.preventDefault(); }
+      return;
+    }
+    if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && activeTbody) {
+      const target = e.target;
+      if (target && target.closest && target.closest('input, textarea, select, button, a') && !target.closest('tr.clickable-row')) {
+        return;
+      }
+      const rows = Array.from(activeTbody.querySelectorAll('tr.clickable-row'));
+      if (!rows.length) return;
+      const focusedRow = document.activeElement && document.activeElement.closest
+        ? document.activeElement.closest('tr.clickable-row') : null;
+      const currentRow = selectedRow && rows.includes(selectedRow)
+        ? selectedRow
+        : (focusedRow && rows.includes(focusedRow) ? focusedRow : null);
+      if (!currentRow && focusedRow == null && document.activeElement && document.activeElement !== document.body && document.activeElement !== document.documentElement) {
+        return;
+      }
+      const idx = currentRow ? rows.indexOf(currentRow) : -1;
+      const next = e.key === 'ArrowDown' ? Math.min(idx + 1, rows.length - 1) : Math.max(idx - 1, 0);
+      if (next !== idx) {
+        rows[next].focus({ preventScroll: true });
+        rows[next].click();
+        rows[next].scrollIntoView({ block: 'nearest' });
+        e.preventDefault();
+      }
+    }
+  });
+
+  function renderExamples(items, titleText, contextText) {
+    currentExamples = items || [];
+    currentExamplesTitle = titleText || 'Examples';
+    currentExamplesContext = contextText || '';
+    setExampleExportState();
+    examplesPanelTitle.textContent = currentExamplesTitle;
+    examplesPanelBody.innerHTML = '';
+    if (contextText) {
+      const meta = document.createElement('div');
+      meta.className = 'examples-context';
+      meta.textContent = contextText;
+      examplesPanelBody.appendChild(meta);
+    }
+    if (!currentExamples || currentExamples.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'note';
+      p.style.margin = '4px 0';
+      p.textContent = 'No examples stored.';
+      examplesPanelBody.appendChild(p);
+    } else {
+      for (const item of currentExamples) {
+        const div = document.createElement('div');
+        div.className = 'example-item';
+        div.innerHTML = `
+          <div class="example-meta">sid=${item.sid} &middot; token=${item.token}#${item.token_id} &middot; gold=${item.gold} &middot; pred=${item.pred}</div>
+          <div class="example-sentence">${item.sentence_html}</div>
+        `;
+        examplesPanelBody.appendChild(div);
+      }
+    }
+    examplesBackdrop.classList.remove('hidden');
+    examplesPanel.classList.remove('hidden');
+    document.body.classList.add('examples-open');
+    examplesPanelBody.scrollTop = 0;
+  }
+
+  // ---------- section controllers ----------
+  const controllers = [];
+
+  function syncFilterReset(input) {
+    if (input && input._resetFilterBtn) {
+      input._resetFilterBtn.hidden = input.value.trim() === '';
+    }
+  }
+
+  function wireFilterReset(input, onClear) {
+    if (!input || input._resetFilterBtn) return;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'filter-clear';
+    btn.innerHTML = '&times;';
+    btn.title = 'Clear filter';
+    btn.setAttribute('aria-label', 'Clear filter');
+    btn.hidden = true;
+    const field = input.closest('.filter-field');
+    if (field) field.appendChild(btn);
+    input._resetFilterBtn = btn;
+    input.addEventListener('input', function() { syncFilterReset(input); });
+    btn.addEventListener('click', function() {
+      if (input.value.trim() === '') return;
+      input.value = '';
+      syncFilterReset(input);
+      onClear();
+      input.focus();
+    });
+    syncFilterReset(input);
+  }
+
+  // Accuracy tables (LAS-by-relation, UPOS accuracy).
+  // Default: single model (Tag | Gold | metric). Optional "Compare with <other>"
+  // reveals the other model's column + diff.
+  function makeAccTable(cfg) {
+    const tbody = document.getElementById(cfg.tbodyId);
+    const countNote = document.getElementById(cfg.countNoteId);
+    const toggle = document.getElementById(cfg.toggleId);
+    const filterInput = document.getElementById(cfg.filterInputId);
+    const noteEl = document.getElementById(cfg.noteId);
+    const compareBtn = document.getElementById(cfg.compareBtnId);
+    const tableWrap = tbody.closest('.table-wrap');
+    const tableEl = tbody.closest('table');
+    const theadRow = tableEl.querySelector('thead tr');
+    let expanded = false;
+    let compare = false;
+
+    function render() {
+      const mk = modelKey(), ok = otherKey();
+      const rows = cfg.rows();
+      const q = filterInput ? filterInput.value.trim().toLowerCase() : '';
+      const filtered = q ? rows.filter(r => r.tag.toLowerCase().includes(q)) : rows;
+      const sorted = filtered.slice().sort((a, b) =>
+        (b[mk] - a[mk]) || (b[ok] - a[ok]) || (b.count - a.count) || a.tag.localeCompare(b.tag));
+
+      // Header row (rebuilt fresh, so sort listeners do not accumulate).
+      if (compare) {
+        theadRow.innerHTML =
+          `<th>${cfg.tagHeader}</th><th class="right">Gold count</th>` +
+          `<th class="right">${modelShort()}${cfg.headerSuffix}</th>` +
+          `<th class="right">${otherShort()}${cfg.headerSuffix}</th>` +
+          `<th class="right">Diff</th>`;
+      } else {
+        theadRow.innerHTML =
+          `<th>${cfg.tagHeader}</th><th class="right">Gold count</th><th class="right">${cfg.shortMetric}</th>`;
+      }
+      noteEl.innerHTML = compare
+        ? `${cfg.subtitle} <em>Comparison shown: difference = ${modelLabel()} &minus; ${otherLabel()}.</em>`
+        : cfg.subtitle;
+      compareBtn.textContent = compare ? 'Hide comparison' : `Compare with ${otherShort()}`;
+      compareBtn.classList.toggle('active', compare);
+
+      tbody.innerHTML = '';
+      const colspan = compare ? 5 : 3;
+      const visible = expanded ? sorted : sorted.slice(0, ROW_LIMIT);
+      if (!sorted.length) {
+        renderEmptyRow(tbody, colspan, 'No matching rows.');
+      } else {
+        for (const row of visible) {
+          const mv = row[mk];
+          const tr = document.createElement('tr');
+          if (compare) {
+            const ov = row[ok], diff = mv - ov;
+            if (diff > 0) tr.classList.add('model-better');
+            else if (diff < 0) tr.classList.add('other-better');
+            tr.innerHTML =
+              `<td class="label">${row.tag}</td>` +
+              `<td class="right">${row.count}</td>` +
+              `<td class="right">${mv.toFixed(2)} ${bar('bar-model', mv)}</td>` +
+              `<td class="right">${ov.toFixed(2)} ${bar('bar-other', ov)}</td>` +
+              `<td class="right ${deltaClass(diff, true)}">${deltaText(diff, 2)}</td>`;
+          } else {
+            tr.innerHTML =
+              `<td class="label">${row.tag}</td>` +
+              `<td class="right">${row.count}</td>` +
+              `<td class="right">${mv.toFixed(2)} ${bar('bar-model', mv)}</td>`;
+          }
+          tbody.appendChild(tr);
+        }
+      }
+      makeSortable(tableEl, render);
+      setCountNote(countNote, visible.length, sorted.length);
+      setExpandedScrollState(tableWrap, expanded, sorted.length);
+      if (sorted.length <= ROW_LIMIT) { toggle.hidden = true; }
+      else { toggle.hidden = false; toggle.textContent = expanded ? 'Show less' : 'Show more'; }
+    }
+
+    if (filterInput) {
+      filterInput.addEventListener('input', () => { expanded = false; render(); });
+      wireFilterReset(filterInput, () => { expanded = false; render(); });
+    }
+    toggle.addEventListener('click', () => { expanded = !expanded; render(); });
+    compareBtn.addEventListener('click', () => { compare = !compare; expanded = false; render(); });
+    document.getElementById(cfg.csvBtnId).addEventListener('click', function() {
+      downloadRenderedTableCSV(tableEl, csvPrefix() + cfg.csvSuffix);
+    });
+    document.getElementById(cfg.mdBtnId).addEventListener('click', function() { copyMarkdown(tableEl, this); });
+
+    controllers.push({
+      render,
+      reset() {
+        expanded = false;
+        compare = false;
+        if (filterInput) {
+          filterInput.value = '';
+          syncFilterReset(filterInput);
+        }
+      },
+    });
+  }
+
+  makeAccTable({
+    tbodyId: 'rel-table', countNoteId: 'rel-count-note', toggleId: 'rel-toggle',
+    filterInputId: 'rel-filter', noteId: 'rel-note', compareBtnId: 'rel-compare-btn',
+    tagHeader: 'Relation', shortMetric: 'LAS', headerSuffix: ' LAS',
+    metricWord: 'LAS', metricWordCap: 'LAS',
+    subtitle: 'For each UD dependency relation, LAS shows the percentage of tokens for which the tool predicted both the correct syntactic head and the correct dependency relation. The table is sorted by the number of examples in the manually annotated test set.',
+    csvBtnId: 'rel-csv-btn', mdBtnId: 'rel-md-btn', csvSuffix: '_las-by-relation.csv',
+    rows: () => corpus().deprel_accuracy_rows,
+  });
+  makeAccTable({
+    tbodyId: 'upos-acc-table', countNoteId: 'upos-acc-count-note', toggleId: 'upos-acc-toggle',
+    filterInputId: 'upos-acc-filter', noteId: 'upos-acc-note', compareBtnId: 'upos-acc-compare-btn',
+    tagHeader: 'UPOS', shortMetric: 'Accuracy', headerSuffix: '',
+    metricWord: 'accuracy', metricWordCap: 'Accuracy',
+    subtitle: 'For each universal part-of-speech tag (UPOS), Accuracy shows the percentage of tokens for which the tool predicted the correct part-of-speech tag. The table is sorted by the number of examples in the manually annotated test set.',
+    csvBtnId: 'upos-acc-csv-btn', mdBtnId: 'upos-acc-md-btn', csvSuffix: '_upos-accuracy.csv',
+    rows: () => corpus().upos_accuracy_rows,
+  });
+
+  // Deprel error buckets (built once; read from current model at render time)
+  const bucketTitles = {
+    head_only: 'A. Correct relation, wrong syntactic head',
+    both_wrong: 'B. Wrong relation and wrong syntactic head',
+    rel_only: 'C. Correct syntactic head, wrong relation',
+  };
+  const deprelFilter = document.getElementById('deprel-err-filter');
+  const deprelSections = document.getElementById('deprel-error-sections');
+  const deprelControllers = [];
+
+  function makeDeprelBucket(bucket) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'deprel-bucket';
+
+    const bucketHeader = document.createElement('div');
+    bucketHeader.className = 'bucket-header';
+    const heading = document.createElement('h3');
+    heading.textContent = bucketTitles[bucket];
+    bucketHeader.appendChild(heading);
+    const actionBtns = document.createElement('div');
+    actionBtns.className = 'action-btns';
+    let mergeBtn = null;
+    if (bucket !== 'head_only') {
+      mergeBtn = document.createElement('button');
+      mergeBtn.type = 'button';
+      mergeBtn.className = 'toggle-btn';
+      mergeBtn.textContent = 'Merge (A⇔B)';
+      actionBtns.appendChild(mergeBtn);
+    }
+    const csvBtn = document.createElement('button');
+    csvBtn.className = 'action-btn'; csvBtn.title = 'Export visible rows as CSV'; csvBtn.textContent = '↓ CSV';
+    const mdBtn = document.createElement('button');
+    mdBtn.className = 'action-btn'; mdBtn.title = 'Copy visible rows as Markdown'; mdBtn.textContent = '⎘ MD';
+    actionBtns.appendChild(csvBtn);
+    actionBtns.appendChild(mdBtn);
+    bucketHeader.appendChild(actionBtns);
+    wrapper.appendChild(bucketHeader);
+
+    const countBar = document.createElement('div');
+    countBar.className = 'toolbar';
+    const countMeta = document.createElement('div');
+    countMeta.className = 'count-meta';
+    const countNote = document.createElement('div');
+    countNote.className = 'note';
+    countMeta.appendChild(countNote);
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'inline-toggle';
+    toggle.hidden = true;
+    countMeta.appendChild(toggle);
+    countBar.appendChild(countMeta);
+    wrapper.appendChild(countBar);
+
+    const tableWrap = document.createElement('div');
+    tableWrap.className = 'table-wrap';
+    const table = document.createElement('table');
+    table.innerHTML = `<thead><tr><th>Error pair</th><th class="right">Error count</th></tr></thead><tbody></tbody>`;
+    const tbody = table.querySelector('tbody');
+    tableWrap.appendChild(table);
+    wrapper.appendChild(tableWrap);
+    deprelSections.appendChild(wrapper);
+    makeSortable(table, render);
+
+    let expanded = false;
+    let merged = false;
+
+    function computeRows() {
+      const rows = errData().deprel_error_rows[bucket] || [];
+      const q = deprelFilter ? deprelFilter.value.trim().toLowerCase() : '';
+      if (!merged) {
+        return q ? rows.filter(r => r.label.toLowerCase().includes(q)) : rows;
+      }
+      const map = new Map();
+      for (const row of rows) {
+        const parts = row.key.split('__to__');
+        const k = parts.length === 2 ? parts.slice().sort().join('__sym__') : row.key;
+        const ex = map.get(k);
+        if (ex) { ex.count += row.count; ex.keys.push(row.key); }
+        else {
+          const sorted = parts.slice().sort();
+          const label = parts.length === 2
+            ? (sorted[0] === sorted[1] ? row.label : sorted.join(' ↔ '))
+            : row.label;
+          map.set(k, { key: k, label, count: row.count, keys: [row.key] });
+        }
+      }
+      const mergedRows = Array.from(map.values()).sort((a, b) => b.count - a.count);
+      return q ? mergedRows.filter(r => r.label.toLowerCase().includes(q)) : mergedRows;
+    }
+
+    function render() {
+      const displayRows = computeRows();
+      tbody.innerHTML = '';
+      const visible = expanded ? displayRows : displayRows.slice(0, ROW_LIMIT);
+      if (!displayRows.length) {
+        renderEmptyRow(tbody, 2, 'No matching rows.');
+      } else {
+        for (const row of visible) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td class="label">${row.label}</td><td class="right">${row.count}</td>`;
+          wireClickableRow(tr, tbody, function() {
+            selectRow(tr, tbody);
+            let exs = [];
+            for (const k of (row.keys || [row.key])) {
+              exs = exs.concat((errData().deprel_examples[bucket] || {})[k] || []);
+            }
+            const keys = row.keys || [row.key];
+            currentExampleRef = makeExampleRef('deprel-' + bucket, keys);
+            const contextText = mergedContextText('deprel-' + bucket, row.label, '', keys.length);
+            renderExamples(exs, `${modelShort()} · ${bucketTitles[bucket]} · ${row.label} (${exs.length} examples)`, contextText);
+            writeHash();
+          }, `Show examples for ${row.label}`);
+          tbody.appendChild(tr);
+        }
+      }
+      renderSortIndicators(table);
+      sortRenderedRows(table);
+      setCountNote(countNote, visible.length, displayRows.length);
+      setExpandedScrollState(tableWrap, expanded, displayRows.length);
+      if (displayRows.length <= ROW_LIMIT) { toggle.hidden = true; }
+      else { toggle.hidden = false; toggle.textContent = expanded ? 'Show less' : 'Show more'; }
+    }
+
+    toggle.addEventListener('click', function() { expanded = !expanded; render(); });
+    csvBtn.addEventListener('click', function() {
+      downloadRenderedTableCSV(table, csvPrefix() + '_deprel-errors-' + bucket + '.csv');
+    });
+    mdBtn.addEventListener('click', function() { copyMarkdown(table, mdBtn); });
+    if (mergeBtn) {
+      mergeBtn.addEventListener('click', function() {
+        merged = !merged;
+        expanded = false;
+        mergeBtn.classList.toggle('active', merged);
+        mergeBtn.textContent = merged ? 'Show (A→B)' : 'Merge (A⇔B)';
+        render();
+      });
+    }
+
+    const ctrl = {
+      render,
+      onFilter() { expanded = false; render(); },
+      reset() {
+        expanded = false; merged = false;
+        if (mergeBtn) { mergeBtn.classList.remove('active'); mergeBtn.textContent = 'Merge (A⇔B)'; }
+      },
+    };
+    controllers.push(ctrl);
+    deprelControllers.push(ctrl);
+  }
+
+  for (const bucket of ['head_only', 'both_wrong', 'rel_only']) makeDeprelBucket(bucket);
+
+  if (deprelFilter) {
+    deprelFilter.addEventListener('input', function() {
+      for (const c of deprelControllers) c.onFilter();
+    });
+    wireFilterReset(deprelFilter, function() {
+      for (const c of deprelControllers) c.onFilter();
+    });
+  }
+
+  // Tag error tables (UPOS / XPOS / lemma)
+  function makeTagErrTable(cfg) {
+    const layer = cfg.layer;
+    const tbody = document.getElementById(cfg.tbodyId);
+    const countNote = document.getElementById(cfg.countNoteId);
+    const toggle = document.getElementById(cfg.toggleId);
+    const mergeBtn = document.getElementById(cfg.mergeBtnId);
+    const filterInput = document.getElementById(cfg.filterInputId);
+    const tableWrap = tbody.closest('.table-wrap');
+    const tableEl = tbody.closest('table');
+    let expanded = false;
+    let merged = false;
+
+    function computeRows() {
+      const base = errData().tag_error_rows[layer] || [];
+      const q = filterInput ? filterInput.value.trim().toLowerCase() : '';
+      if (!merged) {
+        return q ? base.filter(r => r.label.toLowerCase().includes(q)) : base;
+      }
+      const map = new Map();
+      for (const row of base) {
+        const k = [row.gold, row.pred].sort().join('__sym__');
+        const ex = map.get(k);
+        if (ex) { ex.count += row.count; ex.keys.push(row.key); }
+        else {
+          const pair = [row.gold, row.pred].sort();
+          map.set(k, { key: k, label: pair[0] === pair[1] ? pair[0] : `${pair[0]} ↔ ${pair[1]}`, gold: pair[0], pred: pair[1], count: row.count, keys: [row.key] });
+        }
+      }
+      const mergedRows = Array.from(map.values()).sort((a, b) => b.count - a.count);
+      return q ? mergedRows.filter(r => r.label.toLowerCase().includes(q)) : mergedRows;
+    }
+
+    function render() {
+      const displayRows = computeRows();
+      tbody.innerHTML = '';
+      const visible = expanded ? displayRows : displayRows.slice(0, ROW_LIMIT);
+      if (!displayRows.length) {
+        renderEmptyRow(tbody, 2, 'No matching rows.');
+      } else {
+        for (const row of visible) {
+          const tr = document.createElement('tr');
+          const labelCell = document.createElement('td');
+          labelCell.className = 'label';
+          labelCell.textContent = row.label;
+          let contextText = null;
+          if (layer === 'xpos') {
+            contextText = msdTip(row.label);
+            labelCell.classList.add('has-tip');
+            labelCell.setAttribute('data-tip', contextText);
+          }
+          const countCell = document.createElement('td');
+          countCell.className = 'right';
+          countCell.textContent = row.count;
+          tr.appendChild(labelCell);
+          tr.appendChild(countCell);
+          wireClickableRow(tr, tbody, function() {
+            selectRow(tr, tbody);
+            let exs = [];
+            for (const k of (row.keys || [row.key])) {
+              exs = exs.concat((errData().tag_examples[layer] || {})[k] || []);
+            }
+            const keys = row.keys || [row.key];
+            currentExampleRef = makeExampleRef(layer, keys);
+            contextText = mergedContextText(layer, row.label, contextText, keys.length);
+            renderExamples(exs, `${modelShort()} · ${layer.toUpperCase()} · ${row.label} (${exs.length} examples)`, contextText);
+            writeHash();
+          }, `Show examples for ${row.label}`);
+          tbody.appendChild(tr);
+        }
+      }
+      renderSortIndicators(tableEl);
+      sortRenderedRows(tableEl);
+      setCountNote(countNote, visible.length, displayRows.length);
+      setExpandedScrollState(tableWrap, expanded, displayRows.length);
+      if (displayRows.length <= ROW_LIMIT) { toggle.hidden = true; }
+      else { toggle.hidden = false; toggle.textContent = expanded ? 'Show less' : 'Show more'; }
+    }
+
+    mergeBtn.addEventListener('click', function() {
+      merged = !merged;
+      expanded = false;
+      mergeBtn.classList.toggle('active', merged);
+      mergeBtn.textContent = merged ? 'Show (A→B)' : 'Merge (A↔B)';
+      render();
+    });
+    toggle.addEventListener('click', () => { expanded = !expanded; render(); });
+    if (filterInput) {
+      filterInput.addEventListener('input', () => { expanded = false; render(); });
+      wireFilterReset(filterInput, () => { expanded = false; render(); });
+    }
+    makeSortable(tableEl, render);
+    const csvBtn = document.getElementById(cfg.csvBtnId);
+    const mdBtn = document.getElementById(cfg.mdBtnId);
+    if (csvBtn) csvBtn.addEventListener('click', function() {
+      downloadRenderedTableCSV(tableEl, csvPrefix() + '_' + layer + '-errors.csv');
+    });
+    if (mdBtn) mdBtn.addEventListener('click', function() { copyMarkdown(tableEl, mdBtn); });
+
+    controllers.push({
+      render,
+      reset() {
+        expanded = false; merged = false;
+        mergeBtn.classList.remove('active');
+        mergeBtn.textContent = 'Merge (A↔B)';
+        if (filterInput) {
+          filterInput.value = '';
+          syncFilterReset(filterInput);
+        }
+      },
+    });
+  }
+
+  makeTagErrTable({ layer: 'upos', tbodyId: 'upos-err-table', countNoteId: 'upos-err-count-note', toggleId: 'upos-err-toggle', mergeBtnId: 'upos-merge-btn', filterInputId: 'upos-err-filter', csvBtnId: 'upos-err-csv-btn', mdBtnId: 'upos-err-md-btn' });
+  makeTagErrTable({ layer: 'xpos', tbodyId: 'xpos-err-table', countNoteId: 'xpos-err-count-note', toggleId: 'xpos-err-toggle', mergeBtnId: 'xpos-merge-btn', filterInputId: 'xpos-err-filter', csvBtnId: 'xpos-err-csv-btn', mdBtnId: 'xpos-err-md-btn' });
+  makeTagErrTable({ layer: 'lemma', tbodyId: 'lemma-err-table', countNoteId: 'lemma-err-count-note', toggleId: 'lemma-err-toggle', mergeBtnId: 'lemma-merge-btn', filterInputId: 'lemma-err-filter', csvBtnId: 'lemma-err-csv-btn', mdBtnId: 'lemma-err-md-btn' });
+
+  // ---------- chrome (title, overview, provenance, names) ----------
+  const metricsOrder = [
+    ['Lemma', 'lemma', 'Lemmatisation'],
+    ['UPOS', 'upos', 'Part-of-speech tag'],
+    ['XPOS', 'xpos', 'MULTEXT-East morphosyntactic tag'],
+    ['UAS', 'uas', 'Unlabelled attachment score'],
+    ['LAS', 'las', 'Labelled attachment score'],
+  ];
+
+  function updateNames() {
+    document.querySelectorAll('.model-name').forEach(el => { el.textContent = modelLabel(); });
+  }
+
+  function provenanceHtml(c) {
+    const p = c.provenance || {};
+    const tool = (p.models && p.models[modelKey()]) ? p.models[modelKey()] : '';
+    const data = p.data || c.provenance_html || '';
+    const size = `${formatInt(c.gold_sentences)} sentences &middot; ${formatInt(c.compared_tokens)} tokens`;
+    const setup = 'Predictions were run on pre-tokenised text, with gold sentence and token boundaries supplied.';
+    const lines = [];
+    if (tool) lines.push(`<div class="provenance-line"><strong>Selected tool:</strong> ${tool}</div>`);
+    if (data) lines.push(`<div class="provenance-line"><strong>Test set:</strong> ${data}</div>`);
+    lines.push(`<div class="provenance-line"><strong>Size:</strong> ${size}</div>`);
+    lines.push(`<div class="provenance-line"><strong>Evaluation setup:</strong> ${setup} <span style="color:#666666">(run <code>${c.run_id}</code>)</span></div>`);
+    return lines.join('');
+  }
+
+  function updateChrome() {
+    // Title and subtitle are static (set in the HTML); only the Details box
+    // changes with the selected tool / test set.
+    const c = corpus();
+    document.getElementById('provenance').innerHTML = provenanceHtml(c);
+  }
+
+  function renderOverview() {
+    const m = corpus().metrics[modelKey()];
+    const overview = document.getElementById('overview');
+    overview.innerHTML = '';
+    for (const [label, key, desc] of metricsOrder) {
+      const val = m[key];
+      const box = document.createElement('div');
+      box.className = 'metric-box' + (label === 'LAS' ? ' highlight' : '');
+      box.innerHTML = `<div class="label">${label}</div><div class="val">${val != null ? val.toFixed(2) : '—'}</div><div class="sub">${desc}</div>`;
+      overview.appendChild(box);
+    }
+  }
+
+  // ---------- recommended citation: copy BibTeX ----------
+  const bibtexCopyBtn = document.getElementById('bibtex-copy-btn');
+  if (bibtexCopyBtn) {
+    bibtexCopyBtn.addEventListener('click', function() {
+      const bib = document.getElementById('bibtex');
+      if (bib) copyText(bib.textContent, bibtexCopyBtn);
+    });
+  }
+
+  // ---------- selectors + hash routing ----------
+  function buildSeg(containerId, order, labelFn, onPick) {
+    const c = document.getElementById(containerId);
+    c.innerHTML = '';
+    for (const key of order) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'seg-btn';
+      b.dataset.key = key;
+      b.textContent = labelFn(key);
+      b.addEventListener('click', function() { onPick(key); });
+      c.appendChild(b);
+    }
+  }
+  function refreshSeg(containerId, current) {
+    document.querySelectorAll('#' + containerId + ' .seg-btn').forEach(function(b) {
+      const on = b.dataset.key === current;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+  const dropdowns = {};
+
+  function buildDropdown(containerId, order, labelFn, onPick) {
+    const root = document.getElementById(containerId);
+    const button = document.createElement('button');
+    const menu = document.createElement('div');
+    const menuId = containerId + '-menu';
+    const instance = { root, button, menu, order, labelFn, onPick, current: order[0], activeIndex: 0, options: [] };
+
+    root.innerHTML = '';
+    button.type = 'button';
+    button.className = 'testset-button';
+    button.id = containerId + '-button';
+    button.setAttribute('aria-haspopup', 'listbox');
+    button.setAttribute('aria-expanded', 'false');
+    button.setAttribute('aria-labelledby', 'corpus-label ' + button.id);
+    button.setAttribute('aria-controls', menuId);
+
+    menu.className = 'testset-menu';
+    menu.id = menuId;
+    menu.setAttribute('role', 'listbox');
+    menu.setAttribute('aria-labelledby', 'corpus-label');
+
+    function setActive(index) {
+      instance.activeIndex = Math.max(0, Math.min(index, instance.options.length - 1));
+      instance.options.forEach(function(opt, i) {
+        opt.classList.toggle('active', i === instance.activeIndex);
+      });
+      const active = instance.options[instance.activeIndex];
+      if (active) active.scrollIntoView({ block: 'nearest' });
+    }
+
+    function setOpen(open) {
+      root.classList.toggle('open', open);
+      button.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (open) setActive(order.indexOf(instance.current));
+    }
+
+    function choose(key) {
+      setOpen(false);
+      onPick(key);
+      button.focus();
+    }
+
+    for (const key of order) {
+      const opt = document.createElement('button');
+      opt.type = 'button';
+      opt.className = 'testset-option';
+      opt.dataset.key = key;
+      opt.setAttribute('role', 'option');
+      opt.textContent = labelFn(key);
+      opt.addEventListener('click', function() { choose(key); });
+      opt.addEventListener('mouseenter', function() { setActive(order.indexOf(key)); });
+      menu.appendChild(opt);
+      instance.options.push(opt);
+    }
+
+    button.addEventListener('click', function() {
+      setOpen(button.getAttribute('aria-expanded') !== 'true');
+    });
+    button.addEventListener('keydown', function(e) {
+      if (['Enter', ' ', 'ArrowDown', 'ArrowUp'].includes(e.key)) {
+        e.preventDefault();
+        setOpen(true);
+        setActive(e.key === 'ArrowUp' ? order.length - 1 : order.indexOf(instance.current));
+        const active = instance.options[instance.activeIndex];
+        if (active) active.focus();
+      }
+    });
+    menu.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setOpen(false);
+        button.focus();
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setActive(instance.activeIndex + 1);
+        instance.options[instance.activeIndex].focus();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActive(instance.activeIndex - 1);
+        instance.options[instance.activeIndex].focus();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        setActive(0);
+        instance.options[0].focus();
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        setActive(order.length - 1);
+        instance.options[instance.activeIndex].focus();
+      } else if (['Enter', ' '].includes(e.key)) {
+        e.preventDefault();
+        choose(instance.options[instance.activeIndex].dataset.key);
+      } else if (e.key === 'Tab') {
+        setOpen(false);
+      }
+    });
+    document.addEventListener('click', function(e) {
+      if (!root.contains(e.target)) setOpen(false);
+    });
+
+    root.append(button, menu);
+    dropdowns[containerId] = instance;
+    refreshDropdown(containerId, order[0]);
+  }
+  function refreshDropdown(containerId, current) {
+    const instance = dropdowns[containerId];
+    if (!instance) return;
+    instance.current = current;
+    instance.button.textContent = instance.labelFn(current);
+    instance.options.forEach(function(opt, i) {
+      const selected = opt.dataset.key === current;
+      opt.classList.toggle('selected', selected);
+      opt.setAttribute('aria-selected', selected ? 'true' : 'false');
+      if (selected) instance.activeIndex = i;
+    });
+  }
+
+  buildSeg('seg-model', DATA.model_order, k => labelOf(k), function(k) {
+    if (k === state.model) return;
+    state.model = k; renderAll();
+  });
+  buildDropdown('corpus-select', DATA.corpus_order, function(k) {
+    const c = DATA.corpora[k];
+    return c.domain ? `${c.label} · ${c.domain}` : c.label;
+  }, function(k) {
+    if (k === state.corpus) return;
+    state.corpus = k; renderAll();
+  });
+
+  // Open an examples panel from a {section, keys} reference (used for deep links).
+  // section is a tag layer ('upos'/'xpos'/'lemma') or 'deprel-<bucket>'. Returns
+  // false if any key is unknown for the current tool/test set.
+  function showExamplesForRef(refOrSection, key) {
+    const ref = typeof refOrSection === 'object'
+      ? makeExampleRef(refOrSection.section, exampleRefKeys(refOrSection))
+      : makeExampleRef(refOrSection, key);
+    if (!ref) return false;
+    const section = ref.section;
+    const keys = exampleRefKeys(ref);
+    const ed = errData();
+    let items, title, context = null;
+    if (section.indexOf('deprel-') === 0) {
+      const bucket = section.slice('deprel-'.length);
+      const rows = (ed.deprel_error_rows && ed.deprel_error_rows[bucket]) || [];
+      const matched = findRowsByKeys(rows, keys);
+      if (!matched) return false;
+      items = [];
+      for (const k of keys) items = items.concat((ed.deprel_examples[bucket] || {})[k] || []);
+      const label = keys.length === 1 ? matched[0].label : labelFromKeyParts(keys[0], matched[0].label);
+      context = mergedContextText(section, label, '', keys.length);
+      title = `${modelShort()} · ${bucketTitles[bucket]} · ${label} (${items.length} examples)`;
+    } else {
+      const layer = section;
+      const rows = (ed.tag_error_rows && ed.tag_error_rows[layer]) || [];
+      const matched = findRowsByKeys(rows, keys);
+      if (!matched) return false;
+      items = [];
+      for (const k of keys) items = items.concat((ed.tag_examples[layer] || {})[k] || []);
+      const label = tagMergedLabel(matched);
+      if (layer === 'xpos') context = msdTip(label);
+      context = mergedContextText(layer, label, context, keys.length);
+      title = `${modelShort()} · ${layer.toUpperCase()} · ${label} (${items.length} examples)`;
+    }
+    currentExampleRef = ref;
+    renderExamples(items, title, context);
+    writeHash();
+    return true;
+  }
+
+  function writeHash() {
+    let h = `#${state.model}/${state.corpus}`;
+    if (currentExampleRef) {
+      const token = exampleRefToken(currentExampleRef);
+      if (token) h += `/${currentExampleRef.section}/${token}`;
+    }
+    if (location.hash !== h) history.replaceState(null, '', h);
+  }
+  function applyHash() {
+    const m = (location.hash || '').replace(/^#/, '').split('/');
+    if (m.length >= 2) {
+      if (DATA.model_order.includes(m[0])) state.model = m[0];
+      if (DATA.corpus_order.includes(m[1])) state.corpus = m[1];
+    }
+    pendingExampleRef = (m.length >= 4 && m[2] && m[3])
+      ? parseExampleRef(m[2], m[3])
+      : null;
+  }
+  window.addEventListener('hashchange', function() {
+    const prev = state.model + '/' + state.corpus;
+    applyHash();
+    if (state.model + '/' + state.corpus !== prev) {
+      renderAll();
+    } else if (pendingExampleRef) {
+      if (!showExamplesForRef(pendingExampleRef)) {
+        currentExampleRef = null;
+        writeHash();
+      }
+      pendingExampleRef = null;
+    } else {
+      closePanel();
+    }
+  });
+
+  // ---------- master render ----------
+  function renderAll() {
+    closePanel();
+    updateNames();
+    updateChrome();
+    renderOverview();
+    refreshSeg('seg-model', state.model);
+    refreshDropdown('corpus-select', state.corpus);
+    if (deprelFilter) {
+      deprelFilter.value = '';
+      syncFilterReset(deprelFilter);
+    }
+    for (const ctrl of controllers) { ctrl.reset(); ctrl.render(); }
+    // Switching tool/test set returns to the default order: drop any stale sort
+    // indicators left on the static (error-table) headers.
+    document.querySelectorAll('table').forEach(clearSortIndicators);
+    // Reopen a deep-linked examples panel (from the URL), else just sync the hash.
+    if (pendingExampleRef && showExamplesForRef(pendingExampleRef)) {
+      pendingExampleRef = null;
+    } else {
+      pendingExampleRef = null;
+      writeHash();
+    }
+  }
+
+  applyHash();
+  renderAll();
+})();
+</script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 Pipeline and analysis entry points.
 
 - [run_pipeline.py](run_pipeline.py): end-to-end orchestration. Aligned mode is primary by default; base mode is optional. Runs QA validation at the end unless `--skip-qa` is used.
-  - Trankit invocations are wired to `--model-source clarin-11356-1997`, i.e. the specific Slovenian CLARIN handle `11356/1997` from supervisor instructions.
+  - Trankit invocations are wired to `--model-source clarin-11356-1997`, i.e. the specific Slovenian CLARIN handle `11356/1997` selected for this project.
   - Use `--publish-interactive-table` to refresh [tables/comparison_table_v2_ssj.html](../tables/comparison_table_v2_ssj.html) and [tables/comparison_table_v2_ssj_data.js](../tables/comparison_table_v2_ssj_data.js) from the aligned outputs of that run.
 - Default write targets are [predictions/output](../predictions/output/) and [results/output](../results/output/).
 - [conll18_ud_eval_tag-based.py](conll18_ud_eval_tag-based.py): reference evaluator used for scoring; kept unchanged from the originally provided version.
