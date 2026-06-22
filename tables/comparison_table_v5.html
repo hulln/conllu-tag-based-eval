@@ -129,14 +129,15 @@
     margin-bottom: 4px;
   }
   .table-wrap-wide { overflow-x: auto; }
-  .table-wrap-wide table { min-width: 520px; }
-  /* Pin the label + Gold-count columns so they don't shift left/right when the
-     visible rows change (filtering, sorting, clearing). The remaining columns
-     hold constant-width content (fixed bar + fixed-width numbers). */
+  /* Fixed layout: column widths are constant regardless of cell content, so sorting
+     (which appends the sort indicator to a header) or filtering/clearing never shifts
+     the columns. Compare mode changes the column count, so its layout may differ —
+     that is fine. Widths echo the original spread-out look (Gold count to the right). */
+  .table-wrap-wide table { min-width: 520px; table-layout: fixed; }
   .table-wrap-wide th:first-child,
-  .table-wrap-wide td:first-child { width: 116px; }
+  .table-wrap-wide td:first-child { width: 24%; }
   .table-wrap-wide th:nth-child(2),
-  .table-wrap-wide td:nth-child(2) { width: 92px; }
+  .table-wrap-wide td:nth-child(2) { width: 28%; }
   .table-wrap.expanded-scroll {
     max-height: min(62vh, 520px);
     overflow: auto;
@@ -1537,19 +1538,18 @@
         const state = sortState(tableEl);
         const pos = state.findIndex(function(rule) { return rule.colIdx === colIdx; });
         const addSecondary = allowSecondary && (e.shiftKey || tableEl._addSecondarySort);
-        if (addSecondary) {
-          if (pos !== -1) {
-            state[pos].dir = state[pos].dir === 'ascending' ? 'descending' : 'ascending';
-          } else if (!state.length) {
-            state.push({ colIdx: colIdx, dir: 'ascending' });
-          } else {
-            if (state.length > 1) state.splice(1, 1);
-            state.push({ colIdx: colIdx, dir: 'ascending' });
-          }
-        } else if (state.length === 1 && pos === 0) {
-          state[0].dir = state[0].dir === 'ascending' ? 'descending' : 'ascending';
+        if (pos !== -1) {
+          // Column already part of the sort → reverse just its direction in place,
+          // keeping the other level. Lets a 2nd sort be re-ordered (asc/desc) by
+          // clicking it again, without Shift, instead of resetting the whole sort.
+          state[pos].dir = state[pos].dir === 'ascending' ? 'descending' : 'ascending';
+        } else if (addSecondary && state.length) {
+          // New column added as the secondary key (max two levels).
+          if (state.length > 1) state.length = 1;
+          state.push({ colIdx: colIdx, dir: 'ascending' });
         } else {
-          state.splice(0, state.length, { colIdx: colIdx, dir: pos === 0 ? (state[0].dir === 'ascending' ? 'descending' : 'ascending') : 'ascending' });
+          // New column, no modifier → fresh single-column sort.
+          state.splice(0, state.length, { colIdx: colIdx, dir: 'ascending' });
         }
         tableEl._addSecondarySort = false;
         applySortState(tableEl, restore);
@@ -1579,6 +1579,13 @@
   }
   function setCountNote(countEl, visibleCount, totalCount) {
     if (countEl) countEl.textContent = `Showing ${visibleCount} / ${totalCount}`;
+  }
+  // Rows are rendered in full and sorted first (so a column sort applies to the whole
+  // data set, not just the visible page), then trimmed to ROW_LIMIT when collapsed.
+  function trimToLimit(tbody, expanded, total) {
+    if (expanded || total <= ROW_LIMIT) return total;
+    Array.prototype.slice.call(tbody.querySelectorAll('tr'), ROW_LIMIT).forEach(function(tr) { tr.remove(); });
+    return ROW_LIMIT;
   }
   function setExpandedScrollState(wrapper, expanded, totalCount) {
     if (!wrapper) return;
@@ -1983,11 +1990,10 @@
 
       tbody.innerHTML = '';
       const colspan = compare ? 5 : 3;
-      const visible = expanded ? sorted : sorted.slice(0, ROW_LIMIT);
       if (!sorted.length) {
         renderEmptyRow(tbody, colspan, 'No matching rows.');
       } else {
-        for (const row of visible) {
+        for (const row of sorted) {
           const mv = row[mk];
           const tr = document.createElement('tr');
           if (compare) {
@@ -2010,7 +2016,8 @@
         }
       }
       makeSortable(tableEl, render);
-      setCountNote(countNote, visible.length, sorted.length);
+      const shown = trimToLimit(tbody, expanded, sorted.length);
+      setCountNote(countNote, shown, sorted.length);
       setExpandedScrollState(tableWrap, expanded, sorted.length);
       if (sorted.length <= ROW_LIMIT) { toggle.hidden = true; }
       else { toggle.hidden = false; toggle.textContent = expanded ? 'Show less' : 'Show more'; }
@@ -2152,11 +2159,10 @@
     function render() {
       const displayRows = computeRows();
       tbody.innerHTML = '';
-      const visible = expanded ? displayRows : displayRows.slice(0, ROW_LIMIT);
       if (!displayRows.length) {
         renderEmptyRow(tbody, 2, 'No matching rows.');
       } else {
-        for (const row of visible) {
+        for (const row of displayRows) {
           const tr = document.createElement('tr');
           tr.innerHTML = `<td class="label">${row.label}</td><td class="right">${row.count}</td>`;
           wireClickableRow(tr, tbody, function(e) {
@@ -2182,7 +2188,8 @@
       }
       renderSortIndicators(table);
       sortRenderedRows(table);
-      setCountNote(countNote, visible.length, displayRows.length);
+      const shown = trimToLimit(tbody, expanded, displayRows.length);
+      setCountNote(countNote, shown, displayRows.length);
       setExpandedScrollState(tableWrap, expanded, displayRows.length);
       if (displayRows.length <= ROW_LIMIT) { toggle.hidden = true; }
       else { toggle.hidden = false; toggle.textContent = expanded ? 'Show less' : 'Show more'; }
@@ -2262,11 +2269,10 @@
     function render() {
       const displayRows = computeRows();
       tbody.innerHTML = '';
-      const visible = expanded ? displayRows : displayRows.slice(0, ROW_LIMIT);
       if (!displayRows.length) {
         renderEmptyRow(tbody, 2, 'No matching rows.');
       } else {
-        for (const row of visible) {
+        for (const row of displayRows) {
           const tr = document.createElement('tr');
           const labelCell = document.createElement('td');
           labelCell.className = 'label';
@@ -2305,7 +2311,8 @@
       }
       renderSortIndicators(tableEl);
       sortRenderedRows(tableEl);
-      setCountNote(countNote, visible.length, displayRows.length);
+      const shown = trimToLimit(tbody, expanded, displayRows.length);
+      setCountNote(countNote, shown, displayRows.length);
       setExpandedScrollState(tableWrap, expanded, displayRows.length);
       if (displayRows.length <= ROW_LIMIT) { toggle.hidden = true; }
       else { toggle.hidden = false; toggle.textContent = expanded ? 'Show less' : 'Show more'; }
