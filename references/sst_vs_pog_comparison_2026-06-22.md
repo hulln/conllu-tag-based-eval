@@ -1,14 +1,14 @@
-# SST (normalised) vs. SST-pog (colloquial): test-set comparison
+# SST (standardised) vs. SST-pog (colloquial): test-set comparison
 
 _Prepared 2026-06-22. Compares the two spoken test sets used in the v5 evaluation
-table: `sl_sst-ud-test.conllu` (normalised transcription) and
+table: `sl_sst-ud-test.conllu` (standardised transcription) and
 `sl_sst-ud-test-pog.conllu` (colloquial transcription)._
 
 ## Summary
 
 The two sets are the **same spoken material** and their token-level gold tags are
 effectively identical; they differ mainly in how each word is *spelled*
-(normalised vs. colloquial surface form). The score drop from SST → pog therefore
+(standardised vs. colloquial surface form). The score drop from SST → pog therefore
 mostly measures **robustness to non-standard surface forms**. The only structural
 difference is two long spoken segments that are split into sentences in the
 official SST file but kept as run-on sentences in the supplied pog/stan pair.
@@ -17,7 +17,7 @@ Trankit 1.3 was trained on exactly this kind of colloquial spoken data.
 
 ## How the two sets relate
 
-| | SST (normalised) | pog (colloquial) |
+| | SST (standardised) | pog (colloquial) |
 |---|---|---|
 | Sentences | 432 | 420 |
 | Tokens | 11,443 | 11,443 |
@@ -29,9 +29,9 @@ Trankit 1.3 was trained on exactly this kind of colloquial spoken data.
   transcription (e.g. `imado→imajo`, `mate→imate`, `və→v`, `potrebn→potreben`,
   `vržt→vreči`).
 
-  Example sentences (normalised → colloquial):
+  Example sentences (standardised → colloquial):
 
-  | normalised | colloquial |
+  | standardised | colloquial |
   |---|---|
   | …boste **mogli opraviti**, če boste to nalogo **opravili**. | …boste **mogl opravt**, če boste to nalogo **opravl**. |
   | …trije **majhni otroci** pa še **pes** ne **grejo skupaj**. | …trije **məjhni otroc** pa še **pəs** ne **grəjo skupi**. |
@@ -52,11 +52,11 @@ Trankit 1.3 was trained on exactly this kind of colloquial spoken data.
   not missing/extra data. It has no effect on the token-level tagging metrics
   (UPOS/XPOS/lemma); it only changes the gold dependency structure (root/boundary
   attachments) within those two segments (~813 of 11,443 tokens).
-  → *This difference exists only because the normalised set is the **official UD SST**
+  → *This difference exists only because the standardised set is the **official UD SST**
   (which splits those two segments), while pog comes from the supplied zip. The zip also
   contains a paired **stan** (standardised) file — see below.*
 
-## Dataset choice: official UD SST vs. the zip's `stan` file for the normalised set
+## Dataset choice: official UD SST vs. the zip's `stan` file for the standardised set
 
 The supplied zip contains both `pog` and a paired `stan` (standardised) transcription.
 Comparison of the three gold files:
@@ -74,10 +74,10 @@ Comparison of the three gold files:
   those two segments and 2 lemma tokens (surface forms and all tags identical).
 
 **Options:**
-1. **Keep official UD SST** as the normalised set — canonical, publicly citable, but not
+1. **Keep official UD SST** as the standardised set — canonical, publicly citable, but not
    perfectly aligned with pog (the 432 vs 420 / 2-segment difference).
-2. **Use `stan` for the normalised set** — makes stan/pog a controlled minimal pair
-   (recommended if the goal is a direct normalised-vs-colloquial comparison); numbers are
+2. **Use `stan` for the standardised set** — makes stan/pog a controlled minimal pair
+   (recommended if the goal is a direct standardised-vs-colloquial comparison); numbers are
    essentially identical to UD SST since the two files barely differ.
 
 ## Performance drop, SST → pog

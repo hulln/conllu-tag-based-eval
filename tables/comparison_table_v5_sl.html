@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Evaluation of Grammatical Annotation Tools for Slovenian</title>
+<title>Evalvacija orodij za slovnično označevanje slovenščine</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <style>
@@ -157,7 +157,7 @@
   /* Fixed layout: column widths are constant regardless of cell content, so sorting
      (which appends the sort indicator to a header) or filtering/clearing never shifts
      the columns. Compare mode changes the column count, so its layout may differ —
-     that is fine. Widths echo the original spread-out look (Gold count to the right). */
+     that is fine. Widths echo the original spread-out look (Pojavitve to the right). */
   .table-wrap-wide table { min-width: 520px; table-layout: fixed; }
   .table-wrap-wide th:first-child,
   .table-wrap-wide td:first-child { width: 24%; }
@@ -754,12 +754,12 @@
     margin-top: 18px;
   }
   .deprel-bucket .bucket-header h3 { margin: 0; }
-  /* Reserve a stable width so the merge toggle's label swap (Merge (A⇔B) / Show (A→B))
+  /* Reserve a stable width so the merge toggle's label swap (Združi (A⇔B) / Pokaži (A→B))
      keeps the same box and does not nudge the header on click. */
   .deprel-bucket .action-btns .toggle-btn { min-width: 102px; }
   /* Reserve count width so the total losing a digit on merge (e.g. 123 -> 85)
      does not shift the "Show more" toggle that follows it. */
-  .deprel-bucket .count-meta .note { min-width: 92px; }
+  .deprel-bucket .count-meta .note { min-width: 100px; }
   .deprel-bucket table { margin-bottom: 0; }
   /* MSD tooltip */
   .has-tip { position: relative; cursor: help; }
@@ -1039,62 +1039,62 @@
 <body>
 <noscript>
   <div class="noscript-note">
-    <strong>JavaScript is required.</strong> This interactive evaluation table loads its results,
-    selectors, and per-label tables with JavaScript. Please enable JavaScript in your browser to
-    view the comparison.
+    <strong>Potreben je JavaScript.</strong> Ta interaktivna evalvacijska tabela s pomočjo
+    JavaScripta nalaga rezultate, izbirnike in tabele po oznakah. Za prikaz primerjave v
+    brskalniku omogočite JavaScript.
   </div>
 </noscript>
 <header class="page-head">
   <nav class="lang-switch" aria-label="Language / Jezik">
-    <a href="comparison_table_v5_sl.html" hreflang="sl">SL</a>
+    <a href="comparison_table_v5_sl.html" aria-current="page">SL</a>
     <span class="sep" aria-hidden="true">·</span>
-    <a href="comparison_table_v5.html" aria-current="page">EN</a>
+    <a href="comparison_table_v5.html" hreflang="en">EN</a>
   </nav>
-  <h1 id="page-title"><span class="title-context">Evaluation</span> of Grammatical Annotation Tools for Slovenian</h1>
-  <div class="subtitle" id="subtitle">Compare commonly used Slovenian grammatical annotation tools on manually annotated test sets. Select a tool and test set to view detailed per-label results.</div>
+  <h1 id="page-title"><span class="title-context">Evalvacija</span> orodij za slovnično označevanje slovenščine</h1>
+  <div class="subtitle" id="subtitle">Primerjajte pogosta orodja za slovnično označevanje slovenščine na ročno označenih testnih množicah. Izberite orodje in testno množico za podroben prikaz rezultatov po posameznih oznakah.</div>
 
   <div class="selectors">
     <div class="selector-row">
       <div class="selector-field">
-        <span class="selector-label">Tool</span>
-        <div class="seg" id="seg-model" role="group" aria-label="Tool"></div>
+        <span class="selector-label">Orodje</span>
+        <div class="seg" id="seg-model" role="group" aria-label="Orodje"></div>
       </div>
       <div class="selector-field">
-        <span class="selector-label" id="corpus-label">Test set</span>
+        <span class="selector-label" id="corpus-label">Testna množica</span>
         <div class="testset-combobox" id="corpus-select"></div>
       </div>
     </div>
   </div>
 
   <details class="provenance-details">
-    <summary>Details</summary>
+    <summary>Podrobnosti</summary>
     <div class="provenance" id="provenance"></div>
   </details>
 </header>
 
-<h2 id="accuracy">Overall Accuracy &mdash; <span class="model-name"></span></h2>
+<h2 id="accuracy">Splošna natančnost &mdash; <span class="model-name"></span></h2>
 <div class="overview" id="overview"></div>
 
-<h2 id="las-by-relation">Dependency relation scores</h2>
+<h2 id="las-by-relation">Rezultati po skladenjskih relacijah</h2>
 <div class="controls">
   <div class="note control-note" id="rel-note"></div>
   <div class="control-main">
     <label class="filter-field">
       <span class="filter-icon" aria-hidden="true"></span>
-      <span class="sr-only">Filter rows</span>
-      <input id="rel-filter" type="search" placeholder="e.g. nsubj or obl">
+      <span class="sr-only">Filtriraj vrstice</span>
+      <input id="rel-filter" type="search" placeholder="npr. nsubj ali obl">
     </label>
-    <button id="rel-compare-btn" class="toggle-btn" type="button">Compare</button>
+    <button id="rel-compare-btn" class="toggle-btn" type="button">Primerjaj</button>
     <div class="action-btns">
-      <button class="action-btn" id="rel-csv-btn" title="Export visible rows as CSV">&darr; CSV</button>
-      <button class="action-btn" id="rel-md-btn" title="Copy visible rows as Markdown">&#x2398; MD</button>
+      <button class="action-btn" id="rel-csv-btn" title="Izvozi prikazane vrstice kot CSV">&darr; CSV</button>
+      <button class="action-btn" id="rel-md-btn" title="Kopiraj prikazane vrstice kot Markdown">&#x2398; MD</button>
     </div>
   </div>
 </div>
 <div class="toolbar">
   <div class="count-meta">
     <div class="note" id="rel-count-note"></div>
-    <button id="rel-toggle" class="inline-toggle" type="button" hidden>Show more</button>
+    <button id="rel-toggle" class="inline-toggle" type="button" hidden>Pokaži več</button>
   </div>
 </div>
 <div class="table-wrap table-wrap-wide">
@@ -1104,26 +1104,26 @@
 </table>
 </div>
 
-<h2 id="upos-accuracy">Part-of-speech tag scores</h2>
+<h2 id="upos-accuracy">Rezultati po besednih vrstah</h2>
 <div class="controls">
   <div class="note control-note" id="upos-acc-note"></div>
   <div class="control-main">
     <label class="filter-field">
       <span class="filter-icon" aria-hidden="true"></span>
-      <span class="sr-only">Filter rows</span>
-      <input id="upos-acc-filter" type="search" placeholder="e.g. NOUN or VERB">
+      <span class="sr-only">Filtriraj vrstice</span>
+      <input id="upos-acc-filter" type="search" placeholder="npr. NOUN ali VERB">
     </label>
-    <button id="upos-acc-compare-btn" class="toggle-btn" type="button">Compare</button>
+    <button id="upos-acc-compare-btn" class="toggle-btn" type="button">Primerjaj</button>
     <div class="action-btns">
-      <button class="action-btn" id="upos-acc-csv-btn" title="Export visible rows as CSV">&darr; CSV</button>
-      <button class="action-btn" id="upos-acc-md-btn" title="Copy visible rows as Markdown">&#x2398; MD</button>
+      <button class="action-btn" id="upos-acc-csv-btn" title="Izvozi prikazane vrstice kot CSV">&darr; CSV</button>
+      <button class="action-btn" id="upos-acc-md-btn" title="Kopiraj prikazane vrstice kot Markdown">&#x2398; MD</button>
     </div>
   </div>
 </div>
 <div class="toolbar">
   <div class="count-meta">
     <div class="note" id="upos-acc-count-note"></div>
-    <button id="upos-acc-toggle" class="inline-toggle" type="button" hidden>Show more</button>
+    <button id="upos-acc-toggle" class="inline-toggle" type="button" hidden>Pokaži več</button>
   </div>
 </div>
 <div class="table-wrap table-wrap-wide">
@@ -1133,115 +1133,115 @@
 </table>
 </div>
 
-<h2 id="errors-deprel">Most common dependency parsing errors</h2>
+<h2 id="errors-deprel">Najpogostejše napake skladenjskega razčlenjevanja</h2>
 <div class="controls">
-  <div class="note control-note">This table shows the most frequent dependency-relation errors made by the selected tool, compared with the manually annotated test set. Click a row to see examples; use <kbd>↑</kbd>/<kbd>↓</kbd> to navigate and <kbd>Esc</kbd> to close the example view.</div>
+  <div class="note control-note">Ta tabela prikazuje najpogostejše napake skladenjskih relacij izbranega orodja v primerjavi z ročno označeno testno množico. Kliknite vrstico za prikaz primerov; za premikanje uporabite <kbd>↑</kbd>/<kbd>↓</kbd>, za zaprtje pogleda s primeri pa <kbd>Esc</kbd>.</div>
   <div class="control-main">
     <label class="filter-field">
       <span class="filter-icon" aria-hidden="true"></span>
-      <span class="sr-only">Filter rows</span>
-      <input id="deprel-err-filter" type="search" placeholder="e.g. nsubj or obl">
+      <span class="sr-only">Filtriraj vrstice</span>
+      <input id="deprel-err-filter" type="search" placeholder="npr. nsubj ali obl">
     </label>
   </div>
 </div>
 <div id="deprel-error-sections"></div>
 
-<h2 id="errors-upos">Most common part-of-speech tagging errors</h2>
+<h2 id="errors-upos">Najpogostejše napake označevanja besednih vrst</h2>
 <div class="controls">
-  <div class="note control-note">This table shows the most frequent UPOS tagging errors made by the selected tool, compared with the manually annotated test set. Click a row to see examples.</div>
+  <div class="note control-note">Ta tabela prikazuje najpogostejše napake označevanja UPOS izbranega orodja v primerjavi z ročno označeno testno množico. Kliknite vrstico za prikaz primerov.</div>
   <div class="control-main">
     <label class="filter-field">
       <span class="filter-icon" aria-hidden="true"></span>
-      <span class="sr-only">Filter rows</span>
-      <input id="upos-err-filter" type="search" placeholder="e.g. NOUN">
+      <span class="sr-only">Filtriraj vrstice</span>
+      <input id="upos-err-filter" type="search" placeholder="npr. NOUN">
     </label>
-    <button id="upos-merge-btn" class="toggle-btn" type="button">Merge (A&harr;B)</button>
+    <button id="upos-merge-btn" class="toggle-btn" type="button">Združi (A&harr;B)</button>
     <div class="action-btns">
-      <button class="action-btn" id="upos-err-csv-btn" title="Export visible rows as CSV">&darr; CSV</button>
-      <button class="action-btn" id="upos-err-md-btn" title="Copy visible rows as Markdown">&#x2398; MD</button>
+      <button class="action-btn" id="upos-err-csv-btn" title="Izvozi prikazane vrstice kot CSV">&darr; CSV</button>
+      <button class="action-btn" id="upos-err-md-btn" title="Kopiraj prikazane vrstice kot Markdown">&#x2398; MD</button>
     </div>
   </div>
 </div>
 <div class="toolbar">
   <div class="count-meta">
     <div class="note" id="upos-err-count-note"></div>
-    <button id="upos-err-toggle" class="inline-toggle" type="button" hidden>Show more</button>
+    <button id="upos-err-toggle" class="inline-toggle" type="button" hidden>Pokaži več</button>
   </div>
 </div>
 <div class="table-wrap">
 <table>
   <thead>
     <tr>
-      <th>Error pair</th>
-      <th class="right">Error count</th>
+      <th>Par napake</th>
+      <th class="right">Število napak</th>
     </tr>
   </thead>
   <tbody id="upos-err-table"></tbody>
 </table>
 </div>
 
-<h2 id="errors-xpos">Most common MULTEXT-East tagging errors</h2>
+<h2 id="errors-xpos">Najpogostejše napake oblikoskladenjskega označevanja (MULTEXT-East)</h2>
 <div class="controls">
-  <div class="note control-note">This table shows the most frequent MULTEXT-East / JOS morphosyntactic tagging errors made by the selected tool, compared with the manually annotated test set. Hover over or focus a row to see the MSD tag decoded; click a row to see examples.</div>
+  <div class="note control-note">Ta tabela prikazuje najpogostejše napake oblikoskladenjskega označevanja (MULTEXT-East / JOS) izbranega orodja v primerjavi z ročno označeno testno množico. Za prikaz razčlenjene oznake MSD se z miško pomaknite na vrstico ali jo izberite; kliknite vrstico za prikaz primerov.</div>
   <div class="control-main">
     <label class="filter-field">
       <span class="filter-icon" aria-hidden="true"></span>
-      <span class="sr-only">Filter rows</span>
-      <input id="xpos-err-filter" type="search" placeholder="e.g. Ncm or Vmpr">
+      <span class="sr-only">Filtriraj vrstice</span>
+      <input id="xpos-err-filter" type="search" placeholder="npr. Ncm ali Vmpr">
     </label>
-    <button id="xpos-merge-btn" class="toggle-btn" type="button">Merge (A&harr;B)</button>
+    <button id="xpos-merge-btn" class="toggle-btn" type="button">Združi (A&harr;B)</button>
     <div class="action-btns">
-      <button class="action-btn" id="xpos-err-csv-btn" title="Export visible rows as CSV">&darr; CSV</button>
-      <button class="action-btn" id="xpos-err-md-btn" title="Copy visible rows as Markdown">&#x2398; MD</button>
+      <button class="action-btn" id="xpos-err-csv-btn" title="Izvozi prikazane vrstice kot CSV">&darr; CSV</button>
+      <button class="action-btn" id="xpos-err-md-btn" title="Kopiraj prikazane vrstice kot Markdown">&#x2398; MD</button>
     </div>
   </div>
 </div>
 <div class="toolbar">
   <div class="count-meta">
     <div class="note" id="xpos-err-count-note"></div>
-    <button id="xpos-err-toggle" class="inline-toggle" type="button" hidden>Show more</button>
+    <button id="xpos-err-toggle" class="inline-toggle" type="button" hidden>Pokaži več</button>
   </div>
 </div>
 <div class="table-wrap">
 <table>
   <thead>
     <tr>
-      <th>Error pair</th>
-      <th class="right">Error count</th>
+      <th>Par napake</th>
+      <th class="right">Število napak</th>
     </tr>
   </thead>
   <tbody id="xpos-err-table"></tbody>
 </table>
 </div>
 
-<h2 id="errors-lemma">Most common lemmatisation errors</h2>
+<h2 id="errors-lemma">Najpogostejše napake lematizacije</h2>
 <div class="controls">
-  <div class="note control-note">This table shows the most frequent lemmatisation errors made by the selected tool, compared with the manually annotated test set. Click a row to see examples.</div>
+  <div class="note control-note">Ta tabela prikazuje najpogostejše napake lematizacije izbranega orodja v primerjavi z ročno označeno testno množico. Kliknite vrstico za prikaz primerov.</div>
   <div class="control-main">
     <label class="filter-field">
       <span class="filter-icon" aria-hidden="true"></span>
-      <span class="sr-only">Filter rows</span>
-      <input id="lemma-err-filter" type="search" placeholder="e.g. biti or &lt;lemma&gt;">
+      <span class="sr-only">Filtriraj vrstice</span>
+      <input id="lemma-err-filter" type="search" placeholder="npr. biti ali &lt;lema&gt;">
     </label>
-    <button id="lemma-merge-btn" class="toggle-btn" type="button">Merge (A&harr;B)</button>
+    <button id="lemma-merge-btn" class="toggle-btn" type="button">Združi (A&harr;B)</button>
     <div class="action-btns">
-      <button class="action-btn" id="lemma-err-csv-btn" title="Export visible rows as CSV">&darr; CSV</button>
-      <button class="action-btn" id="lemma-err-md-btn" title="Copy visible rows as Markdown">&#x2398; MD</button>
+      <button class="action-btn" id="lemma-err-csv-btn" title="Izvozi prikazane vrstice kot CSV">&darr; CSV</button>
+      <button class="action-btn" id="lemma-err-md-btn" title="Kopiraj prikazane vrstice kot Markdown">&#x2398; MD</button>
     </div>
   </div>
 </div>
 <div class="toolbar">
   <div class="count-meta">
     <div class="note" id="lemma-err-count-note"></div>
-    <button id="lemma-err-toggle" class="inline-toggle" type="button" hidden>Show more</button>
+    <button id="lemma-err-toggle" class="inline-toggle" type="button" hidden>Pokaži več</button>
   </div>
 </div>
 <div class="table-wrap">
 <table>
   <thead>
     <tr>
-      <th>Error pair</th>
-      <th class="right">Error count</th>
+      <th>Par napake</th>
+      <th class="right">Število napak</th>
     </tr>
   </thead>
   <tbody id="lemma-err-table"></tbody>
@@ -1251,12 +1251,12 @@
 <div class="examples-backdrop hidden" id="examples-backdrop"></div>
 <div class="examples-panel hidden" id="examples-panel" role="dialog" aria-modal="true" aria-labelledby="examples-panel-title" tabindex="-1">
   <div class="examples-panel-header">
-    <div class="examples-panel-title" id="examples-panel-title">Examples</div>
+    <div class="examples-panel-title" id="examples-panel-title">Primeri</div>
     <div class="examples-panel-actions">
-      <button class="examples-panel-action" id="examples-link-btn" title="Copy direct link to this examples panel">LINK</button>
-      <button class="examples-panel-action" id="examples-csv-btn" title="Export shown examples as CSV">CSV</button>
-      <button class="examples-panel-action" id="examples-md-btn" title="Copy shown examples as Markdown">MD</button>
-      <button class="examples-panel-close" id="examples-panel-close" title="Close">&times;</button>
+      <button class="examples-panel-action" id="examples-link-btn" title="Kopiraj neposredno povezavo do tega okna s primeri">POVEZAVA</button>
+      <button class="examples-panel-action" id="examples-csv-btn" title="Izvozi prikazane primere kot CSV">CSV</button>
+      <button class="examples-panel-action" id="examples-md-btn" title="Kopiraj prikazane primere kot Markdown">MD</button>
+      <button class="examples-panel-close" id="examples-panel-close" title="Zapri">&times;</button>
     </div>
   </div>
   <div class="examples-panel-body" id="examples-panel-body"></div>
@@ -1266,26 +1266,26 @@
 <div class="info-popover hidden" id="info-popover" role="dialog" aria-modal="true" aria-labelledby="info-popover-title">
   <div class="info-popover-header">
     <span class="info-popover-title" id="info-popover-title"></span>
-    <button class="info-popover-close" id="info-popover-close" title="Close" aria-label="Close">&times;</button>
+    <button class="info-popover-close" id="info-popover-close" title="Zapri" aria-label="Zapri">&times;</button>
   </div>
   <div class="info-popover-body" id="info-popover-body"></div>
 </div>
 
-<h2 id="acknowledgement">Acknowledgement</h2>
+<h2 id="acknowledgement">Zahvala</h2>
 <div class="ack" id="ack-text">
-  This work was partially supported by the research projects
+  To delo je nastalo v okviru raziskovalnih projektov
   <a href="https://spot.ff.uni-lj.si/en/" target="_blank" rel="noopener">SPOT</a>,
-  <a href="https://www.cjvt.si/llm4dh/en/" target="_blank" rel="noopener">LLM4DH</a> and
+  <a href="https://www.cjvt.si/llm4dh/en/" target="_blank" rel="noopener">LLM4DH</a> in
   <a href="https://www.ff.uni-lj.si/mapcase" target="_blank" rel="noopener">MAPCASE</a>
-  (ARIS grant nos. Z6-4617, GC-002 and J6-70213), with infrastructural support from the
-  <a href="https://www.cjvt.si/" target="_blank" rel="noopener">Centre for Language Resources and Technologies at the University of Ljubljana (CJVT UL)</a>
-  and the <a href="https://www.clarin.si/" target="_blank" rel="noopener">Common Language Resources and Technology Infrastructure, Slovenia (CLARIN.SI)</a>.
-  The interactive website was developed by Nives Hüll under the supervision of Kaja Dobrovoljc Zor.
+  (ARIS št. Z6-4617, GC-002 in J6-70213) z infrastrukturno podporo
+  <a href="https://www.cjvt.si/" target="_blank" rel="noopener">Centra za jezikovne vire in tehnologije Univerze v Ljubljani (CJVT UL)</a>
+  in <a href="https://www.clarin.si/" target="_blank" rel="noopener">Slovenske raziskovalne infrastrukture za jezikovne vire in tehnologije (CLARIN.SI)</a>.
+  Interaktivno spletno stran je izdelala Nives Hüll pod mentorstvom Kaje Dobrovoljc Zor.
 </div>
 
-<h2 id="citation">Recommended citation</h2>
+<h2 id="citation">Priporočeno citiranje</h2>
 <div class="ack" id="citation-text">
-  If you use this evaluation table, please cite:
+  Če uporabljate to evalvacijsko tabelo, prosimo, citirajte:
   <p class="citation-ref">
     Dobrovoljc, Kaja. 2025. &ldquo;Treebanking Spoken Slovenian: New Data, Models, and Lessons Learned.&rdquo;
     <em>Contributions to Contemporary History</em> 65(3).
@@ -1294,7 +1294,7 @@
   <details class="bibtex-details">
     <summary>BibTeX</summary>
     <div class="bibtex-wrap">
-      <button class="action-btn bibtex-copy-btn" id="bibtex-copy-btn" title="Copy BibTeX to clipboard">&#x2398; Copy</button>
+      <button class="action-btn bibtex-copy-btn" id="bibtex-copy-btn" title="Kopiraj BibTeX v odložišče">&#x2398; Kopiraj</button>
       <pre class="bibtex" id="bibtex">@article{dobrovoljc2025treebanking,
   author  = {Dobrovoljc, Kaja},
   title   = {Treebanking Spoken Slovenian: New Data, Models, and Lessons Learned},
@@ -1308,9 +1308,9 @@
   </details>
 </div>
 
-<div class="logos" id="logos" aria-label="Funders and infrastructure">
-  <a href="https://www.aris-rs.si/" target="_blank" rel="noopener"><img src="logos/aris.svg" alt="ARIS — Slovenian Research and Innovation Agency"></a>
-  <a href="https://www.cjvt.si/" target="_blank" rel="noopener"><img src="logos/cjvt.png" alt="CJVT UL — Centre for Language Resources and Technologies"></a>
+<div class="logos" id="logos" aria-label="Financerji in infrastruktura">
+  <a href="https://www.aris-rs.si/" target="_blank" rel="noopener"><img src="logos/aris.svg" alt="ARIS — Javna agencija za znanstvenoraziskovalno in inovacijsko dejavnost Republike Slovenije"></a>
+  <a href="https://www.cjvt.si/" target="_blank" rel="noopener"><img src="logos/cjvt.png" alt="CJVT UL — Center za jezikovne vire in tehnologije"></a>
   <a href="https://www.clarin.si/" target="_blank" rel="noopener"><img src="logos/clarin-si.png" alt="CLARIN.SI"></a>
 </div>
 
@@ -1319,7 +1319,7 @@
 (function () {
   const DATA = window.TABLE_DATA_V5;
   if (!DATA) {
-    document.body.innerHTML = '<p>Table data not available.</p>';
+    document.body.innerHTML = '<p>Podatki tabele niso na voljo.</p>';
     return;
   }
 
@@ -1339,12 +1339,19 @@
   function otherShort() { return shortOf(otherKey()); }
   function errData() { return corpus().errors[state.model]; }
   function csvPrefix() { return state.corpus + '_' + state.model; }
-  function formatInt(v) { return Number(v).toLocaleString('en-US'); }
+  function formatInt(v) { return Number(v).toLocaleString('sl-SI'); }
+  function formatDecimal(v, digits) {
+    const d = digits == null ? 2 : digits;
+    return Number(v).toLocaleString('sl-SI', {
+      minimumFractionDigits: d,
+      maximumFractionDigits: d,
+    });
+  }
 
   // ---------- generic utilities ----------
   function downloadCSV(headers, rows, filename) {
     const esc = function(v) { return '"' + String(v).replace(/"/g, '""') + '"'; };
-    const lines = [headers.map(esc).join(',')].concat(rows.map(function(r) { return r.map(esc).join(','); }));
+    const lines = [headers.map(esc).join(';')].concat(rows.map(function(r) { return r.map(esc).join(';'); }));
     const blob = new Blob(['﻿' + lines.join('\n')], {type: 'text/csv;charset=utf-8;'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -1436,11 +1443,11 @@
   }
 
   function slugText(text) {
-    return String(text || 'examples')
+    return String(text || 'primeri')
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '')
-      .slice(0, 80) || 'examples';
+      .slice(0, 80) || 'primeri';
   }
 
   function sortState(tableEl) {
@@ -1457,7 +1464,7 @@
       h.removeAttribute('data-sort-adding');
       const ind = h.querySelector('.sort-ind');
       if (ind) ind.remove();
-      h.title = 'Click to sort; Shift+click for second sort';
+      h.title = 'Kliknite za razvrščanje; Shift+klik za drugo razvrščanje';
     });
   }
 
@@ -1465,8 +1472,13 @@
     const ca = a.cells[colIdx], cb = b.cells[colIdx];
     const ta = ca ? cleanTableText(ca.textContent) : '';
     const tb = cb ? cleanTableText(cb.textContent) : '';
-    const na = parseFloat(ta.replace(/[^0-9.\-+]/g, ''));
-    const nb = parseFloat(tb.replace(/[^0-9.\-+]/g, ''));
+    const parseSlNumber = function(text) {
+      const compact = String(text || '').replace(/\s/g, '');
+      if (!/^[+\-]?(?:\d{1,3}(?:\.\d{3})*|\d+)(?:,\d+)?$/.test(compact)) return NaN;
+      return Number(compact.replace(/\./g, '').replace(',', '.'));
+    };
+    const na = parseSlNumber(ta);
+    const nb = parseSlNumber(tb);
     const isNum = !isNaN(na) && !isNaN(nb);
     return isNum ? (na - nb) : ta.localeCompare(tb);
   }
@@ -1502,9 +1514,9 @@
       if (ind) ind.remove();
       h.title = allowSecondary
         ? (state.length
-          ? 'Click to make this the primary sort; Shift+click or +2 to add second sort'
-          : 'Click to sort; Shift+click or +2 for second sort')
-        : 'Click to sort';
+          ? 'Kliknite, da to postane primarno razvrščanje; Shift+klik ali +2 za dodatno razvrščanje'
+          : 'Kliknite za razvrščanje; Shift+klik ali +2 za drugo razvrščanje')
+        : 'Kliknite za razvrščanje';
     });
     state.forEach(function(rule, idx) {
       const th = ths[rule.colIdx];
@@ -1515,18 +1527,18 @@
       th.setAttribute('aria-sort', rule.dir);
       if (isAdding) th.setAttribute('data-sort-adding', 'true');
       th.title = !allowSecondary
-        ? 'Click to reverse; click another column to sort by it'
+        ? 'Kliknite za obrnitev; kliknite drug stolpec za razvrščanje po njem'
         : (isAdding
-          ? 'Tap another header to add it as sort 2'
+          ? 'Tapnite drugo glavo, da jo dodate kot 2. razvrščanje'
           : (level === 1
-            ? 'Primary sort. Click to reverse; Shift+click another column or tap +2 for second sort'
-            : 'Secondary sort. Shift+click to reverse; click to make primary'));
+            ? 'Primarno razvrščanje. Kliknite za obrnitev; Shift+klik na drug stolpec ali +2 za drugo razvrščanje'
+            : 'Drugotno razvrščanje. Shift+klik za obrnitev; klik za primarno'));
       const ind = document.createElement('span');
       ind.className = 'sort-ind';
       ind.innerHTML = (allowSecondary ? '<span class="sort-level">' + level + '</span>' : '') +
         '<span class="sort-arrow">' + (rule.dir === 'ascending' ? '↑' : '↓') + '</span>' +
-        (isOnlySort && allowSecondary ? '<span class="sort-add" title="Add second sort" aria-label="Add second sort">+2</span>' : '') +
-        '<span class="sort-clear" title="Clear this sort" aria-label="Clear this sort">✕</span>';
+        (isOnlySort && allowSecondary ? '<span class="sort-add" title="Dodaj drugo razvrščanje" aria-label="Dodaj drugo razvrščanje">+2</span>' : '') +
+        '<span class="sort-clear" title="Počisti to razvrščanje" aria-label="Počisti to razvrščanje">✕</span>';
       th.appendChild(ind);
     });
   }
@@ -1545,7 +1557,7 @@
     tableEl.querySelectorAll('thead th').forEach(function(th, colIdx) {
       th.classList.add('sortable');
       th.tabIndex = 0;
-      th.title = allowSecondary ? 'Click to sort; Shift+click for second sort' : 'Click to sort';
+      th.title = allowSecondary ? 'Kliknite za razvrščanje; Shift+klik za drugo razvrščanje' : 'Kliknite za razvrščanje';
       const handleSort = function(e) {
         const addBtn = e.target && e.target.closest ? e.target.closest('.sort-add') : null;
         if (addBtn) {
@@ -1605,7 +1617,7 @@
     return (largerBetter ? v > 0 : v < 0) ? 'pos' : 'neg';
   }
   function deltaText(v, digits) {
-    const s = digits != null ? v.toFixed(digits) : String(v);
+    const s = digits != null ? formatDecimal(v, digits) : String(v);
     return v > 0 ? '+' + s : s;
   }
   function bar(cls, v) {
@@ -1619,7 +1631,7 @@
     tbody.appendChild(tr);
   }
   function setCountNote(countEl, visibleCount, totalCount) {
-    if (countEl) countEl.textContent = `Showing ${visibleCount} / ${totalCount}`;
+    if (countEl) countEl.textContent = `Prikazano ${formatInt(visibleCount)} / ${formatInt(totalCount)}`;
   }
   // Rows are rendered in full and sorted first (so a column sort applies to the whole
   // data set, not just the visible page), then trimmed to ROW_LIMIT when collapsed.
@@ -1639,27 +1651,27 @@
   function decodeMSD(tag) {
     if (!tag || tag === '_') return tag;
     const CAT = {
-      N:'Noun', V:'Verb', A:'Adjective', P:'Pronoun',
-      R:'Adverb', S:'Adposition', C:'Conjunction', M:'Numeral',
-      Q:'Particle', I:'Interjection', X:'Residual', Z:'Punct',
-      G:'Verb', K:'Numeral', L:'Particle', D:'Adposition', O:'Residual',
+      N:'samostalnik', V:'glagol', A:'pridevnik', P:'zaimek',
+      R:'prislov', S:'predlog', C:'veznik', M:'števnik',
+      Q:'členek', I:'medmet', X:'neuvrščeno', Z:'ločilo',
+      G:'glagol', K:'števnik', L:'členek', D:'predlog', O:'neuvrščeno',
     };
-    const GEND = {m:'masc', f:'fem', n:'neut'};
-    const NUM  = {s:'sing', d:'dual', p:'plur'};
-    const CASE = {n:'nom', g:'gen', d:'dat', a:'acc', l:'loc', i:'ins'};
-    const DEG  = {p:'pos', c:'comp', s:'sup'};
+    const GEND = {m:'moški', f:'ženski', n:'srednji'};
+    const NUM  = {s:'ednina', d:'dvojina', p:'množina'};
+    const CASE = {n:'imenovalnik', g:'rodilnik', d:'dajalnik', a:'tožilnik', l:'mestnik', i:'orodnik'};
+    const DEG  = {p:'osnovnik', c:'primernik', s:'presežnik'};
     const cat  = tag[0].toUpperCase();
     const f    = tag.slice(1).toLowerCase().split('');
     const out  = [CAT[cat] || cat];
     if (cat === 'N' || (cat === 'S' && tag.length > 3)) {
-      const TYPE = {c:'common', p:'proper', o:'common'};
+      const TYPE = {c:'občno', p:'lastno', o:'občno'};
       if (f[0]) out.push(TYPE[f[0]] || f[0]);
       if (f[1]) out.push(GEND[f[1]] || f[1]);
       if (f[2]) out.push(NUM[f[2]]  || f[2]);
       if (f[3]) out.push(CASE[f[3]] || f[3]);
-      if (f[4] === 'y') out.push('animate');
+      if (f[4] === 'y') out.push('živo');
     } else if (cat === 'A') {
-      const TYPE = {g:'general', s:'possessive', p:'participial'};
+      const TYPE = {g:'splošni', s:'svojilni', p:'deležniški'};
       if (f[0]) out.push(TYPE[f[0]] || f[0]);
       if (f[2]) out.push(GEND[f[2]] || f[2]);
       if (f[3]) out.push(NUM[f[3]]  || f[3]);
@@ -1667,16 +1679,16 @@
     } else if (cat === 'R') {
       if (f[1]) out.push(DEG[f[1]] || f[1]);
     } else if (cat === 'V' || cat === 'G') {
-      const TYPE = {m:'main', a:'aux', c:'cop', o:'modal'};
-      const TENSE = {p:'pres', f:'fut', i:'past', s:'cond'};
-      const ASP   = {d:'perf', r:'imperf', b:'bi'};
+      const TYPE = {m:'glavni', a:'pomožni', c:'vez', o:'naklonski'};
+      const TENSE = {p:'sedanjik', f:'prihodnjik', i:'preteklik', s:'pogojnik'};
+      const ASP   = {d:'dovršni', r:'nedovršni', b:'dvovidski'};
       if (f[0]) out.push(TYPE[f[0]]  || f[0]);
       if (f[1]) out.push(TENSE[f[1]] || f[1]);
       if (f[2]) out.push(ASP[f[2]]   || f[2]);
-      if (f[3] && /[123]/.test(f[3])) out.push(f[3]+'p');
+      if (f[3] && /[123]/.test(f[3])) out.push(f[3]+'.os');
       if (f[4] && NUM[f[4]]) out.push(NUM[f[4]]);
     } else if (cat === 'C') {
-      const TYPE = {c:'coord', s:'subord'};
+      const TYPE = {c:'priredni', s:'podredni'};
       if (f[0]) out.push(TYPE[f[0]] || f[0]);
     } else if (cat === 'P' || cat === 'Z') {
       if (f.length) out.push(f.slice(0,4).join('-'));
@@ -1688,7 +1700,7 @@
   function msdTip(pair) {
     const parts = pair.split(' → ');
     if (parts.length === 2) {
-      return `gold: ${decodeMSD(parts[0].trim())}\npred: ${decodeMSD(parts[1].trim())}`;
+      return `referenčna oznaka: ${decodeMSD(parts[0].trim())}\nnapovedana oznaka: ${decodeMSD(parts[1].trim())}`;
     }
     const sym = pair.split(' ↔ ');
     if (sym.length === 2) {
@@ -1710,7 +1722,7 @@
   let examplesReturnFocus = null;
   let activeTbody = null;
   let currentExamples = [];
-  let currentExamplesTitle = 'Examples';
+  let currentExamplesTitle = 'Primeri';
   let currentExamplesContext = '';
   // Deep-linking: which examples panel is open ({section, keys}), so it can be
   // encoded in the URL hash and reopened on load. pendingExampleRef holds a ref
@@ -1774,7 +1786,7 @@
 
   function mergedContextText(section, label, baseContext, keyCount) {
     if (keyCount <= 1) return baseContext || '';
-    const mergeNote = 'Merged A↔B view: examples from both error directions.';
+    const mergeNote = 'Združen pogled A↔B: primeri iz obeh smeri napake.';
     if (section === 'xpos' && baseContext) return baseContext + '\n' + mergeNote;
     return mergeNote;
   }
@@ -1832,12 +1844,12 @@
   infoBackdrop.addEventListener('click', closeInfoPopover);
 
   function exampleExportHeaders() {
-    return ['Model', 'Corpus', 'Run', 'Pattern', 'Context', 'sid', 'token_id', 'token', 'gold', 'pred', 'sentence'];
+    return ['Orodje', 'Korpus', 'Zagon', 'Vzorec', 'Kontekst', 'ID povedi', 'ID pojavnice', 'Pojavnica', 'Referenčna oznaka', 'Napovedana oznaka', 'Poved'];
   }
 
   function exampleExportRows() {
     const c = corpus();
-    const pattern = currentExamplesTitle.replace(/\s*\(\d+ examples\)\s*$/, '');
+    const pattern = currentExamplesTitle.replace(/\s*\(primeri: \d+\)\s*$/, '');
     return (currentExamples || []).map(function(item) {
       return [
         modelLabel(),
@@ -1873,7 +1885,7 @@
     downloadCSV(
       exampleExportHeaders(),
       exampleExportRows(),
-      csvPrefix() + '_' + slugText(currentExamplesTitle) + '_examples.csv'
+      csvPrefix() + '_' + slugText(currentExamplesTitle) + '_primeri.csv'
     );
   });
   examplesMdBtn.addEventListener('click', function() {
@@ -1944,7 +1956,7 @@
 
   function renderExamples(items, titleText, contextText) {
     currentExamples = items || [];
-    currentExamplesTitle = titleText || 'Examples';
+    currentExamplesTitle = titleText || 'Primeri';
     currentExamplesContext = contextText || '';
     setExampleExportState();
     examplesPanelTitle.textContent = currentExamplesTitle;
@@ -1959,14 +1971,14 @@
       const p = document.createElement('p');
       p.className = 'note';
       p.style.margin = '4px 0';
-      p.textContent = 'No examples stored.';
+      p.textContent = 'Ni shranjenih primerov.';
       examplesPanelBody.appendChild(p);
     } else {
       for (const item of currentExamples) {
         const div = document.createElement('div');
         div.className = 'example-item';
         div.innerHTML = `
-          <div class="example-meta">sid=${item.sid} &middot; token=${item.token}#${item.token_id} &middot; gold=${item.gold} &middot; pred=${item.pred}</div>
+          <div class="example-meta">ID povedi=${item.sid} &middot; pojavnica=${item.token}#${item.token_id} &middot; referenčna oznaka=${item.gold} &middot; napovedana oznaka=${item.pred}</div>
           <div class="example-sentence">${item.sentence_html}</div>
         `;
         examplesPanelBody.appendChild(div);
@@ -1999,8 +2011,8 @@
     btn.type = 'button';
     btn.className = 'filter-clear';
     btn.innerHTML = '&times;';
-    btn.title = 'Clear filter';
-    btn.setAttribute('aria-label', 'Clear filter');
+    btn.title = 'Počisti filter';
+    btn.setAttribute('aria-label', 'Počisti filter');
     btn.hidden = true;
     const field = input.closest('.filter-field');
     if (field) field.appendChild(btn);
@@ -2043,24 +2055,24 @@
       // Header row (rebuilt fresh, so sort listeners do not accumulate).
       if (compare) {
         theadRow.innerHTML =
-          `<th>${cfg.tagHeader}</th><th class="right">Gold count</th>` +
+          `<th>${cfg.tagHeader}</th><th class="right">Pojavitve</th>` +
           `<th class="right">${modelShort()}${cfg.headerSuffix}</th>` +
           `<th class="right">${otherShort()}${cfg.headerSuffix}</th>` +
-          `<th class="right">Diff</th>`;
+          `<th class="right">Razlika</th>`;
       } else {
         theadRow.innerHTML =
-          `<th>${cfg.tagHeader}</th><th class="right">Gold count</th><th class="right">${cfg.shortMetric}</th>`;
+          `<th>${cfg.tagHeader}</th><th class="right">Pojavitve</th><th class="right">${cfg.shortMetric}</th>`;
       }
       noteEl.innerHTML = compare
-        ? `${cfg.subtitle} <em>Comparison shown: difference = ${modelLabel()} &minus; ${otherLabel()}.</em>`
+        ? `${cfg.subtitle} <em>Prikazana primerjava: razlika = ${modelLabel()} &minus; ${otherLabel()}.</em>`
         : cfg.subtitle;
-      compareBtn.textContent = compare ? 'Hide comparison' : `Compare with ${otherShort()}`;
+      compareBtn.textContent = compare ? 'Skrij primerjavo' : `Primerjaj s ${otherShort()}`;
       compareBtn.classList.toggle('active', compare);
 
       tbody.innerHTML = '';
       const colspan = compare ? 5 : 3;
       if (!sorted.length) {
-        renderEmptyRow(tbody, colspan, 'No matching rows.');
+        renderEmptyRow(tbody, colspan, 'Ni ustreznih vrstic.');
       } else {
         for (const row of sorted) {
           const mv = row[mk];
@@ -2071,15 +2083,15 @@
             else if (diff < 0) tr.classList.add('other-better');
             tr.innerHTML =
               `<td class="label">${row.tag}</td>` +
-              `<td class="right">${row.count}</td>` +
-              `<td class="right">${mv.toFixed(2)} ${bar('bar-model', mv)}</td>` +
-              `<td class="right">${ov.toFixed(2)} ${bar('bar-other', ov)}</td>` +
+              `<td class="right">${formatInt(row.count)}</td>` +
+              `<td class="right">${formatDecimal(mv)} ${bar('bar-model', mv)}</td>` +
+              `<td class="right">${formatDecimal(ov)} ${bar('bar-other', ov)}</td>` +
               `<td class="right ${deltaClass(diff, true)}">${deltaText(diff, 2)}</td>`;
           } else {
             tr.innerHTML =
               `<td class="label">${row.tag}</td>` +
-              `<td class="right">${row.count}</td>` +
-              `<td class="right">${mv.toFixed(2)} ${bar('bar-model', mv)}</td>`;
+              `<td class="right">${formatInt(row.count)}</td>` +
+              `<td class="right">${formatDecimal(mv)} ${bar('bar-model', mv)}</td>`;
           }
           tbody.appendChild(tr);
         }
@@ -2089,7 +2101,7 @@
       setCountNote(countNote, shown, sorted.length);
       setExpandedScrollState(tableWrap, expanded, sorted.length);
       if (sorted.length <= ROW_LIMIT) { toggle.hidden = true; }
-      else { toggle.hidden = false; toggle.textContent = expanded ? 'Show less' : 'Show more'; }
+      else { toggle.hidden = false; toggle.textContent = expanded ? 'Pokaži manj' : 'Pokaži več'; }
     }
 
     if (filterInput) {
@@ -2119,27 +2131,27 @@
   makeAccTable({
     tbodyId: 'rel-table', countNoteId: 'rel-count-note', toggleId: 'rel-toggle',
     filterInputId: 'rel-filter', noteId: 'rel-note', compareBtnId: 'rel-compare-btn',
-    tagHeader: 'Relation', shortMetric: 'LAS', headerSuffix: ' LAS',
+    tagHeader: 'Relacija', shortMetric: 'LAS', headerSuffix: ' LAS',
     metricWord: 'LAS', metricWordCap: 'LAS',
-    subtitle: 'For each UD dependency relation, LAS shows the percentage of tokens for which the tool predicted both the correct syntactic head and the correct dependency relation. The table is sorted by the number of examples in the manually annotated test set.',
+    subtitle: 'Metrika LAS za vsako skladenjsko relacijo UD prikazuje delež pojavnic, pri katerih je orodje pravilno napovedalo tako nadrejeno pojavnico (jedro) kot skladenjsko relacijo. Tabela je urejena po številu pojavitev v ročno označeni referenčni testni množici.',
     csvBtnId: 'rel-csv-btn', mdBtnId: 'rel-md-btn', csvSuffix: '_las-by-relation.csv',
     rows: () => corpus().deprel_accuracy_rows,
   });
   makeAccTable({
     tbodyId: 'upos-acc-table', countNoteId: 'upos-acc-count-note', toggleId: 'upos-acc-toggle',
     filterInputId: 'upos-acc-filter', noteId: 'upos-acc-note', compareBtnId: 'upos-acc-compare-btn',
-    tagHeader: 'UPOS', shortMetric: 'Accuracy', headerSuffix: '',
+    tagHeader: 'UPOS', shortMetric: 'Natančnost', headerSuffix: '',
     metricWord: 'accuracy', metricWordCap: 'Accuracy',
-    subtitle: 'For each universal part-of-speech tag (UPOS), Accuracy shows the percentage of tokens for which the tool predicted the correct part-of-speech tag. The table is sorted by the number of examples in the manually annotated test set.',
+    subtitle: 'Natančnost za vsako univerzalno besednovrstno oznako (UPOS) prikazuje delež pojavnic, ki jim je orodje pripisalo pravilno besedno vrsto. Tabela je urejena po številu pojavitev v ročno označeni referenčni testni množici.',
     csvBtnId: 'upos-acc-csv-btn', mdBtnId: 'upos-acc-md-btn', csvSuffix: '_upos-accuracy.csv',
     rows: () => corpus().upos_accuracy_rows,
   });
 
   // Deprel error buckets (built once; read from current model at render time)
   const bucketTitles = {
-    both_wrong: 'A. Wrong relation and wrong syntactic head',
-    rel_only: 'B. Correct syntactic head, wrong relation',
-    head_only: 'C. Correct relation, wrong syntactic head',
+    both_wrong: 'A. Napačno jedro in napačna oznaka',
+    rel_only: 'B. Pravilno jedro, napačna oznaka',
+    head_only: 'C. Pravilna oznaka, napačno jedro',
   };
   const deprelFilter = document.getElementById('deprel-err-filter');
   const deprelSections = document.getElementById('deprel-error-sections');
@@ -2161,13 +2173,13 @@
       mergeBtn = document.createElement('button');
       mergeBtn.type = 'button';
       mergeBtn.className = 'toggle-btn';
-      mergeBtn.textContent = 'Merge (A⇔B)';
+      mergeBtn.textContent = 'Združi (A⇔B)';
       actionBtns.appendChild(mergeBtn);
     }
     const csvBtn = document.createElement('button');
-    csvBtn.className = 'action-btn'; csvBtn.title = 'Export visible rows as CSV'; csvBtn.textContent = '↓ CSV';
+    csvBtn.className = 'action-btn'; csvBtn.title = 'Izvozi prikazane vrstice kot CSV'; csvBtn.textContent = '↓ CSV';
     const mdBtn = document.createElement('button');
-    mdBtn.className = 'action-btn'; mdBtn.title = 'Copy visible rows as Markdown'; mdBtn.textContent = '⎘ MD';
+    mdBtn.className = 'action-btn'; mdBtn.title = 'Kopiraj prikazane vrstice kot Markdown'; mdBtn.textContent = '⎘ MD';
     actionBtns.appendChild(csvBtn);
     actionBtns.appendChild(mdBtn);
     bucketHeader.appendChild(actionBtns);
@@ -2191,7 +2203,7 @@
     const tableWrap = document.createElement('div');
     tableWrap.className = 'table-wrap';
     const table = document.createElement('table');
-    table.innerHTML = `<thead><tr><th>Error pair</th><th class="right">Error count</th></tr></thead><tbody></tbody>`;
+    table.innerHTML = `<thead><tr><th>Par napake</th><th class="right">Število napak</th></tr></thead><tbody></tbody>`;
     const tbody = table.querySelector('tbody');
     tableWrap.appendChild(table);
     wrapper.appendChild(tableWrap);
@@ -2229,11 +2241,11 @@
       const displayRows = computeRows();
       tbody.innerHTML = '';
       if (!displayRows.length) {
-        renderEmptyRow(tbody, 2, 'No matching rows.');
+        renderEmptyRow(tbody, 2, 'Ni ustreznih vrstic.');
       } else {
         for (const row of displayRows) {
           const tr = document.createElement('tr');
-          tr.innerHTML = `<td class="label">${row.label}</td><td class="right">${row.count}</td>`;
+          tr.innerHTML = `<td class="label">${row.label}</td><td class="right">${formatInt(row.count)}</td>`;
           wireClickableRow(tr, tbody, function(e) {
             const keys = row.keys || [row.key];
             const ref = makeExampleRef('deprel-' + bucket, keys);
@@ -2249,9 +2261,9 @@
             }
             currentExampleRef = ref;
             const contextText = mergedContextText('deprel-' + bucket, row.label, '', keys.length);
-            renderExamples(exs, `${modelShort()} · ${bucketTitles[bucket]} · ${row.label} (${exs.length} examples)`, contextText);
+            renderExamples(exs, `${modelShort()} · ${bucketTitles[bucket]} · ${row.label} (primeri: ${exs.length})`, contextText);
             writeHash();
-          }, `Show examples for ${row.label}`);
+          }, `Prikaži primere za ${row.label}`);
           tbody.appendChild(tr);
         }
       }
@@ -2261,7 +2273,7 @@
       setCountNote(countNote, shown, displayRows.length);
       setExpandedScrollState(tableWrap, expanded, displayRows.length);
       if (displayRows.length <= ROW_LIMIT) { toggle.hidden = true; }
-      else { toggle.hidden = false; toggle.textContent = expanded ? 'Show less' : 'Show more'; }
+      else { toggle.hidden = false; toggle.textContent = expanded ? 'Pokaži manj' : 'Pokaži več'; }
     }
 
     toggle.addEventListener('click', function() { expanded = !expanded; render(); });
@@ -2274,7 +2286,7 @@
         merged = !merged;
         expanded = false;
         mergeBtn.classList.toggle('active', merged);
-        mergeBtn.textContent = merged ? 'Show (A→B)' : 'Merge (A⇔B)';
+        mergeBtn.textContent = merged ? 'Pokaži (A→B)' : 'Združi (A⇔B)';
         render();
       });
     }
@@ -2284,7 +2296,7 @@
       onFilter() { expanded = false; render(); },
       reset() {
         expanded = false; merged = false;
-        if (mergeBtn) { mergeBtn.classList.remove('active'); mergeBtn.textContent = 'Merge (A⇔B)'; }
+        if (mergeBtn) { mergeBtn.classList.remove('active'); mergeBtn.textContent = 'Združi (A⇔B)'; }
       },
     };
     controllers.push(ctrl);
@@ -2339,7 +2351,7 @@
       const displayRows = computeRows();
       tbody.innerHTML = '';
       if (!displayRows.length) {
-        renderEmptyRow(tbody, 2, 'No matching rows.');
+        renderEmptyRow(tbody, 2, 'Ni ustreznih vrstic.');
       } else {
         for (const row of displayRows) {
           const tr = document.createElement('tr');
@@ -2354,7 +2366,7 @@
           }
           const countCell = document.createElement('td');
           countCell.className = 'right';
-          countCell.textContent = row.count;
+          countCell.textContent = formatInt(row.count);
           tr.appendChild(labelCell);
           tr.appendChild(countCell);
           wireClickableRow(tr, tbody, function(e) {
@@ -2372,9 +2384,9 @@
             }
             currentExampleRef = ref;
             contextText = mergedContextText(layer, row.label, contextText, keys.length);
-            renderExamples(exs, `${modelShort()} · ${layer.toUpperCase()} · ${row.label} (${exs.length} examples)`, contextText);
+            renderExamples(exs, `${modelShort()} · ${layer.toUpperCase()} · ${row.label} (primeri: ${exs.length})`, contextText);
             writeHash();
-          }, `Show examples for ${row.label}`);
+          }, `Prikaži primere za ${row.label}`);
           tbody.appendChild(tr);
         }
       }
@@ -2384,14 +2396,14 @@
       setCountNote(countNote, shown, displayRows.length);
       setExpandedScrollState(tableWrap, expanded, displayRows.length);
       if (displayRows.length <= ROW_LIMIT) { toggle.hidden = true; }
-      else { toggle.hidden = false; toggle.textContent = expanded ? 'Show less' : 'Show more'; }
+      else { toggle.hidden = false; toggle.textContent = expanded ? 'Pokaži manj' : 'Pokaži več'; }
     }
 
     mergeBtn.addEventListener('click', function() {
       merged = !merged;
       expanded = false;
       mergeBtn.classList.toggle('active', merged);
-      mergeBtn.textContent = merged ? 'Show (A→B)' : 'Merge (A↔B)';
+      mergeBtn.textContent = merged ? 'Pokaži (A→B)' : 'Združi (A↔B)';
       render();
     });
     toggle.addEventListener('click', () => { expanded = !expanded; render(); });
@@ -2412,7 +2424,7 @@
       reset() {
         expanded = false; merged = false;
         mergeBtn.classList.remove('active');
-        mergeBtn.textContent = 'Merge (A↔B)';
+        mergeBtn.textContent = 'Združi (A↔B)';
         if (filterInput) {
           filterInput.value = '';
           syncFilterReset(filterInput);
@@ -2427,33 +2439,41 @@
 
   // ---------- chrome (title, overview, provenance, names) ----------
   const metricsOrder = [
-    ['Lemma', 'lemma', 'Lemmatisation',
-      'The percentage of tokens assigned the correct <strong>lemma</strong> (dictionary base form). For example, the lemma of <em>delamo</em> is <em>delati</em> and of <em>mizo</em> is <em>miza</em>.'],
-    ['UPOS', 'upos', 'Part-of-speech tag',
-      'The percentage of tokens assigned the correct <strong>universal part-of-speech tag</strong> — one of the 17 Universal Dependencies categories such as <code>NOUN</code>, <code>VERB</code>, <code>ADJ</code>, <code>ADV</code>.'],
-    ['XPOS', 'xpos', 'MULTEXT-East morphosyntactic tag',
-      'The percentage of tokens assigned the correct language-specific <strong>MULTEXT-East / JOS</strong> morphosyntactic description (MSD), which encodes detailed features such as case, number and gender (e.g. <code>Ncmsn</code> = common noun, masculine, singular, nominative).'],
-    ['UAS', 'uas', 'Unlabelled attachment score',
-      'The percentage of tokens attached to the correct <strong>syntactic head</strong>, ignoring the dependency-relation label.'],
-    ['LAS', 'las', 'Labelled attachment score',
-      'The percentage of tokens attached to the correct syntactic head <strong>and</strong> labelled with the correct dependency relation. It is the standard single summary metric for dependency parsing.'],
+    ['Lema', 'lemma', 'Lematizacija',
+      'Delež pojavnic, ki jim je bila dodeljena pravilna <strong>lema</strong> (slovarska osnovna oblika). Na primer, lema besede <em>delamo</em> je <em>delati</em>, besede <em>mizo</em> pa <em>miza</em>.'],
+    ['UPOS', 'upos', 'Besedna vrsta',
+      'Delež pojavnic, ki jim je bila dodeljena pravilna <strong>univerzalna besednovrstna oznaka</strong> — ena od 17 kategorij sheme Universal Dependencies, kot so <code>NOUN</code>, <code>VERB</code>, <code>ADJ</code>, <code>ADV</code>.'],
+    ['XPOS', 'xpos', 'Oblikoskladenjska oznaka (MULTEXT-East)',
+      'Delež pojavnic, ki jim je bil dodeljen pravilen jezikovno specifičen <strong>oblikoskladenjski opis (MSD)</strong> po shemi MULTEXT-East / JOS, ki kodira podrobne lastnosti, kot so sklon, število in spol (npr. <code>Ncmsn</code> = občno ime, moški spol, ednina, imenovalnik).'],
+    ['UAS', 'uas', 'Delež pravilno določenih jeder',
+      'Delež pojavnic s pravilno napovedano <strong>nadrejeno pojavnico (jedrom)</strong>, ne glede na vrsto skladenjske relacije.'],
+    ['LAS', 'las', 'Delež pravilno določenih jeder in oznak',
+      'Delež pojavnic s pravilno napovedano <strong>nadrejeno pojavnico (jedrom)</strong> in vrsto skladenjske relacije med njima. To je standardna povzemalna mera za skladenjsko razčlenjevanje.'],
   ];
 
   function updateNames() {
     document.querySelectorAll('.model-name').forEach(el => { el.textContent = modelLabel(); });
   }
 
+  // Slovenian provenance text (the shared data file carries the English original).
+  const PROV_SL = {
+    ssj: { trankit: `SPOT-Trankit &mdash; slovenski model <strong>1.3</strong> (<a href="https://www.clarin.si/repository/xmlui/handle/11356/2201">CLARIN 11356/2201</a>, arhiv <a href="https://www.clarin.si/repository/xmlui/bitstream/handle/11356/2201/trankit-sl-ssj%2bsststand%2bsstpog.zip"><code>trankit-sl-ssj+sststand+sstpog.zip</code></a>, MD5 <code>ff1f3b86a4996fd5944db14725c602d8</code>), pognan s <a href="https://pypi.org/project/trankit/1.1.2/">trankit==1.1.2</a>. Različica 1.3 v učne podatke SST dodaja nestandardno govorjeno slovenščino in nadomešča <a href="https://www.clarin.si/repository/xmlui/handle/11356/1997">model 1.2</a>; tu je uporabljena za vse testne množice. Na tej pisni testni množici je nadomeščeni <a href="https://www.clarin.si/repository/xmlui/handle/11356/1997">model 1.2</a> dosegel neznatno boljše rezultate (LAS 94,59 proti 94,48, leme 98,05 proti 97,95, XPOS 97,49 proti 97,43, UAS 95,79 proti 95,72; UPOS izenačen).`, classla: `CLASSLA-Stanza &mdash; pognan s <a href="https://pypi.org/project/classla/2.2.1/">classla==2.2.1</a> (<code>classla.Pipeline('sl', pos_use_lexicon=True)</code>).`, data: `testna množica <a href="https://github.com/UniversalDependencies/UD_Slovenian-SSJ/blob/master/sl_ssj-ud-test.conllu">UD Slovenian SSJ</a>, <a href="https://github.com/UniversalDependencies/UD_Slovenian-SSJ/tree/master">v2.17</a> &mdash; pisna standardna slovenščina.` },
+    sst: { trankit: `SPOT-Trankit &mdash; slovenski model <strong>1.3</strong> (<a href="https://www.clarin.si/repository/xmlui/handle/11356/2201">CLARIN 11356/2201</a>, arhiv <a href="https://www.clarin.si/repository/xmlui/bitstream/handle/11356/2201/trankit-sl-ssj%2bsststand%2bsstpog.zip"><code>trankit-sl-ssj+sststand+sstpog.zip</code></a>, MD5 <code>ff1f3b86a4996fd5944db14725c602d8</code>), pognan s <a href="https://pypi.org/project/trankit/1.1.2/">trankit==1.1.2</a>. Različica 1.3 v učne podatke SST dodaja nestandardno govorjeno slovenščino in nadomešča <a href="https://www.clarin.si/repository/xmlui/handle/11356/1997">model 1.2</a>; tu je uporabljena za vse testne množice.`, classla: `CLASSLA-Stanza &mdash; pognan s <a href="https://pypi.org/project/classla/2.2.1/">classla==2.2.1</a> (<code>classla.Pipeline('sl', type='spoken')</code>; leksikon je pri govorjenem modelu izklopljen).`, data: `testna množica <a href="https://github.com/UniversalDependencies/UD_Slovenian-SST/blob/master/sl_sst-ud-test.conllu">UD Slovenian SST</a>, <a href="https://github.com/UniversalDependencies/UD_Slovenian-SST/tree/master">v2.16</a> &mdash; govorjena slovenščina, standardizirani zapis.` },
+    pog: { trankit: `SPOT-Trankit &mdash; slovenski model <strong>1.3</strong> (<a href="https://www.clarin.si/repository/xmlui/handle/11356/2201">CLARIN 11356/2201</a>, arhiv <a href="https://www.clarin.si/repository/xmlui/bitstream/handle/11356/2201/trankit-sl-ssj%2bsststand%2bsstpog.zip"><code>trankit-sl-ssj+sststand+sstpog.zip</code></a>, MD5 <code>ff1f3b86a4996fd5944db14725c602d8</code>), pognan s <a href="https://pypi.org/project/trankit/1.1.2/">trankit==1.1.2</a>. Različica 1.3 v učne podatke SST dodaja nestandardno govorjeno slovenščino in nadomešča <a href="https://www.clarin.si/repository/xmlui/handle/11356/1997">model 1.2</a>; tu je uporabljena za vse testne množice.`, classla: `CLASSLA-Stanza &mdash; pognan s <a href="https://pypi.org/project/classla/2.2.1/">classla==2.2.1</a> (<code>classla.Pipeline('sl', type='spoken')</code>; leksikon je pri govorjenem modelu izklopljen).`, data: `testna množica, izpeljana iz UD Slovenian SST in pripravljena za to evalvacijo &mdash; govorjena slovenščina, <strong>pogovorni (&lsquo;pog&rsquo;) zapis</strong>, pri katerem je pojavna oblika vsake pojavnice njena govorjena, nestandardna izgovarjava (npr. <em>jest</em> namesto <em>jaz</em>). V priloženem testnem arhivu (zip) je povezana s standardiziranim zapisom <code>stan</code>.` },
+  };
+  const DOMAIN_SL = { ssj: 'pisni', sst: 'govorjeni · standardizirani', pog: 'govorjeni · pogovorni' };
+
   function provenanceHtml(c) {
-    const p = c.provenance || {};
-    const tool = (p.models && p.models[modelKey()]) ? p.models[modelKey()] : '';
-    const data = p.data || c.provenance_html || '';
-    const size = `${formatInt(c.gold_sentences)} sentences &middot; ${formatInt(c.compared_tokens)} tokens`;
-    const setup = 'Predictions were run on pre-tokenised text, with gold sentence and token boundaries supplied.';
+    const p = PROV_SL[c.key] || {};
+    const tool = p[modelKey()] || '';
+    const data = p.data || '';
+    const size = `${formatInt(c.gold_sentences)} povedi &middot; ${formatInt(c.compared_tokens)} pojavnic`;
+    const setup = 'Napovedi so bile pridobljene na vnaprej tokeniziranem besedilu, pri čemer so bile meje povedi in pojavnic podane iz ročno označenih referenčnih podatkov.';
     const lines = [];
-    if (tool) lines.push(`<div class="provenance-line"><strong>Selected tool:</strong> ${tool}</div>`);
-    if (data) lines.push(`<div class="provenance-line"><strong>Test set:</strong> ${data}</div>`);
-    lines.push(`<div class="provenance-line"><strong>Size:</strong> ${size}</div>`);
-    lines.push(`<div class="provenance-line"><strong>Evaluation setup:</strong> ${setup} <span style="color:#666666">(run <code>${c.run_id}</code>)</span></div>`);
+    if (tool) lines.push(`<div class="provenance-line"><strong>Izbrano orodje:</strong> ${tool}</div>`);
+    if (data) lines.push(`<div class="provenance-line"><strong>Testna množica:</strong> ${data}</div>`);
+    lines.push(`<div class="provenance-line"><strong>Velikost:</strong> ${size}</div>`);
+    lines.push(`<div class="provenance-line"><strong>Postopek evalvacije:</strong> ${setup} <span style="color:#666666">(zagon <code>${c.run_id}</code>)</span></div>`);
     return lines.join('');
   }
 
@@ -2472,7 +2492,7 @@
       const val = m[key];
       const box = document.createElement('div');
       box.className = 'metric-box' + (label === 'LAS' ? ' highlight' : '');
-      box.innerHTML = `<div class="label">${label}</div><div class="val">${val != null ? val.toFixed(2) : '—'}</div><button type="button" class="sub info-link" title="What is this?">${desc}</button>`;
+      box.innerHTML = `<div class="label">${label}</div><div class="val">${val != null ? formatDecimal(val) : '—'}</div><button type="button" class="sub info-link" title="Kaj je to?">${desc}</button>`;
       box.querySelector('.info-link').addEventListener('click', function(e) {
         e.stopPropagation();
         openInfoPopover(`${label.toUpperCase()} — ${desc}`, info);
@@ -2635,7 +2655,7 @@
   });
   buildDropdown('corpus-select', DATA.corpus_order, function(k) {
     const c = DATA.corpora[k];
-    return c.domain ? `${c.label} · ${c.domain}` : c.label;
+    return c.domain ? `${c.label} · ${DOMAIN_SL[k] || c.domain}` : c.label;
   }, function(k) {
     if (k === state.corpus) return;
     state.corpus = k; renderAll();
@@ -2662,7 +2682,7 @@
       for (const k of keys) items = items.concat((ed.deprel_examples[bucket] || {})[k] || []);
       const label = keys.length === 1 ? matched[0].label : labelFromKeyParts(keys[0], matched[0].label);
       context = mergedContextText(section, label, '', keys.length);
-      title = `${modelShort()} · ${bucketTitles[bucket]} · ${label} (${items.length} examples)`;
+      title = `${modelShort()} · ${bucketTitles[bucket]} · ${label} (primeri: ${items.length})`;
     } else {
       const layer = section;
       const rows = (ed.tag_error_rows && ed.tag_error_rows[layer]) || [];
@@ -2673,7 +2693,7 @@
       const label = tagMergedLabel(matched);
       if (layer === 'xpos') context = msdTip(label);
       context = mergedContextText(layer, label, context, keys.length);
-      title = `${modelShort()} · ${layer.toUpperCase()} · ${label} (${items.length} examples)`;
+      title = `${modelShort()} · ${layer.toUpperCase()} · ${label} (primeri: ${items.length})`;
     }
     currentExampleRef = ref;
     renderExamples(items, title, context);

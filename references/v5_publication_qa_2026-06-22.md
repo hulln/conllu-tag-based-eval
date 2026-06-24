@@ -1,6 +1,7 @@
 # v5 QA audit - 2026-06-22
 
-Scope: `tables/comparison_table_v5.html`, `tables/comparison_table_v5_data.js`,
+Scope: `tables/comparison_table_v5.html`, `tables/comparison_table_v5_sl.html`,
+`tables/comparison_table_v5_data.js`,
 `scripts/build_interactive_comparison_table_v5.py`, and the three v5 run
 artifacts with run stamp `20260622-0810-tk13`.
 
@@ -16,8 +17,8 @@ artifacts with run stamp `20260622-0810-tk13`.
   labels are present.
 - Acknowledgement, recommended citation, copyable BibTeX, and ARIS/CJVT/CLARIN.SI
   logos are present.
-- Website-facing copy uses UK spelling for checked terms: `normalised`,
-  `standardised`, `lemmatisation`, `Unlabelled`, `Labelled`, and
+- Website-facing copy uses UK spelling for checked terms: `standardised`,
+  `lemmatisation`, `Unlabelled`, `Labelled`, and
   `Acknowledgement`.
 
 ## Gold files and provenance
@@ -25,7 +26,7 @@ artifacts with run stamp `20260622-0810-tk13`.
 | Test set | File | Sentences | Tokens | Verification |
 |---|---:|---:|---:|---|
 | SSJ written | `data/gold/sl_ssj-ud-test.conllu` | 1,282 | 25,442 | Exact SHA-256 match to UD Slovenian SSJ `r2.17` |
-| SST normalised | `data/gold/sl_sst-ud-test.conllu` | 432 | 11,443 | Exact SHA-256 match to UD Slovenian SST `r2.16` and `r2.17` |
+| SST standardised | `data/gold/sl_sst-ud-test.conllu` | 432 | 11,443 | Exact SHA-256 match to UD Slovenian SST `r2.16` and `r2.17` |
 | SST colloquial | `data/gold/sl_sst-ud-test-pog.conllu` | 420 | 11,443 | Exact SHA-256 match to `pog/sl_sst-ud-test-pog.conllu` inside supplied `sst2.15-dev3-pog.zip` |
 
 Relevant hashes:
@@ -43,7 +44,7 @@ All v5 table entries use run stamp `20260622-0810-tk13`.
 | Test set | Run ID | Trankit | CLASSLA |
 |---|---|---|---|
 | SSJ written | `20260622-0810-tk13_sl-ssj-ud-test_full` | SPOT-Trankit 1.3 | `classla.Pipeline('sl', pos_use_lexicon=True)` |
-| SST normalised | `20260622-0810-tk13_sl-sst-ud-test_full` | SPOT-Trankit 1.3 | `classla.Pipeline('sl', type='spoken')` |
+| SST standardised | `20260622-0810-tk13_sl-sst-ud-test_full` | SPOT-Trankit 1.3 | `classla.Pipeline('sl', type='spoken')` |
 | SST colloquial | `20260622-0810-tk13_sl-sst-ud-test-pog_full` | SPOT-Trankit 1.3 | `classla.Pipeline('sl', type='spoken')` |
 
 For all six prediction files, sentence count, token count, and `sent_id`
@@ -56,20 +57,20 @@ sequence match the selected gold file. Re-run `qa_validate_run.py` reports
 |---|---|---:|---:|---:|---:|---:|
 | SSJ written | SPOT-Trankit | 94.48 | 95.72 | 98.99 | 97.43 | 97.95 |
 | SSJ written | CLASSLA-Stanza | 90.48 | 92.12 | 98.60 | 97.08 | 98.94 |
-| SST normalised | SPOT-Trankit | 86.86 | 89.20 | 98.78 | 97.43 | 98.71 |
-| SST normalised | CLASSLA-Stanza | 82.08 | 85.24 | 98.16 | 96.75 | 99.23 |
+| SST standardised | SPOT-Trankit | 86.86 | 89.20 | 98.78 | 97.43 | 98.71 |
+| SST standardised | CLASSLA-Stanza | 82.08 | 85.24 | 98.16 | 96.75 | 99.23 |
 | SST colloquial | SPOT-Trankit | 83.76 | 86.45 | 97.88 | 95.58 | 95.84 |
 | SST colloquial | CLASSLA-Stanza | 73.96 | 78.97 | 93.25 | 89.66 | 89.38 |
 
 `tables/comparison_table_v5_data.js` is reproducible from
 `scripts/build_interactive_comparison_table_v5.py`.
 
-## SST normalised/pog pairing note
+## SST standardised/pog pairing note
 
 The supplied zip contains a paired `stan`/`pog` test set. The local `stan` and
 `pog` files have the same 420 sentence IDs, the same 11,443 tokens, and no
 structural differences except surface forms/text. The current v5 table uses the
-official UD SST normalised test file for the normalised row instead. That file
+official UD SST standardised test file for the standardised row instead. That file
 has the same 11,443 tokens but 432 sentence blocks.
 
 This is accurate as documented. If the intended comparison is strictly paired

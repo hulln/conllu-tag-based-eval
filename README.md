@@ -8,9 +8,13 @@ sentence/token boundaries fixed, predictions on pre-tokenised text).
 
 **Current table:** [live v5 table](https://conllu-tag-based-eval-table.netlify.app/comparison_table_v5.html)
 ([local file](tables/comparison_table_v5.html)) combines SSJ written, SST
-normalised, and supplied SST colloquial (`pog`) evaluation. It provides per-tool
+standardised, and supplied SST colloquial (`pog`) evaluation. It provides per-tool
 metric summaries, accuracy/error tables, examples, compare mode, deep links, and
 CSV/Markdown export.
+
+**Slovenian version:** [live v5 table](https://conllu-tag-based-eval-table.netlify.app/comparison_table_v5_sl.html)
+([local file](tables/comparison_table_v5_sl.html)). Both pages use the same generated
+data bundle.
 
 v5 uses [SPOT-Trankit 1.3](https://www.clarin.si/repository/xmlui/handle/11356/2201)
 for all test sets and [CLASSLA-Stanza 2.2.1](https://pypi.org/project/classla/2.2.1/).
@@ -20,7 +24,7 @@ models predict lemma, POS/morphology, and dependency annotation.
 | Test set | Gold data | SPOT-Trankit | CLASSLA-Stanza |
 |---|---|---|---|
 | SSJ written | UD Slovenian SSJ `r2.17` | 1.3 | `classla.Pipeline('sl', pos_use_lexicon=True)` |
-| SST normalised | UD Slovenian SST `r2.16` / `r2.17` | 1.3 | `classla.Pipeline('sl', type='spoken')` |
+| SST standardised | UD Slovenian SST `r2.16` / `r2.17` | 1.3 | `classla.Pipeline('sl', type='spoken')` |
 | SST colloquial | supplied `pog` test file | 1.3 | `classla.Pipeline('sl', type='spoken')` |
 
 The supplied paired `stan` file is present locally but is not evaluated in v5.

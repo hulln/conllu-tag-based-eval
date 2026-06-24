@@ -70,7 +70,7 @@ DATA_PROV_SSJ = (
 )
 DATA_PROV_SST = (
     '<a href="https://github.com/UniversalDependencies/UD_Slovenian-SST/blob/master/sl_sst-ud-test.conllu">UD Slovenian SST</a> '
-    'test set, <a href="https://github.com/UniversalDependencies/UD_Slovenian-SST/tree/master">v2.16</a> &mdash; spoken Slovenian, normalised transcription.'
+    'test set, <a href="https://github.com/UniversalDependencies/UD_Slovenian-SST/tree/master">v2.16</a> &mdash; spoken Slovenian, standardised transcription.'
 )
 DATA_PROV_POG = (
     'UD Slovenian SST-derived test set supplied for this evaluation &mdash; spoken Slovenian, '
@@ -95,7 +95,7 @@ CORPORA = [
     {
         "key": "sst",
         "label": "SST-UD",
-        "domain": "spoken · normalised",
+        "domain": "spoken · standardised",
         "run_id": "20260622-0810-tk13_sl-sst-ud-test_full",
         "gold": "data/gold/sl_sst-ud-test.conllu",
         "provenance": {

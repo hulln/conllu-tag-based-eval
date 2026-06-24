@@ -23,7 +23,7 @@ Trankit 1.3 run, CLARIN `11356/2201`, run `20260604-0859-tk13` — its SST predi
 
 v5 run, CLARIN `11356/2201`, run `20260622-0810-tk13`:
 - SSJ written: Trankit and CLASSLA aligned predictions for `sl_ssj-ud-test`
-- SST normalised: Trankit and CLASSLA aligned predictions for official `sl_sst-ud-test`
+- SST standardised: Trankit and CLASSLA aligned predictions for official `sl_sst-ud-test`
 - SST colloquial: Trankit and CLASSLA aligned predictions for supplied `sl_sst-ud-test-pog`
 
 No v5 prediction files are currently present for the supplied paired `stan`
