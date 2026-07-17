@@ -37,6 +37,15 @@ Previous table versions are kept for traceability: [v4](https://conllu-tag-based
 [v2 SSJ](https://conllu-tag-based-eval-table.netlify.app/comparison_table_v2_ssj.html),
 and [v1 legacy](https://conllu-tag-based-eval-table.netlify.app/comparison_table_v1_ssj.html).
 
+## Publishing (CJVT)
+
+The v5 pages (EN + SL) are being published on CJVT infrastructure at
+https://orodja.cjvt.si/oznacevalnik/eval/ (in progress, July 2026). Only the
+files needed to serve the pages (the two v5 HTMLs, the shared data bundle,
+favicons, and logos) are mirrored to a separate deploy repository on the CJVT
+Gitea (`webapps/oznacevalnik-eval`); this repository remains the development
+workspace.
+
 ## Setup & rerun
 
 ```bash
