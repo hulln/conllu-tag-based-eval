@@ -30,10 +30,12 @@
     border-radius: 2px;
     box-shadow: 0 1px 1px 0 #e0e0e0;
   }
+  /* Floated rather than absolutely positioned: the h1 then wraps around the
+     switch instead of running underneath it. On narrow screens the title needs
+     3-5 lines and its first line used to slide under the SL/EN links. */
   .lang-switch {
-    position: absolute;
-    top: 16px;
-    right: 20px;
+    float: right;
+    margin: -2px -2px 2px 16px;
     display: flex;
     gap: 4px;
     align-items: center;
@@ -60,6 +62,7 @@
     font-weight: 600;
   }
   .subtitle {
+    clear: right;
     max-width: 760px;
     font-size: 13px;
     color: #666;
