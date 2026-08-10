@@ -46,6 +46,17 @@ favicons, and logos) are mirrored to a separate deploy repository on the CJVT
 Gitea (`webapps/oznacevalnik-eval`); this repository remains the development
 workspace.
 
+## Stanza 1.13 vs 1.14 comparison
+
+A separate aligned evaluation compares **Stanza 1.13.0** and **Stanza 1.14.0**
+on the same SSJ-UD test set, using both `default` and `default_accurate`
+packages.
+
+The complete reproducibility record, including Docker environments, exact
+package versions, model caches, encountered compatibility issues, run commands
+and results, is in
+[docker/README_stanza_versions.md](docker/README_stanza_versions.md).
+
 ## Setup & rerun
 
 ```bash

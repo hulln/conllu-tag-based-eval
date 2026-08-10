@@ -8,6 +8,13 @@ Evaluation outputs and analysis reports.
 
 Supplementary base-mode outputs are local-only (gitignored).
 
+Stanza 1.13.0 vs 1.14.0 evaluation outputs are stored in
+[`stanza/`](stanza/). The directory contains the four full SSJ evaluator
+outputs for `default` and `default_accurate` under both Stanza versions.
+
+See [`../docker/README_stanza_versions.md`](../docker/README_stanza_versions.md)
+for the full reproducibility record.
+
 Current active canonical runs:
 
 - SSJ: [output/20260414-1819_sl-ssj-ud-test_full](output/20260414-1819_sl-ssj-ud-test_full/)

@@ -1,0 +1,56 @@
+# newdoc id = ssj562
+# newpar id = ssj562.2919
+# sent_id = ssj562.2919.10333
+# text = Deloma se strinjam z drugim delom članka, ko opisuje finančne učinke reforme.
+# document_genre = magazine
+1	Deloma	deloma	ADV	Rgp	Degree=Pos	3	advmod	_	NER=O
+2	se	se	PRON	Px------y	PronType=Prs|Reflex=Yes|Variant=Short	3	expl	_	NER=O
+3	strinjam	strinjati	VERB	Vmpr1s	Aspect=Imp|Mood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin	0	root	_	NER=O
+4	z	z	ADP	Si	Case=Ins	6	case	_	NER=O
+5	drugim	drug	ADJ	Mlpmsi	Case=Ins|Gender=Masc|Number=Sing	6	amod	_	NER=O
+6	delom	del	NOUN	Ncmsi	Case=Ins|Gender=Masc|Number=Sing	3	obl	_	NER=O
+7	članka	članek	NOUN	Ncmsg	Case=Gen|Gender=Masc|Number=Sing	6	nmod	_	NER=O|SpaceAfter=No
+8	,	,	PUNCT	Z	_	10	punct	_	NER=O
+9	ko	ko	SCONJ	Cs	_	10	mark	_	NER=O
+10	opisuje	opisovati	VERB	Vmpr3s	Aspect=Imp|Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	6	acl	_	NER=O
+11	finančne	finančen	ADJ	Agpmpa	Case=Acc|Degree=Pos|Gender=Masc|Number=Plur	12	amod	_	NER=O
+12	učinke	učinek	NOUN	Ncmpa	Case=Acc|Gender=Masc|Number=Plur	10	obj	_	NER=O
+13	reforme	reforma	NOUN	Ncfsg	Case=Gen|Gender=Fem|Number=Sing	12	nmod	_	NER=O|SpaceAfter=No
+14	.	.	PUNCT	Z	_	3	punct	_	NER=O
+
+# sent_id = ssj562.2919.10334
+# text = Namreč po zdravi "kmečki pameti" in lastnih izkušnjah še nobena reforma ni prinesla nečesa več, kvečjemu nekaj manj, predvsem pa na drugačen način, po možnosti boljši.
+# document_genre = magazine
+1	Namreč	namreč	CCONJ	Cc	_	15	cc	_	NER=O
+2	po	po	ADP	Sl	Case=Loc	6	case	_	NER=O
+3	zdravi	zdrav	ADJ	Agpfsl	Case=Loc|Degree=Pos|Gender=Fem|Number=Sing	6	amod	_	NER=O
+4	"	"	PUNCT	Z	_	6	punct	_	NER=O|SpaceAfter=No
+5	kmečki	kmečki	ADJ	Agpfsl	Case=Loc|Degree=Pos|Gender=Fem|Number=Sing	6	amod	_	NER=O
+6	pameti	pamet	NOUN	Ncfsl	Case=Loc|Gender=Fem|Number=Sing	15	obl	_	NER=O|SpaceAfter=No
+7	"	"	PUNCT	Z	_	6	punct	_	NER=O
+8	in	in	CCONJ	Cc	_	10	cc	_	NER=O
+9	lastnih	lasten	ADJ	Agpfpl	Case=Loc|Degree=Pos|Gender=Fem|Number=Plur	10	amod	_	NER=O
+10	izkušnjah	izkušnja	NOUN	Ncfpl	Case=Loc|Gender=Fem|Number=Plur	6	conj	_	NER=O
+11	še	še	PART	Q	_	13	advmod	_	NER=O
+12	nobena	noben	DET	Pz-fsn	Case=Nom|Gender=Fem|Number=Sing|PronType=Neg	13	det	_	NER=O
+13	reforma	reforma	NOUN	Ncfsn	Case=Nom|Gender=Fem|Number=Sing	15	nsubj	_	NER=O
+14	ni	biti	AUX	Va-r3s-y	Mood=Ind|Number=Sing|Person=3|Polarity=Neg|Tense=Pres|VerbForm=Fin	15	aux	_	NER=O
+15	prinesla	prinesti	VERB	Vmep-sf	Aspect=Perf|Gender=Fem|Number=Sing|VerbForm=Part	0	root	_	NER=O
+16	nečesa	nekaj	PRON	Pi-nsg	Case=Gen|Gender=Neut|Number=Sing|PronType=Ind	15	obj	_	NER=O
+17	več	več	DET	Rgc	PronType=Ind	15	advmod	_	NER=O|SpaceAfter=No
+18	,	,	PUNCT	Z	_	21	punct	_	NER=O
+19	kvečjemu	kvečjemu	PART	Q	_	21	advmod	_	NER=O
+20	nekaj	nekaj	DET	Rgp	PronType=Ind	21	advmod	_	NER=O
+21	manj	manj	DET	Rgc	PronType=Ind	17	conj	_	NER=O|SpaceAfter=No
+22	,	,	PUNCT	Z	_	27	punct	_	NER=O
+23	predvsem	predvsem	PART	Q	_	27	advmod	_	NER=O
+24	pa	pa	CCONJ	Cc	_	27	orphan	_	NER=O
+25	na	na	ADP	Sa	Case=Acc	27	case	_	NER=O
+26	drugačen	drugačen	ADJ	Agpmsan	Case=Acc|Definite=Ind|Degree=Pos|Gender=Masc|Number=Sing	27	amod	_	NER=O
+27	način	način	NOUN	Ncmsan	Animacy=Inan|Case=Acc|Gender=Masc|Number=Sing	15	parataxis	_	NER=O|SpaceAfter=No
+28	,	,	PUNCT	Z	_	31	punct	_	NER=O
+29	po	po	ADP	Sl	Case=Loc	30	case	_	NER=O
+30	možnosti	možnost	NOUN	Ncfsl	Case=Loc|Gender=Fem|Number=Sing	31	nmod	_	NER=O
+31	boljši	dober	ADJ	Agcmsny	Case=Nom|Definite=Def|Degree=Cmp|Gender=Masc|Number=Sing	27	appos	_	NER=O|SpaceAfter=No
+32	.	.	PUNCT	Z	_	15	punct	_	NER=O
+

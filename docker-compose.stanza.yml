@@ -1,0 +1,33 @@
+services:
+  stanza113:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.stanza
+      args:
+        STANZA_VERSION: "1.13.0"
+    image: conllu-stanza:1.13.0
+    gpus: all
+    volumes:
+      - .:/project
+      - /mnt/local-hddpool/niveshull/stanza-eval/1.13:/cache
+    environment:
+      - STANZA_RESOURCES_DIR=/cache/stanza
+      - HF_HOME=/cache/huggingface
+      - TORCH_HOME=/cache/torch
+
+  stanza114:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.stanza
+      args:
+        STANZA_VERSION: "1.14.0"
+        TORCH_VERSION: "2.6.0+cu118"
+    image: conllu-stanza:1.14.0
+    gpus: all
+    volumes:
+      - .:/project
+      - /mnt/local-hddpool/niveshull/stanza-eval/1.14:/cache
+    environment:
+      - STANZA_RESOURCES_DIR=/cache/stanza
+      - HF_HOME=/cache/huggingface
+      - TORCH_HOME=/cache/torch

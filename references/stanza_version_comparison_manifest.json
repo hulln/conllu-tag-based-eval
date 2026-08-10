@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "comparison_id": "stanza-1.13.0-vs-1.14.0-ssj-2026-08-10",
+  "date": "2026-08-10",
+  "task": "Aligned comparison of Stanza 1.13.0 and 1.14.0 on UD Slovenian SSJ using default and default_accurate packages.",
+  "source_commit": "5e71a17a76d4c07b9992380dc61639b63968ae98",
+  "git_branch": "stanza-1.13-vs-1.14",
+  "mode": "aligned",
+  "dataset": {
+    "name": "UD Slovenian SSJ",
+    "release": "r2.17 / UD v2.17",
+    "file": "data/gold/sl_ssj-ud-test.conllu",
+    "sha256": "c14d5d2f4f20a7ad43e0f598a2e18c5e41f08364ab36be1c87d6d9eae7f5c8b0",
+    "sentences": 1282,
+    "syntactic_words": 25442,
+    "multiword_token_rows": 0,
+    "empty_node_rows": 0
+  },
+  "evaluation": {
+    "gold_sentence_boundaries": true,
+    "gold_token_boundaries": true,
+    "prediction_script": "scripts/predict_stanza.py",
+    "evaluator": "scripts/conll18_ud_eval_tag-based.py",
+    "predicted_fields": [
+      "LEMMA",
+      "UPOS",
+      "XPOS",
+      "FEATS",
+      "HEAD",
+      "DEPREL"
+    ],
+    "preserved_gold_fields": [
+      "ID",
+      "FORM",
+      "MISC"
+    ],
+    "deps_field": "_"
+  },
+  "server": {
+    "environment": "CJVT GPU server",
+    "repository_path": "/home/niveshull/conllu-tag-based-eval",
+    "cache_root": "/mnt/local-hddpool/niveshull/stanza-eval",
+    "gpu": "NVIDIA GeForce GTX 1080 Ti",
+    "gpu_count_observed": 2,
+    "nvidia_driver": "560.35.05",
+    "host_cuda_reported": "12.6",
+    "docker_compose": "v5.4.0"
+  },
+  "docker": {
+    "base_image": "python:3.10-slim",
+    "base_image_digest": "sha256:63669fd2563fa90b0442fa7b568e66e3667755636cda086d7bcaaa895f66fe39",
+    "dockerfile": "docker/Dockerfile.stanza",
+    "compose_file": "docker-compose.stanza.yml",
+    "images": {
+      "stanza_1.13.0": {
+        "tag": "conllu-stanza:1.13.0",
+        "image_id": "sha256:dbbc66d648e4f951022c4511086b9d6cc3f663eb453bb1dfc421772154d6217c",
+        "cache": "/mnt/local-hddpool/niveshull/stanza-eval/1.13"
+      },
+      "stanza_1.14.0": {
+        "tag": "conllu-stanza:1.14.0",
+        "image_id": "sha256:52edf2dff5c8da66ef448be0390728ad3df7a8f9d49f19b94eb3f83d8b83fc14",
+        "cache": "/mnt/local-hddpool/niveshull/stanza-eval/1.14"
+      }
+    }
+  },
+  "python_environments": {
+    "common_pins": {
+      "numpy": "1.26.4",
+      "typing_extensions": "4.10.0",
+      "transformers": "4.35.2",
+      "huggingface-hub": "0.19.4",
+      "accelerate": "0.24.1",
+      "peft": "0.6.2"
+    },
+    "stanza_1.13.0": {
+      "stanza": "1.13.0",
+      "torch": "2.0.1+cu118",
+      "pip_freeze": "references/stanza-1.13.0-pip-freeze.txt"
+    },
+    "stanza_1.14.0": {
+      "stanza": "1.14.0",
+      "torch": "2.6.0+cu118",
+      "pip_freeze": "references/stanza-1.14.0-pip-freeze.txt"
+    }
+  },
+  "model_packages": {
+    "conditions": [
+      {
+        "stanza": "1.13.0",
+        "package": "default"
+      },
+      {
+        "stanza": "1.13.0",
+        "package": "default_accurate"
+      },
+      {
+        "stanza": "1.14.0",
+        "package": "default"
+      },
+      {
+        "stanza": "1.14.0",
+        "package": "default_accurate"
+      }
+    ],
+    "external_transformer_for_default_accurate": "EMBEDDIA/crosloengual-bert",
+    "stanza_resources_dir_inside_container": "/cache/stanza",
+    "huggingface_cache_inside_container": "/cache/huggingface"
+  },
+  "setup_notes": [
+    "Separate model/cache directories were used for Stanza 1.13 and 1.14.",
+    "An initial unconstrained transformer installation selected an unsuitable newer PyTorch/CUDA stack, so CUDA 11.8 PyTorch wheels were pinned explicitly.",
+    "accelerate was pinned to 0.24.1 because a newer Accelerate release was incompatible with huggingface-hub 0.19.4 in this dependency stack.",
+    "default_accurate requires EMBEDDIA/crosloengual-bert, which was downloaded into each version-specific Hugging Face cache as needed.",
+    "Stanza 1.14 Slovenian lemmatizer loading failed under torch 2.0.1+cu118 with weights_only=True and Unsupported class _codecs.encode.",
+    "The Stanza 1.14 image was therefore rebuilt with torch 2.6.0+cu118; Stanza 1.13 remained on torch 2.0.1+cu118.",
+    "Transformers emitted non-fatal torch.utils._pytree deprecation warnings under the Stanza 1.14 environment."
+  ],
+  "file_hashes": {
+    "data/gold/sl_ssj-ud-test.conllu": "c14d5d2f4f20a7ad43e0f598a2e18c5e41f08364ab36be1c87d6d9eae7f5c8b0",
+    "docker/Dockerfile.stanza": "b98b1de98943e8d9587abbf0813fe43bc397b3c1c170b45b262676c9b91fe892",
+    "docker-compose.stanza.yml": "984150acaf5b441517d3a6a50bc0b94b395314bfc75283bacfdb2dad4028eabd",
+    "scripts/predict_stanza.py": "bdae7194eadbf9d025c38d6e6398d708f78e4401a237471dcec233539e93045c",
+    "scripts/conll18_ud_eval_tag-based.py": "e7eb23ce69747e5c9176f55fffe47dcddc8c1774c9703c1f2f16e6848f96fa95",
+    "references/stanza-1.13.0-pip-freeze.txt": "862a25a0ca7df152d09c23fe5f06f2d1f1c24cb0c84c9800e26de938e27fdd1a",
+    "references/stanza-1.14.0-pip-freeze.txt": "8945f1e9a13b88b4788adbafeabeb256b9754787b291761499371801f51c153a",
+    "predictions/stanza/stanza-1.13.0-default-ssj.conllu": "ca99531992f838ef2b5336769d24091005e0579543e174895b8d4d4cff4d24f6",
+    "predictions/stanza/stanza-1.13.0-accurate-ssj.conllu": "d6da5580bdb7e04de18332ebb2228fc46bffcb6d0cea95c669193942cf0a2b91",
+    "predictions/stanza/stanza-1.14.0-default-ssj.conllu": "140482073468f5c33d6a340ea77243575a6acd097eabaf509c3b7e5b234b63d9",
+    "predictions/stanza/stanza-1.14.0-accurate-ssj.conllu": "d7fe4ee4c3c820ed9b32b00c040dc9fccaac7e915511907e50b0caaea420afeb",
+    "results/stanza/stanza-1.13.0-default-ssj-eval.txt": "0a010f410ba36cdc7fe513e65c8db9b7a26aa453a994f6dfee0ec05ff724fb0b",
+    "results/stanza/stanza-1.13.0-accurate-ssj-eval.txt": "738d16f00b3fe76dc5873ad102bb24a4ff6da243be032c0305b0754453920cbd",
+    "results/stanza/stanza-1.14.0-default-ssj-eval.txt": "13dac16b82ecad9b31d5c2bd2008480148ee8e6eda3a4b5bc38d6a91697bf1ed",
+    "results/stanza/stanza-1.14.0-accurate-ssj-eval.txt": "46ca9fad6e5b66b37ad51e7463600f017549cad3bee1f1748568e656f630815b"
+  },
+  "expected_metrics": {
+    "stanza_1.13.0_default": {
+      "Sentences": 100.0,
+      "Tokens": 100.0,
+      "Words": 100.0,
+      "AllTags": 95.83,
+      "LAS": 90.73,
+      "UAS": 92.40,
+      "UPOS": 98.59,
+      "XPOS": 96.32,
+      "UFeats": 96.60,
+      "Lemmas": 98.76,
+      "BLEX_F1": 87.11,
+      "CLAS_F1": 88.38,
+      "MLAS_F1": 84.26
+    },
+    "stanza_1.13.0_default_accurate": {
+      "Sentences": 100.0,
+      "Tokens": 100.0,
+      "Words": 100.0,
+      "AllTags": 97.69,
+      "LAS": 94.85,
+      "UAS": 95.98,
+      "UPOS": 99.14,
+      "XPOS": 97.98,
+      "UFeats": 98.16,
+      "Lemmas": 98.92,
+      "BLEX_F1": 91.91,
+      "CLAS_F1": 93.33,
+      "MLAS_F1": 90.48
+    },
+    "stanza_1.14.0_default": {
+      "Sentences": 100.0,
+      "Tokens": 100.0,
+      "Words": 100.0,
+      "AllTags": 95.83,
+      "LAS": 90.73,
+      "UAS": 92.40,
+      "UPOS": 98.59,
+      "XPOS": 96.32,
+      "UFeats": 96.60,
+      "Lemmas": 98.76,
+      "BLEX_F1": 87.11,
+      "CLAS_F1": 88.38,
+      "MLAS_F1": 84.22
+    },
+    "stanza_1.14.0_default_accurate": {
+      "Sentences": 100.0,
+      "Tokens": 100.0,
+      "Words": 100.0,
+      "AllTags": 97.69,
+      "LAS": 94.86,
+      "UAS": 95.98,
+      "UPOS": 99.14,
+      "XPOS": 97.98,
+      "UFeats": 98.16,
+      "Lemmas": 98.89,
+      "BLEX_F1": 91.88,
+      "CLAS_F1": 93.34,
+      "MLAS_F1": 90.49
+    }
+  },
+  "metric_tolerance": 0.0
+}
