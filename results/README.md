@@ -9,8 +9,9 @@ Evaluation outputs and analysis reports.
 Supplementary base-mode outputs are local-only (gitignored).
 
 Stanza 1.13.0 vs 1.14.0 evaluation outputs are stored in
-[`stanza/`](stanza/). The directory contains the four full SSJ evaluator
-outputs for `default` and `default_accurate` under both Stanza versions.
+[`output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/`](output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/).
+The directory contains the four full SSJ evaluator outputs and the
+token-level version-change review.
 
 See [`../docker/README_stanza_versions.md`](../docker/README_stanza_versions.md)
 for the full reproducibility record.

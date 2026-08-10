@@ -7,9 +7,11 @@ Generated model outputs in CoNLL-U format.
 
 Supplementary base-mode outputs are local-only (gitignored).
 
-Stanza 1.13.0 vs 1.14.0 comparison artifacts are stored in
-[`stanza/`](stanza/). This includes the four full aligned SSJ predictions and
-the two-sentence smoke-test outputs used only for functional validation.
+Stanza 1.13.0 vs 1.14.0 comparison predictions are stored in
+[`output/`](output/) under the run prefix
+`20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full`.
+This includes the four full aligned SSJ predictions for `default` and
+`default_accurate` under both Stanza versions.
 
 See [`../docker/README_stanza_versions.md`](../docker/README_stanza_versions.md)
 for the full reproducibility record.

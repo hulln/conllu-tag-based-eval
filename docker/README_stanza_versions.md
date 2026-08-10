@@ -643,34 +643,12 @@ likewise already exist in the corresponding version-specific cache.
 
 ## 10. Smoke tests
 
-Before running the complete SSJ test set, a local two-sentence file was used:
+Before the full SSJ runs, two-sentence smoke tests were used locally to verify
+pipeline loading, GPU inference, package selection, CoNLL-U output, alignment,
+and evaluator compatibility.
 
-```text
-data/gold/ssj-smoke-2.conllu
-```
-
-It contains the first two SSJ sentences and was used only to verify that:
-
-* the pipeline loads;
-* GPU inference works;
-* the expected Stanza package is used;
-* output is valid CoNLL-U;
-* token/word alignment remains 100%;
-* the evaluator accepts the output.
-
-Smoke predictions were written to:
-
-```text
-predictions/stanza/ssj-smoke-2-stanza113-default.conllu
-predictions/stanza/ssj-smoke-2-stanza113-accurate.conllu
-predictions/stanza/ssj-smoke-2-stanza114-default.conllu
-predictions/stanza/ssj-smoke-2-stanza114-accurate.conllu
-```
-
-These files are **functional/preflight artifacts only**.
-
-Their scores must not be interpreted as evaluation results because they cover
-only two sentences.
+These were functional preflight checks only. Their temporary prediction files
+are not retained as evaluation artifacts.
 
 ---
 
@@ -682,7 +660,7 @@ only two sentences.
 docker compose -f docker-compose.stanza.yml run --rm stanza113 \
   python scripts/predict_stanza.py \
   --gold data/gold/sl_ssj-ud-test.conllu \
-  --output predictions/stanza/stanza-1.13.0-default-ssj.conllu \
+  --output predictions/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full_stanza-1.13.0-default_aligned_predicted.conllu \
   --package default
 ```
 
@@ -692,7 +670,7 @@ docker compose -f docker-compose.stanza.yml run --rm stanza113 \
 docker compose -f docker-compose.stanza.yml run --rm stanza113 \
   python scripts/predict_stanza.py \
   --gold data/gold/sl_ssj-ud-test.conllu \
-  --output predictions/stanza/stanza-1.13.0-accurate-ssj.conllu \
+  --output predictions/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full_stanza-1.13.0-accurate_aligned_predicted.conllu \
   --package default_accurate
 ```
 
@@ -702,7 +680,7 @@ docker compose -f docker-compose.stanza.yml run --rm stanza113 \
 docker compose -f docker-compose.stanza.yml run --rm stanza114 \
   python scripts/predict_stanza.py \
   --gold data/gold/sl_ssj-ud-test.conllu \
-  --output predictions/stanza/stanza-1.14.0-default-ssj.conllu \
+  --output predictions/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full_stanza-1.14.0-default_aligned_predicted.conllu \
   --package default
 ```
 
@@ -712,7 +690,7 @@ docker compose -f docker-compose.stanza.yml run --rm stanza114 \
 docker compose -f docker-compose.stanza.yml run --rm stanza114 \
   python scripts/predict_stanza.py \
   --gold data/gold/sl_ssj-ud-test.conllu \
-  --output predictions/stanza/stanza-1.14.0-accurate-ssj.conllu \
+  --output predictions/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full_stanza-1.14.0-accurate_aligned_predicted.conllu \
   --package default_accurate
 ```
 
@@ -737,8 +715,8 @@ scripts/conll18_ud_eval_tag-based.py
 ```bash
 python3 scripts/conll18_ud_eval_tag-based.py -v \
   data/gold/sl_ssj-ud-test.conllu \
-  predictions/stanza/stanza-1.13.0-default-ssj.conllu \
-  | tee results/stanza/stanza-1.13.0-default-ssj-eval.txt
+  predictions/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full_stanza-1.13.0-default_aligned_predicted.conllu \
+  | tee results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/stanza-1.13.0-default-ssj-eval.txt
 ```
 
 ### Stanza 1.13.0 — default_accurate
@@ -746,8 +724,8 @@ python3 scripts/conll18_ud_eval_tag-based.py -v \
 ```bash
 python3 scripts/conll18_ud_eval_tag-based.py -v \
   data/gold/sl_ssj-ud-test.conllu \
-  predictions/stanza/stanza-1.13.0-accurate-ssj.conllu \
-  | tee results/stanza/stanza-1.13.0-accurate-ssj-eval.txt
+  predictions/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full_stanza-1.13.0-accurate_aligned_predicted.conllu \
+  | tee results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/stanza-1.13.0-accurate-ssj-eval.txt
 ```
 
 ### Stanza 1.14.0 — default
@@ -755,8 +733,8 @@ python3 scripts/conll18_ud_eval_tag-based.py -v \
 ```bash
 python3 scripts/conll18_ud_eval_tag-based.py -v \
   data/gold/sl_ssj-ud-test.conllu \
-  predictions/stanza/stanza-1.14.0-default-ssj.conllu \
-  | tee results/stanza/stanza-1.14.0-default-ssj-eval.txt
+  predictions/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full_stanza-1.14.0-default_aligned_predicted.conllu \
+  | tee results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/stanza-1.14.0-default-ssj-eval.txt
 ```
 
 ### Stanza 1.14.0 — default_accurate
@@ -764,8 +742,8 @@ python3 scripts/conll18_ud_eval_tag-based.py -v \
 ```bash
 python3 scripts/conll18_ud_eval_tag-based.py -v \
   data/gold/sl_ssj-ud-test.conllu \
-  predictions/stanza/stanza-1.14.0-accurate-ssj.conllu \
-  | tee results/stanza/stanza-1.14.0-accurate-ssj-eval.txt
+  predictions/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full_stanza-1.14.0-accurate_aligned_predicted.conllu \
+  | tee results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/stanza-1.14.0-accurate-ssj-eval.txt
 ```
 
 ---
@@ -803,7 +781,7 @@ confirming complete alignment with the gold test set.
 Full evaluator output is stored in:
 
 ```text
-results/stanza/
+results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/
 ```
 
 Files:
@@ -1013,35 +991,26 @@ docker/README_stanza_versions.md
 Full prediction artifacts:
 
 ```text
-predictions/stanza/stanza-1.13.0-default-ssj.conllu
-predictions/stanza/stanza-1.13.0-accurate-ssj.conllu
-predictions/stanza/stanza-1.14.0-default-ssj.conllu
-predictions/stanza/stanza-1.14.0-accurate-ssj.conllu
+predictions/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full_stanza-1.13.0-default_aligned_predicted.conllu
+predictions/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full_stanza-1.13.0-accurate_aligned_predicted.conllu
+predictions/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full_stanza-1.14.0-default_aligned_predicted.conllu
+predictions/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full_stanza-1.14.0-accurate_aligned_predicted.conllu
 ```
 
-Smoke-test prediction artifacts:
-
-```text
-predictions/stanza/ssj-smoke-2-stanza113-default.conllu
-predictions/stanza/ssj-smoke-2-stanza113-accurate.conllu
-predictions/stanza/ssj-smoke-2-stanza114-default.conllu
-predictions/stanza/ssj-smoke-2-stanza114-accurate.conllu
-```
 
 Evaluation output:
 
 ```text
-results/stanza/stanza-1.13.0-default-ssj-eval.txt
-results/stanza/stanza-1.13.0-accurate-ssj-eval.txt
-results/stanza/stanza-1.14.0-default-ssj-eval.txt
-results/stanza/stanza-1.14.0-accurate-ssj-eval.txt
+results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/stanza-1.13.0-default-ssj-eval.txt
+results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/stanza-1.13.0-accurate-ssj-eval.txt
+results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/stanza-1.14.0-default-ssj-eval.txt
+results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/stanza-1.14.0-accurate-ssj-eval.txt
 ```
 
 Local-only data:
 
 ```text
 data/gold/sl_ssj-ud-test.conllu
-data/gold/ssj-smoke-2.conllu
 ```
 
 Large model and transformer caches remain outside Git under:

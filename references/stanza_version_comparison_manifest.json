@@ -124,14 +124,14 @@
     "scripts/conll18_ud_eval_tag-based.py": "e7eb23ce69747e5c9176f55fffe47dcddc8c1774c9703c1f2f16e6848f96fa95",
     "references/stanza-1.13.0-pip-freeze.txt": "862a25a0ca7df152d09c23fe5f06f2d1f1c24cb0c84c9800e26de938e27fdd1a",
     "references/stanza-1.14.0-pip-freeze.txt": "8945f1e9a13b88b4788adbafeabeb256b9754787b291761499371801f51c153a",
-    "predictions/stanza/stanza-1.13.0-default-ssj.conllu": "ca99531992f838ef2b5336769d24091005e0579543e174895b8d4d4cff4d24f6",
-    "predictions/stanza/stanza-1.13.0-accurate-ssj.conllu": "d6da5580bdb7e04de18332ebb2228fc46bffcb6d0cea95c669193942cf0a2b91",
-    "predictions/stanza/stanza-1.14.0-default-ssj.conllu": "140482073468f5c33d6a340ea77243575a6acd097eabaf509c3b7e5b234b63d9",
-    "predictions/stanza/stanza-1.14.0-accurate-ssj.conllu": "d7fe4ee4c3c820ed9b32b00c040dc9fccaac7e915511907e50b0caaea420afeb",
-    "results/stanza/stanza-1.13.0-default-ssj-eval.txt": "0a010f410ba36cdc7fe513e65c8db9b7a26aa453a994f6dfee0ec05ff724fb0b",
-    "results/stanza/stanza-1.13.0-accurate-ssj-eval.txt": "738d16f00b3fe76dc5873ad102bb24a4ff6da243be032c0305b0754453920cbd",
-    "results/stanza/stanza-1.14.0-default-ssj-eval.txt": "13dac16b82ecad9b31d5c2bd2008480148ee8e6eda3a4b5bc38d6a91697bf1ed",
-    "results/stanza/stanza-1.14.0-accurate-ssj-eval.txt": "46ca9fad6e5b66b37ad51e7463600f017549cad3bee1f1748568e656f630815b"
+    "predictions/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full_stanza-1.13.0-default_aligned_predicted.conllu": "ca99531992f838ef2b5336769d24091005e0579543e174895b8d4d4cff4d24f6",
+    "predictions/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full_stanza-1.13.0-accurate_aligned_predicted.conllu": "d6da5580bdb7e04de18332ebb2228fc46bffcb6d0cea95c669193942cf0a2b91",
+    "predictions/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full_stanza-1.14.0-default_aligned_predicted.conllu": "140482073468f5c33d6a340ea77243575a6acd097eabaf509c3b7e5b234b63d9",
+    "predictions/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full_stanza-1.14.0-accurate_aligned_predicted.conllu": "d7fe4ee4c3c820ed9b32b00c040dc9fccaac7e915511907e50b0caaea420afeb",
+    "results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/stanza-1.13.0-default-ssj-eval.txt": "0a010f410ba36cdc7fe513e65c8db9b7a26aa453a994f6dfee0ec05ff724fb0b",
+    "results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/stanza-1.13.0-accurate-ssj-eval.txt": "738d16f00b3fe76dc5873ad102bb24a4ff6da243be032c0305b0754453920cbd",
+    "results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/stanza-1.14.0-default-ssj-eval.txt": "13dac16b82ecad9b31d5c2bd2008480148ee8e6eda3a4b5bc38d6a91697bf1ed",
+    "results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/stanza-1.14.0-accurate-ssj-eval.txt": "46ca9fad6e5b66b37ad51e7463600f017549cad3bee1f1748568e656f630815b"
   },
   "expected_metrics": {
     "stanza_1.13.0_default": {
