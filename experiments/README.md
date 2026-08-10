@@ -1,7 +1,8 @@
 # experiments/
 
 Human-written documentation and provenance for each evaluation experiment in
-this repository. One directory per run stamp.
+this repository. Normally one directory per run stamp — see
+[Shared stamps](#shared-stamps) for the one exception.
 
 ## Where things live
 
@@ -27,12 +28,45 @@ run_id  = <stamp>_<dataset-tag>_<label>      e.g. 20260622-0810-tk13_sl-ssj-ud-t
 ```
 
 One stamp can produce several run directories — one per dataset. The experiment
-directory is named after the stamp and documents all of them.
+directory is normally named after the stamp and documents all of them; see
+[Shared stamps](#shared-stamps) for the case where a stamp gets one experiment
+directory per dataset instead.
 
 `20260810-stanza-1.13-vs-1.14` predates this rule and uses a long descriptive tag
-with no time component. It is left as it is, because the stamp is embedded in the
-run directory name, four prediction filenames and the pinned manifest paths. New
-runs should follow the grammar above.
+with no time component. The stamp itself is left as it is, because it is embedded
+in the run directory names, eight prediction filenames and the pinned manifest
+paths. New runs should follow the grammar above.
+
+### Shared stamps
+
+The Stanza version comparison is documented in **two** sibling directories that
+share one stamp, one per test set:
+
+```
+experiments/20260810-stanza-1.13-vs-1.14-ssj/   SSJ arm + shared environment/ and control
+experiments/20260810-stanza-1.13-vs-1.14-sst/   SST arm
+```
+
+The shared stamp stays `20260810-stanza-1.13-vs-1.14`; only the experiment
+directories carry the `-ssj` / `-sst` dataset suffix. Prediction filenames, run
+IDs and `results/output/` directories are unaffected — they already name their
+dataset (`_sl-ssj-ud-test_full`, `_sl-sst-ud-test_full`) and are left unchanged
+so the scientific artifacts stay stable.
+
+They were run on the same day with the same code, the same two container images
+and the same two model caches. Rather than duplicate that material, the shared
+parts live **once** in the SSJ directory and the SST directory links to them:
+
+| Shared artifact | Lives in | Used by |
+|---|---|---|
+| `environment/*-pip-freeze.txt` | SSJ directory | both (hashed in both manifests) |
+| `control-torch2.6.md` | SSJ directory | both (the SST control repeat is recorded in the SST manifest) |
+| [`references/stanza-1.13-vs-1.14-model-provenance.md`](../references/stanza-1.13-vs-1.14-model-provenance.md) | `references/` | both |
+
+Each directory still carries its own `README.md` and `manifest.json`, and each
+manifest is independently hash-verifiable. Prefer this over a third "shared"
+experiment directory: the split follows the `run_id` grammar, which is per
+dataset.
 
 Generated artifacts follow from the `run_id`:
 
@@ -69,7 +103,8 @@ experiment README — link to them.
 | [`20260420-1105`](20260420-1105/) | Canonical SST run | SST spoken | SPOT-Trankit 1.2, CLASSLA-Stanza |
 | [`20260604-0859-tk13`](20260604-0859-tk13/) | Trankit 1.3 upgrade (CLARIN `11356/2201`) | SSJ, SST | SPOT-Trankit 1.3, CLASSLA-Stanza |
 | [`20260622-0810-tk13`](20260622-0810-tk13/) | v5 run, adds the supplied colloquial SST | SSJ, SST, SST-pog | SPOT-Trankit 1.3, CLASSLA-Stanza 2.2.1 |
-| [`20260810-stanza-1.13-vs-1.14`](20260810-stanza-1.13-vs-1.14/) | Stanza 1.13.0 vs 1.14.0, `default` vs `default_accurate` | SSJ written | Stanza 1.13.0, Stanza 1.14.0 |
+| [`20260810-stanza-1.13-vs-1.14-ssj`](20260810-stanza-1.13-vs-1.14-ssj/) | Stanza 1.13.0 vs 1.14.0, `default` vs `default_accurate` | SSJ written | Stanza 1.13.0, Stanza 1.14.0 |
+| [`20260810-stanza-1.13-vs-1.14-sst`](20260810-stanza-1.13-vs-1.14-sst/) | Same comparison on spoken data — SST follow-up to the row above | SST standardised | Stanza 1.13.0, Stanza 1.14.0 |
 
 All runs use aligned mode: gold sentence and token boundaries are fixed, and the
 systems predict lemma, POS/morphology and dependency annotation on top of that

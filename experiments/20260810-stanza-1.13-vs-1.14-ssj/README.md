@@ -2,6 +2,11 @@
 
 Run stamp `20260810-stanza-1.13-vs-1.14` · CJVT GPU server · 2026-08-10
 
+This directory holds the **SSJ** (written) arm, plus the environment snapshots
+and PyTorch control shared by the whole stamp. The **SST** (spoken) arm is the
+companion run in
+[`experiments/20260810-stanza-1.13-vs-1.14-sst/`](../20260810-stanza-1.13-vs-1.14-sst/).
+
 ## Purpose
 
 Does upgrading Stanza from **1.13.0** to **1.14.0** change Slovenian annotation
@@ -194,6 +199,38 @@ either release is better.
 Full metrics and the complete token-level analysis:
 [`results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/`](../../results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/)
 
+## Model and resource provenance (added 2026-08-11)
+
+The scores, prediction files and evaluator outputs above are exactly as produced
+on 2026-08-10 and are unchanged. A **later follow-up on 2026-08-11** inspected the
+model caches these runs used, and its result changes how the comparison should be
+read:
+
+> The tokenizer, POS and dependency-parser checkpoints that the two conditions
+> actually load are **byte-identical** between the 1.13 and 1.14 caches. Both
+> combined lemmatizer checkpoints differ.
+
+So this run does **not** reproduce the original Slovenian 1.13 default model
+configuration against the 1.14 configuration: current 1.13 resource resolution
+already points to the later combined POS and dependency-parser models. The Stanza
+library versions and the lemmatizer checkpoints do still differ between the two
+arms. The near-identical POS and dependency scores are consistent with the two
+arms sharing the same POS and parser binaries.
+
+The reason lies upstream: commit `654c7f7f` (2026-06-23) repointed the Slovenian
+`default` and `default_accurate` packages in `resources_1.13.0.json` from `ssj_*`
+to `combined_*` — five days *after* the 1.13.0 release. Installing 1.13 today
+therefore resolves to a different Slovenian model set than 1.13 resolved to at
+release time.
+
+**The canonical record is
+[references/stanza-1.13-vs-1.14-model-provenance.md](../../references/stanza-1.13-vs-1.14-model-provenance.md)**
+— full chronology, before/after mapping tables, upstream MD5 cross-check, and an
+explicit statement of what the audit does *not* establish. It covers this run and
+the [SST companion run](../20260810-stanza-1.13-vs-1.14-sst/) together, since both
+used the same caches. Per-artifact SHA-256 values are in
+[manifest.json](manifest.json) under `model_artifacts`.
+
 ## Files
 
 Generated predictions — [`predictions/output/`](../../predictions/output/), prefix
@@ -254,22 +291,40 @@ The following were checked directly against the committed artifacts:
 
 ## Known limitations
 
-1. **Model artifacts are not pinned.** The manifest records the Stanza *library*
-   versions and packages, but not which model files each condition loaded — no
-   `resources.json` version, no model filenames or hashes. This comparison is
-   therefore "1.13 vs 1.14 as they resolved on 2026-08-10". Closing this needs
-   information from the CJVT server; see `model_artifacts_todo` in
-   [manifest.json](manifest.json).
-2. **The byte-identical POS output is unexplained.** `UPOS`/`XPOS`/`FEATS` do not
-   differ at all between releases, which suggests the tagger artifacts may be the
-   same files. Item 1 would settle it.
-3. **The lemmatizer asymmetry is unexplained.** Stanza 1.14 ships a new Slovenian
-   lemmatizer checkpoint, yet lemma output changed in 43 tokens under
-   `default_accurate` and in **zero** tokens under `default`.
-4. **The PyTorch confound is only controlled in one direction.** 1.13 was rerun
+1. ~~**Model artifacts are not pinned.**~~ **Resolved on 2026-08-11.** The
+   resolved `resources.json` versions and per-artifact SHA-256 values are now
+   recorded under `model_resolution` and `model_artifacts` in
+   [manifest.json](manifest.json). The comparison is still only
+   "1.13 vs 1.14 as they resolved on 2026-08-10" — see item 3.
+2. ~~**The byte-identical POS output is unexplained.**~~ **Explained on
+   2026-08-11.** `UPOS`/`XPOS`/`FEATS` do not differ between the releases because
+   the POS checkpoints are the *same files* in both caches. The dependency-parser
+   and tokenizer checkpoints are byte-identical too, so the two arms differ in
+   Stanza library version and in lemmatizer checkpoint, but not in the POS or
+   parser binaries they load.
+3. **"1.13 vs 1.14" is not a historical model-generation comparison**, for the
+   upstream reason given above. The historical resource *mappings* have been
+   reconstructed; a **historical 1.13 model run has not been performed**, so no
+   scores exist here for the `ssj_*` model set 1.13 resolved to at release time. The
+   causal chain for individual predictions was not demonstrated, and none of this
+   is evidence of a Stanza defect — see
+   [the provenance document](../../references/stanza-1.13-vs-1.14-model-provenance.md).
+4. **The lemmatizer asymmetry is now better characterised, not fully explained.**
+   *Both* combined lemmatizer checkpoints differ between the caches — yet lemma
+   output changed in 43 tokens under `default_accurate` (`combined_charlm`) and
+   in **zero** tokens under `default` (`combined_nocharlm`). The `nocharlm`
+   change simply produced no different lemma on this test set.
+5. **Identical parser checkpoints still yield differing dependency output.** 61
+   and 57 token rows differ despite byte-identical `depparse` checkpoints. The
+   PyTorch control rules out the torch 2.0.1-vs-2.6.0 difference for the 1.13
+   arm; which Stanza library change accounts for the rest was not isolated.
+6. **The PyTorch confound is only controlled in one direction.** 1.13 was rerun
    under torch 2.6.0 with identical output; 1.14 cannot run under torch 2.0.1 at
    all. The control's own outputs were not retained — see
    [control-torch2.6.md](control-torch2.6.md).
-5. **Single run per condition**, no seed/determinism statement. The control run
+7. **Single run per condition**, no seed/determinism statement. The control run
    is the only evidence of run-to-run stability.
-6. **No statistical testing.** See the headline note above.
+8. **Model binaries and `resources.json` snapshots are not committed.** Their
+   hashes are recorded in [manifest.json](manifest.json), but reproducing the
+   exact model environment still requires obtaining artifacts that match them.
+9. **No statistical testing.** See the headline note above.

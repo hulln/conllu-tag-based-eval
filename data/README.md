@@ -29,6 +29,18 @@ Methodology note:
 - Verified note for v5: this file is byte-identical to the official UD SST
   `r2.16` and `r2.17` test file. It contains 432 sentence blocks and 11,443
   tokens.
+- SHA-256 `6824234edf98cbbedb2e981644c324a3058c2920ed6cdcd7f467e835cfe25eeb`
+  (Git blob `384138ac9791e96e8e030bfc9dfafd7de741dce8`).
+- **Pinned deliberately — do not upgrade in place.** UD `r2.18` was released
+  later and changes this treebank, notably by enriching metadata/`MISC`.
+  Replacing this file would break byte-level reproducibility and direct
+  comparability with the SST runs already evaluated against this version
+  ([`20260420-1105`](../experiments/20260420-1105/),
+  [`20260604-0859-tk13`](../experiments/20260604-0859-tk13/),
+  [`20260622-0810-tk13`](../experiments/20260622-0810-tk13/),
+  [`20260810-stanza-1.13-vs-1.14-sst`](../experiments/20260810-stanza-1.13-vs-1.14-sst/)),
+  and would invalidate their pinned gold-file hashes. Evaluate a newer release as
+  a **new run** under a new stamp instead.
 
 ### SST colloquial / standardised supplied pair
 

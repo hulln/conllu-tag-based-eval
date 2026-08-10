@@ -25,6 +25,14 @@ not here.
 - [v5_publication_qa_2026-06-22.md](v5_publication_qa_2026-06-22.md) — QA of the
   v5 publication surface, spanning the three [`20260622-0810-tk13`](../experiments/20260622-0810-tk13/)
   runs and the published tables.
+- [stanza-1.13-vs-1.14-model-provenance.md](stanza-1.13-vs-1.14-model-provenance.md) —
+  provenance audit of the model artifacts behind the two
+  `20260810-stanza-1.13-vs-1.14` runs
+  ([SSJ](../experiments/20260810-stanza-1.13-vs-1.14-ssj/) and
+  [SST](../experiments/20260810-stanza-1.13-vs-1.14-sst/)). Kept
+  here because both runs share one set of caches and one finding. **Read it
+  before citing those runs**: the POS and dependency checkpoints are
+  byte-identical across the two Stanza versions.
 
 ## External sources
 

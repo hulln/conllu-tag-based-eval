@@ -5,7 +5,7 @@
   "task": "Aligned comparison of Stanza 1.13.0 and 1.14.0 on UD Slovenian SSJ using default and default_accurate packages.",
   "source_commit": "5e71a17a76d4c07b9992380dc61639b63968ae98",
   "git_branch": "stanza-1.13-vs-1.14",
-  "path_note": "file_hashes and pip_freeze paths reflect the current repository layout. The documentation, manifest and environment snapshots were moved into experiments/20260810-stanza-1.13-vs-1.14/ and the evaluator outputs renamed to the *_aligned_eval.txt convention after the run; file contents and SHA-256 values are unchanged.",
+  "path_note": "file_hashes and pip_freeze paths reflect the current repository layout. Two layout changes happened after the run, neither of which altered any file contents or SHA-256 values: (1) the documentation, manifest and environment snapshots were moved into an experiment directory and the evaluator outputs renamed to the *_aligned_eval.txt convention; (2) on 2026-08-11 that directory was renamed from experiments/20260810-stanza-1.13-vs-1.14/ to experiments/20260810-stanza-1.13-vs-1.14-ssj/ for symmetry with the SST companion run. The run stamp itself, the prediction filenames and the results/output/ run directories were deliberately left unchanged.",
   "mode": "aligned",
   "dataset": {
     "name": "UD Slovenian SSJ",
@@ -24,7 +24,7 @@
     "evaluator": "scripts/conll18_ud_eval_tag-based.py",
     "version_diff_script": "scripts/compare_stanza_versions.py",
     "change_review": "results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/stanza-1.13-vs-1.14-change-review.md",
-    "documentation": "experiments/20260810-stanza-1.13-vs-1.14/README.md",
+    "documentation": "experiments/20260810-stanza-1.13-vs-1.14-ssj/README.md",
     "alignment_note": "Sentence/token boundaries are taken from gold, so the evaluator's Sentences/Tokens/Words rows are 100.00 by construction and are an integrity check rather than a quality result.",
     "predicted_fields": [
       "LEMMA",
@@ -81,12 +81,12 @@
     "stanza_1.13.0": {
       "stanza": "1.13.0",
       "torch": "2.0.1+cu118",
-      "pip_freeze": "experiments/20260810-stanza-1.13-vs-1.14/environment/stanza-1.13.0-pip-freeze.txt"
+      "pip_freeze": "experiments/20260810-stanza-1.13-vs-1.14-ssj/environment/stanza-1.13.0-pip-freeze.txt"
     },
     "stanza_1.14.0": {
       "stanza": "1.14.0",
       "torch": "2.6.0+cu118",
-      "pip_freeze": "experiments/20260810-stanza-1.13-vs-1.14/environment/stanza-1.14.0-pip-freeze.txt"
+      "pip_freeze": "experiments/20260810-stanza-1.13-vs-1.14-ssj/environment/stanza-1.14.0-pip-freeze.txt"
     }
   },
   "model_packages": {
@@ -136,18 +136,133 @@
       },
       "artifacts_retained": false,
       "retention_note": "The duplicate control prediction files were not retained, and no pip-freeze or Compose service was captured for the control image. The recorded SHA-256 values match the committed Stanza 1.13.0 prediction files, but the control itself is not independently reproducible from this repository.",
-      "documentation": "experiments/20260810-stanza-1.13-vs-1.14/control-torch2.6.md"
+      "documentation": "experiments/20260810-stanza-1.13-vs-1.14-ssj/control-torch2.6.md"
     }
   ],
   "model_artifacts_todo": {
-    "status": "open",
-    "problem": "This manifest pins the Stanza library versions and package names, but not the model artifacts each condition actually loaded.",
+    "status": "resolved",
+    "opened": "2026-08-10",
+    "resolved": "2026-08-11",
+    "resolution_note": "Recorded as an open item when this run was documented on 2026-08-10. The server-side caches were inspected the following day, 2026-08-11, as a separate provenance follow-up. No score, prediction file or evaluator output in this experiment was affected or regenerated; only the interpretation changed. See model_resolution, model_artifacts and resource_history below.",
+    "problem": "This manifest originally pinned the Stanza library versions and package names, but not the model artifacts each condition actually loaded.",
     "needed_from_server": [
       "resources.json version resolved inside each container",
       "filenames and SHA-256 of the Slovenian pos, lemma and depparse models under /cache/stanza in the 1.13 and 1.14 caches",
       "whether the 1.13 and 1.14 model files are identical, which would explain the byte-identical UPOS/XPOS/FEATS output"
     ],
-    "consequence": "Until recorded, this comparison is reproducible only as '1.13 vs 1.14 as they resolved on 2026-08-10'; a later rerun may resolve different model files."
+    "answers": [
+      "Resource versions 1.13.0 and 1.14.0 respectively, each pinned by SHA-256 in model_resolution.",
+      "Per-artifact SHA-256 values are recorded in model_artifacts.",
+      "Yes. The POS checkpoints are byte-identical between the two caches, which explains the byte-identical UPOS/XPOS/FEATS output. The dependency-parser and tokenizer checkpoints are also byte-identical; the two combined lemmatizer checkpoints differ."
+    ],
+    "consequence": "This comparison remains reproducible only as '1.13 vs 1.14 as they resolved on 2026-08-10'. The resource_history block below shows why that caveat is stronger than it first appeared: the versioned 1.13 resource file was updated upstream after the 1.13 library release."
+  },
+  "companion_experiment": {
+    "run": "experiments/20260810-stanza-1.13-vs-1.14-sst/",
+    "note": "Same run stamp, code, container images and model caches, evaluated on the UD Slovenian SST test set. The environment snapshots in this directory and the PyTorch control recipe in control-torch2.6.md are shared by both runs."
+  },
+  "model_resolution": {
+    "audit_date": "2026-08-11",
+    "audit_note": "Resolved after the 2026-08-10 run, by inspecting the caches that run used. No score, prediction file or evaluator output was affected.",
+    "documentation": "references/stanza-1.13-vs-1.14-model-provenance.md",
+    "stanza_1.13.0": {
+      "resources_version": "1.13.0",
+      "resources_json_sha256": "ad1104000ff4175881e2ef5eb4ded2d9082eefe52f053e98918b54926ede0594"
+    },
+    "stanza_1.14.0": {
+      "resources_version": "1.14.0",
+      "resources_json_sha256": "4e41c1df152146fa26ed0c006a08feea7a60bb3414bb6d57dbda24ad2e3cb99c"
+    },
+    "package_mappings_same_between_versions": true,
+    "default": {
+      "tokenize": "combined_nocharlm",
+      "lemma": "combined_nocharlm",
+      "pos": "combined_charlm",
+      "depparse": "combined_nocharlm"
+    },
+    "default_accurate": {
+      "tokenize": "combined_charlm",
+      "lemma": "combined_charlm",
+      "pos": "combined_crosloengual-bert",
+      "depparse": "combined_crosloengual-bert",
+      "transformer": "EMBEDDIA/crosloengual-bert"
+    }
+  },
+  "model_artifacts": {
+    "status": "verified",
+    "audit_date": "2026-08-11",
+    "note": "All listed cache files matched the MD5 declared by their version-specific resources.json. The tokenizer, POS and dependency-parser checkpoints used by these two packages are byte-identical between the 1.13 and 1.14 caches, as are the inspected charLM, pretrain and NER files (NER is not used by this experiment). The two combined lemmatizer checkpoints differ, and so does default.zip, which bundles them.",
+    "byte_identical_between_caches": [
+      "tokenize_combined_nocharlm",
+      "tokenize_combined_charlm",
+      "pos_combined_charlm",
+      "pos_combined_crosloengual-bert",
+      "depparse_combined_nocharlm",
+      "depparse_combined_crosloengual-bert",
+      "inspected charLM files",
+      "inspected pretrain file",
+      "inspected NER files (unused by this experiment)"
+    ],
+    "different_between_caches": [
+      "lemma_combined_nocharlm",
+      "lemma_combined_charlm",
+      "default.zip"
+    ],
+    "interpretation": "Because the POS and dependency checkpoints are the same files in both arms, this run does not reproduce the original Slovenian 1.13 default model configuration against the 1.14 configuration: current 1.13 resource resolution already points to the later combined POS and dependency-parser models. The Stanza library versions and the lemmatizer checkpoints do still differ between the two arms.",
+    "sha256": {
+      "tokenize_combined_nocharlm": {
+        "1.13": "389f8f277b370bc434daf5cfc3741014536ba64f50a530a8b3341811a9a506a1",
+        "1.14": "389f8f277b370bc434daf5cfc3741014536ba64f50a530a8b3341811a9a506a1"
+      },
+      "tokenize_combined_charlm": {
+        "1.13": "f1c5f1ecaaf0f25514c3c787458e4170ff019f5c47a484ac27ebf996882b0dac",
+        "1.14": "f1c5f1ecaaf0f25514c3c787458e4170ff019f5c47a484ac27ebf996882b0dac"
+      },
+      "pos_combined_charlm": {
+        "1.13": "ddfb799ba68931b2626819810cc144c76887e6ca0d838405659621721c8ceccf",
+        "1.14": "ddfb799ba68931b2626819810cc144c76887e6ca0d838405659621721c8ceccf"
+      },
+      "pos_combined_crosloengual-bert": {
+        "1.13": "8db7bdbbe0bb559031739d109029361f96c50ff18d7b539a3c7ac3f24b823e0c",
+        "1.14": "8db7bdbbe0bb559031739d109029361f96c50ff18d7b539a3c7ac3f24b823e0c"
+      },
+      "lemma_combined_nocharlm": {
+        "1.13": "bf7ed7e311fd44f0a3a2d56b611a41c2804c64b41f9187e256d08fafd2e54f08",
+        "1.14": "3c0268c7bdaa2fe7db9680489a3f10b2a09b4d18212ce452a42f528a272cefc6"
+      },
+      "lemma_combined_charlm": {
+        "1.13": "a50f35bae84dfaf506318f01047bd6564693dccf677c4db0ff1f2394e4ae8c3c",
+        "1.14": "89b964766e2c777b478929671161e9f28a151960bd66b9ac6e49892dcc45fdac"
+      },
+      "depparse_combined_nocharlm": {
+        "1.13": "535969cd42d26855d034eec6560077f3ae2ebeb67874b1ef8db691b5f4b21a15",
+        "1.14": "535969cd42d26855d034eec6560077f3ae2ebeb67874b1ef8db691b5f4b21a15"
+      },
+      "depparse_combined_crosloengual-bert": {
+        "1.13": "6f52eb9a951336dfea6c6772e6e03b8ff0ebdbaea977088f0803256c7bbc8f8c",
+        "1.14": "6f52eb9a951336dfea6c6772e6e03b8ff0ebdbaea977088f0803256c7bbc8f8c"
+      }
+    }
+  },
+  "resource_history": {
+    "audit_date": "2026-08-11",
+    "documentation": "references/stanza-1.13-vs-1.14-model-provenance.md",
+    "canonical_source_note": "The document above is the single source of truth for this provenance work: full upstream chronology, the before/after Slovenian mapping tables, the analysis of which later commits did and did not touch depparse, the upstream-declared MD5 cross-check, and the limits of interpretation. This block is a summary for reading this manifest standalone; do not re-duplicate that detail here.",
+    "summary": "Upstream commit 654c7f7f (2026-06-23) switched the Slovenian default and default_accurate packages in resources_1.13.0.json from ssj_* to combined_*, and introduced the combined_* depparse entries, five days after the Stanza 1.13.0 release of 2026-06-18. A present-day '1.13 + resources 1.13' install therefore does not resolve to the Slovenian model set that Stanza 1.13 resolved to at release time.",
+    "key_commit": {
+      "sha": "654c7f7f489b6f8c4bfec0b4a6e5088bf2634e76",
+      "date": "2026-06-23",
+      "repository": "stanfordnlp/stanza-resources",
+      "files_changed": [
+        "resources_1.13.0.json"
+      ],
+      "effect": "Slovenian default and default_accurate repointed from ssj_* to combined_*; combined_nocharlm and combined_crosloengual-bert depparse entries added; combined package added."
+    },
+    "verified_via": "GitHub API, resource files fetched and parsed at the specific commits, and PyPI release metadata; all checked on 2026-08-11",
+    "reconstruction_status": {
+      "historical_resource_mappings": "reconstructed",
+      "historical_1_13_model_run": "not performed - this repository holds no scores for the ssj_* Slovenian model set that Stanza 1.13 resolved to at release time; that would be a new experiment under a new stamp"
+    }
   },
   "file_hashes": {
     "data/gold/sl_ssj-ud-test.conllu": "c14d5d2f4f20a7ad43e0f598a2e18c5e41f08364ab36be1c87d6d9eae7f5c8b0",
@@ -156,8 +271,8 @@
     "scripts/predict_stanza.py": "bdae7194eadbf9d025c38d6e6398d708f78e4401a237471dcec233539e93045c",
     "scripts/conll18_ud_eval_tag-based.py": "e7eb23ce69747e5c9176f55fffe47dcddc8c1774c9703c1f2f16e6848f96fa95",
     "scripts/compare_stanza_versions.py": "c0a68d51b1a3224037bf385a2e7c34802c19aabd5b7936adeeccc0dcce69b7c2",
-    "experiments/20260810-stanza-1.13-vs-1.14/environment/stanza-1.13.0-pip-freeze.txt": "862a25a0ca7df152d09c23fe5f06f2d1f1c24cb0c84c9800e26de938e27fdd1a",
-    "experiments/20260810-stanza-1.13-vs-1.14/environment/stanza-1.14.0-pip-freeze.txt": "8945f1e9a13b88b4788adbafeabeb256b9754787b291761499371801f51c153a",
+    "experiments/20260810-stanza-1.13-vs-1.14-ssj/environment/stanza-1.13.0-pip-freeze.txt": "862a25a0ca7df152d09c23fe5f06f2d1f1c24cb0c84c9800e26de938e27fdd1a",
+    "experiments/20260810-stanza-1.13-vs-1.14-ssj/environment/stanza-1.14.0-pip-freeze.txt": "8945f1e9a13b88b4788adbafeabeb256b9754787b291761499371801f51c153a",
     "predictions/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full_stanza-1.13.0-default_aligned_predicted.conllu": "ca99531992f838ef2b5336769d24091005e0579543e174895b8d4d4cff4d24f6",
     "predictions/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full_stanza-1.13.0-accurate_aligned_predicted.conllu": "d6da5580bdb7e04de18332ebb2228fc46bffcb6d0cea95c669193942cf0a2b91",
     "predictions/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full_stanza-1.14.0-default_aligned_predicted.conllu": "140482073468f5c33d6a340ea77243575a6acd097eabaf509c3b7e5b234b63d9",

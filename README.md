@@ -52,14 +52,22 @@ workspace.
 ## Stanza 1.13 vs 1.14 comparison
 
 A separate aligned evaluation compares **Stanza 1.13.0** and **Stanza 1.14.0** on
-the same SSJ-UD test set, using both `default` and `default_accurate` packages.
-On this test set the release upgrade changes very little, while choosing
-`default_accurate` over `default` makes a clear difference.
+both Slovenian test sets, using the `default` and `default_accurate` packages. On
+each test set the release upgrade changes very little, while choosing
+`default_accurate` over `default` makes a clear difference (about +4 LAS).
 
-Documentation, environment and provenance:
-[experiments/20260810-stanza-1.13-vs-1.14/](experiments/20260810-stanza-1.13-vs-1.14/).
-Detailed results:
-[results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/](results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/).
+| Arm | Documentation | Results |
+|---|---|---|
+| SSJ written | [experiments/20260810-stanza-1.13-vs-1.14-ssj/](experiments/20260810-stanza-1.13-vs-1.14-ssj/) | [results …_sl-ssj-ud-test_full/main/](results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/) |
+| SST spoken | [experiments/20260810-stanza-1.13-vs-1.14-sst/](experiments/20260810-stanza-1.13-vs-1.14-sst/) | [results …_sl-sst-ud-test_full/main/](results/output/20260810-stanza-1.13-vs-1.14_sl-sst-ud-test_full/main/) |
+
+**Important provenance note:** a follow-up audit found that the current Stanza
+1.13 and 1.14 resources resolve to byte-identical Slovenian POS and
+dependency-parser checkpoints. These runs therefore do not reconstruct the
+original 1.13 default model configuration; the Stanza library versions and
+lemmatizer checkpoints still differ. See
+[model provenance audit](references/stanza-1.13-vs-1.14-model-provenance.md).
+No significance testing was performed.
 
 ## Setup & rerun
 

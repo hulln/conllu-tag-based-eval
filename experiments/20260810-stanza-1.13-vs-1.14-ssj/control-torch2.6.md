@@ -23,6 +23,17 @@ PyTorch 2.0.1 vs 2.6.0 therefore did not affect the Stanza 1.13 predictions in
 this evaluation, and the differences reported between 1.13.0 and 1.14.0 are not
 attributable to the PyTorch version difference alone.
 
+## Repeat on SST
+
+The same control was run again for the
+[SST companion experiment](../20260810-stanza-1.13-vs-1.14-sst/), using the same
+`conllu-stanza:1.13.0-torch2.6.0` image against the SST gold file. Both SST
+control outputs were likewise byte-for-byte identical to the Stanza 1.13.0 +
+torch 2.0.1 SST predictions; the two SHA-256 values are recorded under
+`control_runs` in
+[the SST manifest](../20260810-stanza-1.13-vs-1.14-sst/manifest.json). Those
+duplicate control files were also not retained.
+
 ## What this control does and does not establish
 
 - It is one-directional: 1.13 was rerun under the *newer* PyTorch. The reverse
