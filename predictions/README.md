@@ -1,45 +1,45 @@
 # predictions/
 
-Generated model outputs in CoNLL-U format.
+**Generated** model outputs in CoNLL-U format. Nothing here is written by hand —
+these files are produced by the prediction scripts and should only be
+regenerated, never edited.
 
-- [output](output/): canonical public aligned prediction outputs
-- [archive/local](../archive/local/): local-only historical outputs (gitignored)
+- [output/](output/) — public aligned prediction outputs, one flat directory
+- [../archive/local/](../archive/local/) — local-only historical outputs (gitignored)
 
-Supplementary base-mode outputs are local-only (gitignored).
+## Naming
 
-Stanza 1.13.0 vs 1.14.0 comparison predictions are stored in
-[`output/`](output/) under the run prefix
-`20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full`.
-This includes the four full aligned SSJ predictions for `default` and
-`default_accurate` under both Stanza versions.
+```
+<run_id>_<system>_<mode>_predicted.conllu
+```
 
-See [`../docker/README_stanza_versions.md`](../docker/README_stanza_versions.md)
-for the full reproducibility record.
+where `run_id = <stamp>_<dataset-tag>_<label>`, e.g.
 
-Current active canonical aligned files:
+```
+20260622-0810-tk13_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu
+20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full_stanza-1.14.0-accurate_aligned_predicted.conllu
+```
 
-SSJ (written, run `20260414-1819`):
-- [output/20260414-1819_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu](output/20260414-1819_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu)
-- [output/20260414-1819_sl-ssj-ud-test_full_classla_aligned_predicted.conllu](output/20260414-1819_sl-ssj-ud-test_full_classla_aligned_predicted.conllu)
+To find out what a run was and why, look up its stamp in
+[experiments/](../experiments/).
 
-SST (spoken, run `20260420-1105`):
-- [output/20260420-1105_sl-sst-ud-test_full_trankit_aligned_predicted.conllu](output/20260420-1105_sl-sst-ud-test_full_trankit_aligned_predicted.conllu)
-- [output/20260420-1105_sl-sst-ud-test_full_classla_aligned_predicted.conllu](output/20260420-1105_sl-sst-ud-test_full_classla_aligned_predicted.conllu)
+## Aligned-mode contract
 
-Trankit 1.3 run, CLARIN `11356/2201`, run `20260604-0859-tk13` — its SST prediction is the one shown in the recommended v4 table (CLASSLA files are identical to the canonical runs above):
-- [output/20260604-0859-tk13_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu](output/20260604-0859-tk13_sl-ssj-ud-test_full_trankit_aligned_predicted.conllu)
-- [output/20260604-0859-tk13_sl-sst-ud-test_full_trankit_aligned_predicted.conllu](output/20260604-0859-tk13_sl-sst-ud-test_full_trankit_aligned_predicted.conllu)
+Aligned predictions keep the gold `ID`, `FORM` and `MISC` columns and the gold
+sentence metadata, and replace `LEMMA`, `UPOS`, `XPOS`, `FEATS`, `HEAD` and
+`DEPREL` with the system's predictions. Sentence and token boundaries therefore
+match gold exactly.
 
-v5 run, CLARIN `11356/2201`, run `20260622-0810-tk13`:
-- SSJ written: Trankit and CLASSLA aligned predictions for `sl_ssj-ud-test`
-- SST standardised: Trankit and CLASSLA aligned predictions for official `sl_sst-ud-test`
-- SST colloquial: Trankit and CLASSLA aligned predictions for supplied `sl_sst-ud-test-pog`
+## Producing and checking
 
-No v5 prediction files are currently present for the supplied paired `stan`
-test file.
+Produced by [run_pipeline.py](../scripts/run_pipeline.py),
+[predict_trankit.py](../scripts/predict_trankit.py),
+[predict_classla.py](../scripts/predict_classla.py) and
+[predict_stanza.py](../scripts/predict_stanza.py).
 
-Aligned predictions preserve gold `sent_id` values and sentence-level metadata where available.
+Verify the canonical run's files against pinned hashes with
+[verify_canonical_run.py](../scripts/verify_canonical_run.py) and
+[references/canonical_run_manifest.json](../references/canonical_run_manifest.json).
 
-Use [scripts/verify_canonical_run.py](../scripts/verify_canonical_run.py) with [references/canonical_run_manifest.json](../references/canonical_run_manifest.json) to check these aligned prediction files against canonical hashes.
-
-These files are produced by [scripts/run_pipeline.py](../scripts/run_pipeline.py), [scripts/predict_trankit.py](../scripts/predict_trankit.py), and [scripts/predict_classla.py](../scripts/predict_classla.py).
+Supplementary base-mode outputs, superseded trial runs and sample files are
+local-only; see [`.gitignore`](../.gitignore).

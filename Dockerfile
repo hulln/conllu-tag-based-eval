@@ -18,5 +18,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # The project (scripts, data/gold, cache/, predictions/, results/) is mounted at
 # runtime via docker-compose, so nothing else is COPYed in. Default to a shell;
-# the actual run command is documented in docker/README.md.
+# run commands are documented in docker/README.md and in experiments/<stamp>/.
 CMD ["bash"]

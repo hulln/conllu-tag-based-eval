@@ -4,8 +4,9 @@
 # previous full runs: aligned mode, Trankit vs CLASSLA, on the standard SSJ test
 # set, the standardized spoken SST test set, and the colloquial ('pog') SST set.
 #
-# Designed to run inside the Docker container (see docker/README.md), but works
-# on any host with the project venv active.
+# Designed to run inside the Docker container (container setup: docker/README.md;
+# this experiment: experiments/20260604-0859-tk13/README.md), but works on any
+# host with the project venv active.
 #
 # Tunables via environment:
 #   GPU=1            -> pass --trankit-gpu (only if preflight reports a GPU)

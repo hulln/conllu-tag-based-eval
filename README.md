@@ -4,6 +4,9 @@ Tag-based evaluation of SPOT-Trankit and CLASSLA-Stanza on the Slovenian UD test
 sets **SSJ** (written) and **SST** (spoken / non-standard), in aligned mode (gold
 sentence/token boundaries fixed, predictions on pre-tokenised text).
 
+Each evaluation run is documented in [experiments/](experiments/) — start there
+to see what has been run, why, and where its outputs are.
+
 ## Results
 
 **Current table:** [live v5 table](https://conllu-tag-based-eval-table.netlify.app/comparison_table_v5.html)
@@ -48,14 +51,15 @@ workspace.
 
 ## Stanza 1.13 vs 1.14 comparison
 
-A separate aligned evaluation compares **Stanza 1.13.0** and **Stanza 1.14.0**
-on the same SSJ-UD test set, using both `default` and `default_accurate`
-packages.
+A separate aligned evaluation compares **Stanza 1.13.0** and **Stanza 1.14.0** on
+the same SSJ-UD test set, using both `default` and `default_accurate` packages.
+On this test set the release upgrade changes very little, while choosing
+`default_accurate` over `default` makes a clear difference.
 
-The complete reproducibility record, including Docker environments, exact
-package versions, model caches, encountered compatibility issues, run commands
-and results, is in
-[docker/README_stanza_versions.md](docker/README_stanza_versions.md).
+Documentation, environment and provenance:
+[experiments/20260810-stanza-1.13-vs-1.14/](experiments/20260810-stanza-1.13-vs-1.14/).
+Detailed results:
+[results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/](results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/).
 
 ## Setup & rerun
 
@@ -69,7 +73,7 @@ then run the aligned pipeline or the dedicated Trankit 1.3 Docker workflow:
 ```bash
 # General aligned run
 python3 scripts/run_pipeline.py --modes aligned --gold data/gold/sl_ssj-ud-test.conllu --run-stamp <stamp>
-# Trankit 1.3 workflow; see docker/README.md
+# Trankit 1.3 workflow; see experiments/20260604-0859-tk13/README.md
 bash scripts/run_trankit13_eval.sh        # GPU=1 to use a GPU
 ```
 
@@ -92,13 +96,13 @@ python3 scripts/verify_canonical_run.py --run-stamp <stamp>              # canon
 
 ## Repository guide
 
-- [scripts/](scripts/) — pipeline, prediction, QA, verification
+- [experiments/](experiments/) — one directory per run: what was done, how, and with what environment
+- [scripts/](scripts/) — reusable code: pipeline, prediction, evaluation, QA, verification
 - [data/](data/) — gold files and dataset notes
-- [predictions/](predictions/), [results/](results/) — run artifacts
-- [tables/](tables/) — interactive table bundles (HTML + JS)
-- [tables/logos/](tables/logos/) — local logo assets and source URLs
-- [docker/](docker/) — containerised run (used for the Trankit 1.3 SST run)
-- [references/](references/) — paper link and verification manifest
+- [predictions/](predictions/), [results/](results/) — generated run artifacts
+- [tables/](tables/) — interactive table bundles (HTML + JS); [tables/logos/](tables/logos/) for logo assets
+- [docker/](docker/) — container build files and generic container instructions
+- [references/](references/) — canonical verification manifest, cross-run notes, external sources
 
 ## Reference
 

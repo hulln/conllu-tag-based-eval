@@ -12,6 +12,8 @@ Pipeline and analysis entry points.
   - Default CLARIN URL is `https://www.clarin.si/repository/xmlui/bitstream/handle/11356/1997/trankit-sl-ssj%2bsst.zip` (the same command-line form shown on CLARIN).
   - Use `--model-source upstream` to force Trankit default model downloads instead.
 - [predict_classla.py](predict_classla.py): CLASSLA prediction export. In aligned mode it consumes gold CoNLL-U segmentation/tokenization and preserves gold sentence metadata.
+- [predict_stanza.py](predict_stanza.py): plain-Stanza prediction export for the [Stanza version comparison](../experiments/20260810-stanza-1.13-vs-1.14/). Aligned mode only; `--package default|default_accurate`. Assumes a treebank with no multiword tokens or empty nodes.
+- [compare_stanza_versions.py](compare_stanza_versions.py): token-level diff of two Stanza releases over the same gold file, classifying every changed field as fix/regression/both-wrong. Paths are fixed to that run; it regenerates `stanza-1.13-vs-1.14-change-review.md`.
 - [qa_validate_run.py](qa_validate_run.py): strict mode-aware run validation for aligned-only or aligned+base runs.
 - [verify_canonical_run.py](verify_canonical_run.py): strict rerun verifier using canonical hash/metric manifest.
 - [content_comparison_table.py](content_comparison_table.py): table-style HEAD/DEPREL content comparison (with examples) for Task 2 reporting.
