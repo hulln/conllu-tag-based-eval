@@ -303,11 +303,14 @@ The following were checked directly against the committed artifacts:
    Stanza library version and in lemmatizer checkpoint, but not in the POS or
    parser binaries they load.
 3. **"1.13 vs 1.14" is not a historical model-generation comparison**, for the
-   upstream reason given above. The historical resource *mappings* have been
-   reconstructed; a **historical 1.13 model run has not been performed**, so no
-   scores exist here for the `ssj_*` model set 1.13 resolved to at release time. The
-   causal chain for individual predictions was not demonstrated, and none of this
-   is evidence of a Stanza defect — see
+   upstream reason given above. The historical resource *mappings* were
+   reconstructed first. A subsequent follow-up in
+   [`experiments/20260811-stanza-release-time-1.13-vs-1.14/`](../20260811-stanza-release-time-1.13-vs-1.14/)
+   also reconstructed and evaluated the release-time 1.13 `ssj_*` model set and
+   the release-time 1.14 side. The scores and artifacts of this **2026-08-10**
+   experiment itself remain unchanged and still represent the resource resolution
+   used on that date. The causal chain for individual predictions was not
+   demonstrated, and none of this is evidence of a Stanza defect — see
    [the provenance document](../../references/stanza-1.13-vs-1.14-model-provenance.md).
 4. **The lemmatizer asymmetry is now better characterised, not fully explained.**
    *Both* combined lemmatizer checkpoints differ between the caches — yet lemma

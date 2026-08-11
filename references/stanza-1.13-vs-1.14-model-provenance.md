@@ -217,13 +217,13 @@ should be read as a Stanza bug report.
 - **Not** that Stanza 1.14 contains no new Slovenian training. It shows only
   which artifacts these two caches resolved to on 2026-08-10, and what the
   versioned resource files declare.
-- **Not** a historical rerun. The historical *resource mappings* have now been
-  reconstructed and are tabulated above — that part is no longer open. What has
-  **not** been done is a **historical model run**: Stanza 1.13 has not been
-  executed against the pre-2026-06-23 Slovenian defaults (`ssj_*` tokenizer,
-  lemma, POS and depparse), so this repository holds no scores for the model set
-  that 1.13 resolved to at release time. That would be a new experiment under a new
-  stamp.
+- The 2026-08-10 run documented here is **not itself a historical rerun**: it
+  records how the two Stanza versions resolved their Slovenian resources on that
+  date. A separate follow-up experiment,
+  [`experiments/20260811-stanza-release-time-1.13-vs-1.14/`](../experiments/20260811-stanza-release-time-1.13-vs-1.14/),
+  subsequently reconstructed the release-time Slovenian resource/model
+  configurations for both 1.13.0 and 1.14.0 and evaluated them on SSJ and SST.
+  The original 2026-08-10 predictions, scores and provenance remain unchanged.
 - **Not** an explanation for every changed dependency prediction. The parser
   checkpoints are byte-identical, yet `HEAD`/`DEPREL` output is not. Library
   code between the two releases — inference, batching, preprocessing, or

@@ -219,7 +219,7 @@
     "verified_via": "GitHub API, resource files fetched and parsed at the specific commits, and PyPI release metadata; all checked on 2026-08-11",
     "reconstruction_status": {
       "historical_resource_mappings": "reconstructed",
-      "historical_1_13_model_run": "not performed - this repository holds no scores for the ssj_* Slovenian model set that Stanza 1.13 resolved to at release time; that would be a new experiment under a new stamp"
+      "historical_1_13_model_run": "performed in follow-up experiment experiments/20260811-stanza-release-time-1.13-vs-1.14/; the original 2026-08-10 experiment itself was not regenerated and still represents the resource/model resolution used on that date"
     }
   },
   "control_runs": [

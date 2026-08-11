@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "description": "Release-time Slovenian Stanza model artifacts used in the 2026-08-11 reconstruction.",
+  "versions": {
+    "1.13.0": {
+      "resources_json_sha256": "77a07c185dd875edae3b15cf62be01491ae37477f8902275276f7bfa91f7a22b",
+      "packages": {
+        "default": {
+          "tokenize": "ssj",
+          "lemma": "ssj_nocharlm",
+          "pos": "ssj_nocharlm",
+          "depparse": "ssj_nocharlm"
+        },
+        "default_accurate": {
+          "tokenize": "ssj",
+          "lemma": "ssj_nocharlm",
+          "pos": "ssj_crosloengual-bert",
+          "depparse": "ssj_crosloengual-bert"
+        }
+      },
+      "artifacts": {
+        "depparse/ssj_crosloengual-bert.pt": {
+          "size_bytes": 112339709,
+          "md5": "b6ee4c4d5e6d48bf8ba54572e58b0663",
+          "sha256": "3cc51a117258709d9016c753def117a1cbb5020c433a08f4c64e12c449ad7f46"
+        },
+        "depparse/ssj_nocharlm.pt": {
+          "size_bytes": 97575678,
+          "md5": "4234e03672e96e82a782c4619c44f269",
+          "sha256": "69dc882906aabd306e46cb830debfeebcd0210e165b0f64c69935fb6094141ad"
+        },
+        "lemma/ssj_nocharlm.pt": {
+          "size_bytes": 5071950,
+          "md5": "4dec22506f988669cab44666ee931e40",
+          "sha256": "4d6c3d6f78e17ffbc46c921d7ec6ae43aa4488c9bf699ae81ea217544de10131"
+        },
+        "pos/ssj_crosloengual-bert.pt": {
+          "size_bytes": 28315667,
+          "md5": "5a88beac7ad13e8463b0549d0413e8ab",
+          "sha256": "c516c6345b40c67dbe23b31b65b08d04102437fc168c8dce2ed72819f9cf8350"
+        },
+        "pos/ssj_nocharlm.pt": {
+          "size_bytes": 20925567,
+          "md5": "f5d37e80374a5ad1617e3ed9513979fa",
+          "sha256": "e7128d557b165042004fc04f1b916a440da35a97f838d950808394caa31fdc62"
+        },
+        "pretrain/conll17.pt": {
+          "size_bytes": 106897299,
+          "md5": "e9710fbfa537a30610e7c3cb370d52f0",
+          "sha256": "6345c7cef4d258ace8bc58a4df624613b04185af137c784042a56824e20a1eb0"
+        },
+        "tokenize/ssj.pt": {
+          "size_bytes": 636615,
+          "md5": "a6b8b84173f313ee80e0f3cc18ae477d",
+          "sha256": "e65f68d975e8f65f15548751dc66cb81de1b73cbb697a4e17817483737852ad7"
+        }
+      }
+    },
+    "1.14.0": {
+      "resources_json_sha256": "dbaf5f0c740072df4f0c571c750073c21e5af4d23b277ca590f2b64400a58a84",
+      "packages": {
+        "default": {
+          "tokenize": "combined_nocharlm",
+          "lemma": "combined_nocharlm",
+          "pos": "combined_charlm",
+          "depparse": "combined_nocharlm"
+        },
+        "default_accurate": {
+          "tokenize": "combined_charlm",
+          "lemma": "combined_charlm",
+          "pos": "combined_crosloengual-bert",
+          "depparse": "combined_crosloengual-bert"
+        }
+      },
+      "artifacts": {
+        "backward_charlm/oscar2023.pt": {
+          "size_bytes": 19660351,
+          "md5": "714ab47c45593356da52bd1ab8502a21",
+          "sha256": "9157697803113359ceb6a4f64dfc2b79a9475599ec756f27ba1096ac4acfafec"
+        },
+        "depparse/combined_crosloengual-bert.pt": {
+          "size_bytes": 115347359,
+          "md5": "c640d6c89966bf456a0f5ef526187550",
+          "sha256": "6f52eb9a951336dfea6c6772e6e03b8ff0ebdbaea977088f0803256c7bbc8f8c"
+        },
+        "depparse/combined_nocharlm.pt": {
+          "size_bytes": 100583521,
+          "md5": "7b2d2d0f22ec8516a909dcf39dee30d1",
+          "sha256": "535969cd42d26855d034eec6560077f3ae2ebeb67874b1ef8db691b5f4b21a15"
+        },
+        "forward_charlm/oscar2023.pt": {
+          "size_bytes": 19660363,
+          "md5": "6cf63d4630f8144ceb2095d1cecbb721",
+          "sha256": "4e71581faf86bb7752bc703754645b0e11fb489c0eb67f90bf0871bb0fd1a250"
+        },
+        "lemma/combined_charlm.pt": {
+          "size_bytes": 49265351,
+          "md5": "ed65f0e34223ec836654f7e1c49b9708",
+          "sha256": "89b964766e2c777b478929671161e9f28a151960bd66b9ac6e49892dcc45fdac"
+        },
+        "lemma/combined_nocharlm.pt": {
+          "size_bytes": 19966456,
+          "md5": "cb53c36fd0678f8244d6d254431b1087",
+          "sha256": "3c0268c7bdaa2fe7db9680489a3f10b2a09b4d18212ce452a42f528a272cefc6"
+        },
+        "pos/combined_charlm.pt": {
+          "size_bytes": 37901556,
+          "md5": "74240ce9ffbbe05e79b5ca6922223fa9",
+          "sha256": "ddfb799ba68931b2626819810cc144c76887e6ca0d838405659621721c8ceccf"
+        },
+        "pos/combined_crosloengual-bert.pt": {
+          "size_bytes": 45292763,
+          "md5": "81efb4bf6671c538dae71da2b2113c0c",
+          "sha256": "8db7bdbbe0bb559031739d109029361f96c50ff18d7b539a3c7ac3f24b823e0c"
+        },
+        "pretrain/conll17.pt": {
+          "size_bytes": 106897299,
+          "md5": "e9710fbfa537a30610e7c3cb370d52f0",
+          "sha256": "6345c7cef4d258ace8bc58a4df624613b04185af137c784042a56824e20a1eb0"
+        },
+        "tokenize/combined_charlm.pt": {
+          "size_bytes": 2735848,
+          "md5": "4d1c0d8b70440335d1ca568508103aaa",
+          "sha256": "f1c5f1ecaaf0f25514c3c787458e4170ff019f5c47a484ac27ebf996882b0dac"
+        },
+        "tokenize/combined_nocharlm.pt": {
+          "size_bytes": 638065,
+          "md5": "5370163852bbb5c99b4673e0c9c0f804",
+          "sha256": "389f8f277b370bc434daf5cfc3741014536ba64f50a530a8b3341811a9a506a1"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,367 @@
+{
+  "schema_version": 1,
+  "comparison_id": "stanza-release-time-1.13.0-vs-1.14.0-ssj-sst-2026-08-11",
+  "date": "2026-08-11",
+  "task": "Aligned reconstruction and comparison of the Slovenian model configurations and artifacts resolved by Stanza 1.13.0 and 1.14.0 at their respective release times, evaluated on UD Slovenian SSJ and SST with default and default_accurate packages.",
+  "source_commit_before_new_experiment_artifacts": "aa07b05af7e2ed64089ea934fe751c6c0fe52c1c",
+  "git_branch": "stanza-1.13-vs-1.14",
+  "mode": "aligned",
+  "scope_note": "This reconstructs the release-time Slovenian Stanza resources/model configuration and artifacts under Stanza 1.13.0 and 1.14.0. It is not a bit-for-bit reconstruction of the operating-system/CUDA environment of the historical release dates.",
+  "datasets": {
+    "ssj": {
+      "name": "UD Slovenian SSJ",
+      "release": "r2.17 / UD v2.17",
+      "file": "data/gold/sl_ssj-ud-test.conllu",
+      "sentences": 1282,
+      "syntactic_words": 25442,
+      "multiword_token_rows": 0,
+      "empty_node_rows": 0,
+      "sha256": "c14d5d2f4f20a7ad43e0f598a2e18c5e41f08364ab36be1c87d6d9eae7f5c8b0"
+    },
+    "sst": {
+      "name": "UD Slovenian SST",
+      "release": "r2.16 / r2.17 (byte-identical for this file)",
+      "file": "data/gold/sl_sst-ud-test.conllu",
+      "git_blob": "384138ac9791e96e8e030bfc9dfafd7de741dce8",
+      "sentences": 432,
+      "syntactic_words": 11443,
+      "multiword_token_rows": 0,
+      "empty_node_rows": 0,
+      "note": "The r2.16 and r2.17 SST test files are byte-identical. Do not silently migrate this experiment to r2.18.",
+      "sha256": "6824234edf98cbbedb2e981644c324a3058c2920ed6cdcd7f467e835cfe25eeb"
+    }
+  },
+  "evaluation": {
+    "gold_sentence_boundaries": true,
+    "gold_token_boundaries": true,
+    "prediction_script": "scripts/predict_stanza.py",
+    "evaluator": "scripts/conll18_ud_eval_tag-based.py",
+    "comparison_script": "scripts/compare_stanza_release_time.py",
+    "comparison_output": "experiments/20260811-stanza-release-time-1.13-vs-1.14/comparison.txt",
+    "predicted_fields": [
+      "LEMMA",
+      "UPOS",
+      "XPOS",
+      "FEATS",
+      "HEAD",
+      "DEPREL"
+    ],
+    "preserved_gold_fields": [
+      "ID",
+      "FORM",
+      "MISC"
+    ],
+    "deps_field": "_",
+    "metric_note": "Reported BLEX, CLAS and MLAS values are F1. The comparison script reads the evaluator F1 column consistently for all metrics.",
+    "alignment_note": "Sentence/token boundaries are taken from gold. Sentences/Tokens/Words therefore equal 100.00 by construction and serve as integrity checks."
+  },
+  "release_time_resources": {
+    "1.13.0": {
+      "release_date": "2026-06-18",
+      "resources_commit": "9b46b7fe61df0ef466240f0ee19825cdc352af65",
+      "resources_json_sha256": "77a07c185dd875edae3b15cf62be01491ae37477f8902275276f7bfa91f7a22b",
+      "cache_root": "/mnt/local-hddpool/niveshull/stanza-eval-release113",
+      "docker_image": "conllu-stanza:1.13.0",
+      "docker_image_id": "sha256:dbbc66d648e4f951022c4511086b9d6cc3f663eb453bb1dfc421772154d6217c",
+      "packages": {
+        "default": {
+          "tokenize": "ssj",
+          "lemma": "ssj_nocharlm",
+          "pos": "ssj_nocharlm",
+          "depparse": "ssj_nocharlm"
+        },
+        "default_accurate": {
+          "tokenize": "ssj",
+          "lemma": "ssj_nocharlm",
+          "pos": "ssj_crosloengual-bert",
+          "depparse": "ssj_crosloengual-bert"
+        }
+      }
+    },
+    "1.14.0": {
+      "release_date": "2026-07-15",
+      "resources_commit": "f016b8e92f0ae9dd76729db44c4a582a72db2252",
+      "resources_json_sha256": "dbaf5f0c740072df4f0c571c750073c21e5af4d23b277ca590f2b64400a58a84",
+      "cache_root": "/mnt/local-hddpool/niveshull/stanza-eval-release114",
+      "docker_image": "conllu-stanza:1.14.0",
+      "docker_image_id": "sha256:52edf2dff5c8da66ef448be0390728ad3df7a8f9d49f19b94eb3f83d8b83fc14",
+      "packages": {
+        "default": {
+          "tokenize": "combined_nocharlm",
+          "lemma": "combined_nocharlm",
+          "pos": "combined_charlm",
+          "depparse": "combined_nocharlm"
+        },
+        "default_accurate": {
+          "tokenize": "combined_charlm",
+          "lemma": "combined_charlm",
+          "pos": "combined_crosloengual-bert",
+          "depparse": "combined_crosloengual-bert"
+        }
+      }
+    }
+  },
+  "model_artifacts": {
+    "record": "experiments/20260811-stanza-release-time-1.13-vs-1.14/model-artifacts.json",
+    "verification": "Every listed Stanza artifact was rehashed and matched the MD5 declared in its pinned historical resources.json; SHA-256 and byte size are recorded in model-artifacts.json."
+  },
+  "external_transformer": {
+    "model": "EMBEDDIA/crosloengual-bert",
+    "revision": "750255b6915cf42623143690d8ea79ceab8ee2e8",
+    "used_by": [
+      "1.13.0 default_accurate",
+      "1.14.0 default_accurate"
+    ],
+    "offline_during_evaluation": true,
+    "snapshot_files": {
+      ".gitattributes": {
+        "size_bytes": 391,
+        "sha256": "f049f7c0d16eaffe605baca479013bcb7a3847077cf6e548ba7b228831cf9c38"
+      },
+      "README.md": {
+        "size_bytes": 1035,
+        "sha256": "c00d973c2c2c257bf48fc8c9cfa3bef79d9f22653b929fd684ccc5ee9f031d71"
+      },
+      "config.json": {
+        "size_bytes": 433,
+        "sha256": "e990f8e0e960e590d3b090c0d04a8420ced461421b75665032d52906e8bee40f"
+      },
+      "flax_model.msgpack": {
+        "size_bytes": 496751463,
+        "sha256": "7e3d879fb10aa50046f9a6fdd227e0139e375b7240f1df9a9f6c63b70f27fafe"
+      },
+      "pytorch_model.bin": {
+        "size_bytes": 499161406,
+        "sha256": "230c770eadd60a36d3d012e4f1067f45fb165fc8da3cb65ca00f210e89184f08"
+      },
+      "tokenizer_config.json": {
+        "size_bytes": 46,
+        "sha256": "dd6dd0d61cbe8d0436cee9caf7b256ff37320da54384feccfdff6a2fa9eb6a7f"
+      },
+      "vocab.txt": {
+        "size_bytes": 329130,
+        "sha256": "af85931a777f7330c0ea06e74464f1ed5b2945cfdf4bc9968151fd1654317b6b"
+      }
+    }
+  },
+  "comparisons": {
+    "main": {
+      "left": "release-time 1.13.0",
+      "right": "release-time 1.14.0",
+      "meaning": "Primary release-to-release comparison."
+    },
+    "resource_drift": {
+      "left": "release-time 1.13.0",
+      "right": "present-day-resource resolution under Stanza 1.13.0",
+      "meaning": "Effect of the post-release resource/model-set change while keeping the Stanza library at 1.13.0."
+    },
+    "original_experiment": {
+      "left": "present-day-resource Stanza 1.13.0",
+      "right": "Stanza 1.14.0",
+      "meaning": "The 2026-08-10 experiment. It is not a pure library-only comparison because the lemmatizer checkpoints differ between the arms."
+    }
+  },
+  "release_1.14_identity_check": {
+    "result": "All four reconstructed release-time 1.14 prediction files and all four evaluator outputs are byte-identical to the original 2026-08-10 Stanza 1.14 artifacts.",
+    "conditions": {
+      "ssj": {
+        "default": {
+          "prediction_byte_identical": true,
+          "evaluator_output_byte_identical": true
+        },
+        "accurate": {
+          "prediction_byte_identical": true,
+          "evaluator_output_byte_identical": true
+        }
+      },
+      "sst": {
+        "default": {
+          "prediction_byte_identical": true,
+          "evaluator_output_byte_identical": true
+        },
+        "accurate": {
+          "prediction_byte_identical": true,
+          "evaluator_output_byte_identical": true
+        }
+      }
+    }
+  },
+  "expected_metrics": {
+    "1.13": {
+      "ssj": {
+        "default": {
+          "AllTags": 95.26,
+          "BLEX_F1": 85.1,
+          "CLAS_F1": 87.91,
+          "LAS": 90.55,
+          "Lemmas": 97.61,
+          "MLAS_F1": 83.26,
+          "Sentences": 100.0,
+          "Tokens": 100.0,
+          "UAS": 92.41,
+          "UFeats": 95.98,
+          "UPOS": 98.29,
+          "Words": 100.0,
+          "XPOS": 95.77
+        },
+        "accurate": {
+          "AllTags": 97.76,
+          "BLEX_F1": 90.58,
+          "CLAS_F1": 93.56,
+          "LAS": 95.04,
+          "Lemmas": 97.89,
+          "MLAS_F1": 90.9,
+          "Sentences": 100.0,
+          "Tokens": 100.0,
+          "UAS": 96.21,
+          "UFeats": 98.16,
+          "UPOS": 99.03,
+          "Words": 100.0,
+          "XPOS": 98.01
+        }
+      },
+      "sst": {
+        "default": {
+          "AllTags": 88.46,
+          "BLEX_F1": 61.88,
+          "CLAS_F1": 63.33,
+          "LAS": 68.9,
+          "Lemmas": 97.89,
+          "MLAS_F1": 57.56,
+          "Sentences": 100.0,
+          "Tokens": 100.0,
+          "UAS": 73.93,
+          "UFeats": 89.82,
+          "UPOS": 92.05,
+          "Words": 100.0,
+          "XPOS": 89.38
+        },
+        "accurate": {
+          "AllTags": 93.21,
+          "BLEX_F1": 71.62,
+          "CLAS_F1": 73.49,
+          "LAS": 78.33,
+          "Lemmas": 98.36,
+          "MLAS_F1": 68.49,
+          "Sentences": 100.0,
+          "Tokens": 100.0,
+          "UAS": 82.24,
+          "UFeats": 94.57,
+          "UPOS": 95.29,
+          "Words": 100.0,
+          "XPOS": 93.87
+        }
+      }
+    },
+    "1.14": {
+      "ssj": {
+        "default": {
+          "AllTags": 95.83,
+          "BLEX_F1": 87.11,
+          "CLAS_F1": 88.38,
+          "LAS": 90.73,
+          "Lemmas": 98.76,
+          "MLAS_F1": 84.22,
+          "Sentences": 100.0,
+          "Tokens": 100.0,
+          "UAS": 92.4,
+          "UFeats": 96.6,
+          "UPOS": 98.59,
+          "Words": 100.0,
+          "XPOS": 96.32
+        },
+        "accurate": {
+          "AllTags": 97.69,
+          "BLEX_F1": 91.88,
+          "CLAS_F1": 93.34,
+          "LAS": 94.86,
+          "Lemmas": 98.89,
+          "MLAS_F1": 90.49,
+          "Sentences": 100.0,
+          "Tokens": 100.0,
+          "UAS": 95.98,
+          "UFeats": 98.16,
+          "UPOS": 99.14,
+          "Words": 100.0,
+          "XPOS": 97.98
+        }
+      },
+      "sst": {
+        "default": {
+          "AllTags": 95.34,
+          "BLEX_F1": 77.1,
+          "CLAS_F1": 77.78,
+          "LAS": 81.95,
+          "Lemmas": 99.14,
+          "MLAS_F1": 72.98,
+          "Sentences": 100.0,
+          "Tokens": 100.0,
+          "UAS": 85.06,
+          "UFeats": 96.35,
+          "UPOS": 97.9,
+          "Words": 100.0,
+          "XPOS": 96.24
+        },
+        "accurate": {
+          "AllTags": 96.57,
+          "BLEX_F1": 82.28,
+          "CLAS_F1": 82.96,
+          "LAS": 86.13,
+          "Lemmas": 99.29,
+          "MLAS_F1": 78.58,
+          "Sentences": 100.0,
+          "Tokens": 100.0,
+          "UAS": 88.7,
+          "UFeats": 97.36,
+          "UPOS": 98.51,
+          "Words": 100.0,
+          "XPOS": 97.23
+        }
+      }
+    }
+  },
+  "metric_tolerance": 0.0,
+  "file_hashes": {
+    "scripts/predict_stanza.py": "bdae7194eadbf9d025c38d6e6398d708f78e4401a237471dcec233539e93045c",
+    "scripts/conll18_ud_eval_tag-based.py": "e7eb23ce69747e5c9176f55fffe47dcddc8c1774c9703c1f2f16e6848f96fa95",
+    "scripts/compare_stanza_release_time.py": "f6496b32cda89900b1c6cbae3a66d3a110b6b4a2b466e5e683541c3404d8db6e",
+    "experiments/20260811-stanza-release-time-1.13-vs-1.14/comparison.txt": "bc81b6a93c87ffb4662dadb93a74f7f03db8f2a0f13bd271f0d9d57942dfced8",
+    "experiments/20260811-stanza-release-time-1.13-vs-1.14/model-artifacts.json": "f5080f06c479388876bca3989045a15e29898cfd722a1ec9c30b044defd43ea1",
+    "data/gold/sl_ssj-ud-test.conllu": "c14d5d2f4f20a7ad43e0f598a2e18c5e41f08364ab36be1c87d6d9eae7f5c8b0",
+    "data/gold/sl_sst-ud-test.conllu": "6824234edf98cbbedb2e981644c324a3058c2920ed6cdcd7f467e835cfe25eeb",
+    "predictions/output/20260811-stanza-1.13-release-defaults_sl-ssj-ud-test_full_stanza-1.13.0-release-default_aligned_predicted.conllu": "2a424055c464472c9f4d64d7c189d4e71088ef648fd086ded37f388a01f29a11",
+    "results/output/20260811-stanza-1.13-release-defaults_sl-ssj-ud-test_full/main/stanza-1.13.0-release-default_aligned_eval.txt": "98f8f0bad532e36932c9daa0551c2cb9a2a5018cf9d5cf5cff4a516853f773de",
+    "predictions/output/20260811-stanza-1.13-release-defaults_sl-ssj-ud-test_full_stanza-1.13.0-release-accurate_aligned_predicted.conllu": "d295a00a790e85e8980a0182f1bfa2551a3fe14e94a5c502defcd124e9ca7640",
+    "results/output/20260811-stanza-1.13-release-defaults_sl-ssj-ud-test_full/main/stanza-1.13.0-release-accurate_aligned_eval.txt": "6910d56de7f7a53aa08ee1ae03a8bb412c3dce32eddd43073d5ff0d190f06b65",
+    "predictions/output/20260811-stanza-1.13-release-defaults_sl-sst-ud-test_full_stanza-1.13.0-release-default_aligned_predicted.conllu": "6a2fbf01b5cea9d0d67d2dec81233f9d81f7b5f09c921a4dc33d4ae5442b77bf",
+    "results/output/20260811-stanza-1.13-release-defaults_sl-sst-ud-test_full/main/stanza-1.13.0-release-default_aligned_eval.txt": "014f0ec3439fb40051a6ccfbd4da61bc7c44099f37bb8abaf64aec903087cabf",
+    "predictions/output/20260811-stanza-1.13-release-defaults_sl-sst-ud-test_full_stanza-1.13.0-release-accurate_aligned_predicted.conllu": "f34c845021ac4e6ed959f8873f95587585e85fa3f9a2405a28bc491703980abd",
+    "results/output/20260811-stanza-1.13-release-defaults_sl-sst-ud-test_full/main/stanza-1.13.0-release-accurate_aligned_eval.txt": "4c9079326c556f96eb99406520899bce82002f241448ac120d4b76bd636e8b01",
+    "predictions/output/20260811-stanza-1.14-release-defaults_sl-ssj-ud-test_full_stanza-1.14.0-release-default_aligned_predicted.conllu": "140482073468f5c33d6a340ea77243575a6acd097eabaf509c3b7e5b234b63d9",
+    "results/output/20260811-stanza-1.14-release-defaults_sl-ssj-ud-test_full/main/stanza-1.14.0-release-default_aligned_eval.txt": "13dac16b82ecad9b31d5c2bd2008480148ee8e6eda3a4b5bc38d6a91697bf1ed",
+    "predictions/output/20260811-stanza-1.14-release-defaults_sl-ssj-ud-test_full_stanza-1.14.0-release-accurate_aligned_predicted.conllu": "d7fe4ee4c3c820ed9b32b00c040dc9fccaac7e915511907e50b0caaea420afeb",
+    "results/output/20260811-stanza-1.14-release-defaults_sl-ssj-ud-test_full/main/stanza-1.14.0-release-accurate_aligned_eval.txt": "46ca9fad6e5b66b37ad51e7463600f017549cad3bee1f1748568e656f630815b",
+    "predictions/output/20260811-stanza-1.14-release-defaults_sl-sst-ud-test_full_stanza-1.14.0-release-default_aligned_predicted.conllu": "ba955acd92c673c435564971330f8227a5a3a2e3b9ebf3ead0b4c10d0c52b867",
+    "results/output/20260811-stanza-1.14-release-defaults_sl-sst-ud-test_full/main/stanza-1.14.0-release-default_aligned_eval.txt": "ae37d004982ad975e79ed34608c863768a0d52878e9d1c7a0df640262a135ae1",
+    "predictions/output/20260811-stanza-1.14-release-defaults_sl-sst-ud-test_full_stanza-1.14.0-release-accurate_aligned_predicted.conllu": "d7ff2519b6205bcc61906cb58b5c3ec9e4eee25589cdc25986679f66eb791969",
+    "results/output/20260811-stanza-1.14-release-defaults_sl-sst-ud-test_full/main/stanza-1.14.0-release-accurate_aligned_eval.txt": "fcc592b2b501ed089867846e7b6fa222a334007661d016cfaa5b1f6c7a5bc15f",
+    "results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/stanza-1.13.0-default_aligned_eval.txt": "0a010f410ba36cdc7fe513e65c8db9b7a26aa453a994f6dfee0ec05ff724fb0b",
+    "results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/stanza-1.14.0-default_aligned_eval.txt": "13dac16b82ecad9b31d5c2bd2008480148ee8e6eda3a4b5bc38d6a91697bf1ed",
+    "predictions/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full_stanza-1.14.0-default_aligned_predicted.conllu": "140482073468f5c33d6a340ea77243575a6acd097eabaf509c3b7e5b234b63d9",
+    "results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/stanza-1.13.0-accurate_aligned_eval.txt": "738d16f00b3fe76dc5873ad102bb24a4ff6da243be032c0305b0754453920cbd",
+    "results/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full/main/stanza-1.14.0-accurate_aligned_eval.txt": "46ca9fad6e5b66b37ad51e7463600f017549cad3bee1f1748568e656f630815b",
+    "predictions/output/20260810-stanza-1.13-vs-1.14_sl-ssj-ud-test_full_stanza-1.14.0-accurate_aligned_predicted.conllu": "d7fe4ee4c3c820ed9b32b00c040dc9fccaac7e915511907e50b0caaea420afeb",
+    "results/output/20260810-stanza-1.13-vs-1.14_sl-sst-ud-test_full/main/stanza-1.13.0-default_aligned_eval.txt": "73f0f0bbefd14d24c9e24004c9219cd1f5ee3153b88812ede375694cb6e6802f",
+    "results/output/20260810-stanza-1.13-vs-1.14_sl-sst-ud-test_full/main/stanza-1.14.0-default_aligned_eval.txt": "ae37d004982ad975e79ed34608c863768a0d52878e9d1c7a0df640262a135ae1",
+    "predictions/output/20260810-stanza-1.13-vs-1.14_sl-sst-ud-test_full_stanza-1.14.0-default_aligned_predicted.conllu": "ba955acd92c673c435564971330f8227a5a3a2e3b9ebf3ead0b4c10d0c52b867",
+    "results/output/20260810-stanza-1.13-vs-1.14_sl-sst-ud-test_full/main/stanza-1.13.0-accurate_aligned_eval.txt": "a354b7d0ed14efcfc070986ad549fba49ad607e3c3fd7c20a653e66e555594bf",
+    "results/output/20260810-stanza-1.13-vs-1.14_sl-sst-ud-test_full/main/stanza-1.14.0-accurate_aligned_eval.txt": "fcc592b2b501ed089867846e7b6fa222a334007661d016cfaa5b1f6c7a5bc15f",
+    "predictions/output/20260810-stanza-1.13-vs-1.14_sl-sst-ud-test_full_stanza-1.14.0-accurate_aligned_predicted.conllu": "d7ff2519b6205bcc61906cb58b5c3ec9e4eee25589cdc25986679f66eb791969"
+  },
+  "limitations": [
+    "No statistical significance testing was performed.",
+    "Single evaluation run per condition; no new stochastic stability study was performed.",
+    "Tokenisation quality is out of scope because gold token boundaries are fixed.",
+    "The reconstruction pins historical Stanza resources/model artifacts, not a complete historical machine image."
+  ]
+}
