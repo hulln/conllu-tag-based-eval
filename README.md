@@ -69,6 +69,15 @@ lemmatizer checkpoints still differ. See
 [model provenance audit](references/stanza-1.13-vs-1.14-model-provenance.md).
 No significance testing was performed.
 
+A separate follow-up,
+[experiments/20260811-stanza-release-time-1.13-vs-1.14/](experiments/20260811-stanza-release-time-1.13-vs-1.14/),
+reconstructs the Slovenian model sets the two releases resolved to **at release
+time** (`ssj_*` for 1.13.0, `combined_*` for 1.14.0) and re-evaluates both on SSJ
+and SST. There the SSJ differences stay small while the SST differences are
+large. Library version, model set and PyTorch version all change together in that
+comparison, so their individual effects cannot be separated. The 2026-08-10 runs
+above are unchanged.
+
 ## Setup & rerun
 
 ```bash

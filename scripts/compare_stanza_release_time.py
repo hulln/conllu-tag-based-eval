@@ -86,6 +86,12 @@ def prediction114(corpus, package, release):
 
 
 def verify_release114_identity():
+    """Independent check that the reconstruction reproduces the original 1.14 run.
+
+    This is a verification step in its own right. No comparison below depends on
+    it: each block reads the artifacts named in its own title, so skipping this
+    check cannot silently change which files are compared.
+    """
     for corpus in ("ssj", "sst"):
         for package in ("default", "accurate"):
             old_eval = original114(corpus, package)
@@ -156,10 +162,12 @@ def main():
         current113,
     )
 
+    # Right side is original114, not release114: this block reports what the
+    # 2026-08-10 experiment measured, so it must read that run's own artifacts.
     print_comparison(
         "ORIGINAL EXPERIMENT: present-day-resource 1.13 -> 1.14",
         current113,
-        release114,
+        original114,
     )
 
 

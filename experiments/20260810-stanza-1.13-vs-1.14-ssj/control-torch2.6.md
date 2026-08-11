@@ -20,8 +20,17 @@ Both control outputs were **byte-for-byte identical** to the original Stanza
 | `default_accurate` | `d6da5580bdb7e04de18332ebb2228fc46bffcb6d0cea95c669193942cf0a2b91` | `…_stanza-1.13.0-accurate_aligned_predicted.conllu` |
 
 PyTorch 2.0.1 vs 2.6.0 therefore did not affect the Stanza 1.13 predictions in
-this evaluation, and the differences reported between 1.13.0 and 1.14.0 are not
-attributable to the PyTorch version difference alone.
+this evaluation, and the differences reported between 1.13.0 and 1.14.0 **in this
+2026-08-10 experiment** are not attributable to the PyTorch version difference
+alone.
+
+This statement is scoped to the configuration tested here — Stanza 1.13.0 with
+the present-day-resource `combined_*` model set. It does **not** carry over to
+the release-time reconstruction in
+[`20260811-stanza-release-time-1.13-vs-1.14`](../20260811-stanza-release-time-1.13-vs-1.14/),
+whose 1.13 arm resolves to the `ssj_*` model set that this control never ran. For
+that experiment, the contribution of the PyTorch-version difference has not been
+isolated.
 
 ## Repeat on SST
 

@@ -6,7 +6,34 @@
   "source_commit_before_new_experiment_artifacts": "aa07b05af7e2ed64089ea934fe751c6c0fe52c1c",
   "git_branch": "stanza-1.13-vs-1.14",
   "mode": "aligned",
-  "scope_note": "This reconstructs the release-time Slovenian Stanza resources/model configuration and artifacts under Stanza 1.13.0 and 1.14.0. It is not a bit-for-bit reconstruction of the operating-system/CUDA environment of the historical release dates.",
+  "scope_note": "This reconstructs the release-time Slovenian Stanza resources/model configuration and artifacts under Stanza 1.13.0 and 1.14.0. It is not a bit-for-bit reconstruction of the operating-system/CUDA environment of the historical release dates, and PyTorch is not pinned to anything contemporary with them.",
+  "python_environments": {
+    "note": "The two container images are the same ones used by the 2026-08-10 run - the image IDs are identical to those recorded in experiments/20260810-stanza-1.13-vs-1.14-ssj/manifest.json - so the interpreter, torch and library pins are the ones recorded there under python_environments, and the pip-freeze snapshots in experiments/20260810-stanza-1.13-vs-1.14-ssj/environment/ apply unchanged.",
+    "common_pins": {
+      "numpy": "1.26.4",
+      "typing_extensions": "4.10.0",
+      "transformers": "4.35.2",
+      "huggingface-hub": "0.19.4",
+      "accelerate": "0.24.1",
+      "peft": "0.6.2"
+    },
+    "stanza_1.13.0": {
+      "stanza": "1.13.0",
+      "torch": "2.0.1+cu118",
+      "pip_freeze": "experiments/20260810-stanza-1.13-vs-1.14-ssj/environment/stanza-1.13.0-pip-freeze.txt"
+    },
+    "stanza_1.14.0": {
+      "stanza": "1.14.0",
+      "torch": "2.6.0+cu118",
+      "pip_freeze": "experiments/20260810-stanza-1.13-vs-1.14-ssj/environment/stanza-1.14.0-pip-freeze.txt"
+    }
+  },
+  "torch_confound": {
+    "status": "present and uncontrolled for this experiment",
+    "detail": "The two arms of the main comparison run different PyTorch versions: 2.0.1+cu118 for Stanza 1.13.0 and 2.6.0+cu118 for Stanza 1.14.0. This is forced, not chosen: Stanza 1.14 cannot load its Slovenian lemmatizer under torch 2.0.1 (weights_only=True fails on _codecs.encode, and that torch version has no torch.serialization.add_safe_globals).",
+    "existing_control": "The control in experiments/20260810-stanza-1.13-vs-1.14-ssj/control-torch2.6.md showed unchanged output for the present-day-resource Stanza 1.13 configuration under torch 2.0.1 vs 2.6.0. Its recorded output SHA-256 values (ca99531992f838ef2b5336769d24091005e0579543e174895b8d4d4cff4d24f6, d6da5580bdb7e04de18332ebb2228fc46bffcb6d0cea95c669193942cf0a2b91) match the 2026-08-10 present-day-resource combined_* predictions, so it did not directly test the release-time ssj_* 1.13 configuration used here. The 1.14 configuration cannot be run under torch 2.0.1 in this setup. A common-PyTorch control for the release-time comparison was not run.",
+    "conclusion": "The contribution of the PyTorch-version difference to the observed between-release differences has not been isolated."
+  },
   "datasets": {
     "ssj": {
       "name": "UD Slovenian SSJ",
@@ -63,6 +90,7 @@
       "cache_root": "/mnt/local-hddpool/niveshull/stanza-eval-release113",
       "docker_image": "conllu-stanza:1.13.0",
       "docker_image_id": "sha256:dbbc66d648e4f951022c4511086b9d6cc3f663eb453bb1dfc421772154d6217c",
+      "torch": "2.0.1+cu118",
       "packages": {
         "default": {
           "tokenize": "ssj",
@@ -81,10 +109,12 @@
     "1.14.0": {
       "release_date": "2026-07-15",
       "resources_commit": "f016b8e92f0ae9dd76729db44c4a582a72db2252",
+      "resources_commit_note": "f016b8e9 modifies resources_1.14.0.json and was committed on 2026-07-15 at 01:09 UTC, shortly before the 01:58 UTC PyPI release of Stanza 1.14.0. It is both the stanza-resources repository state and the last commit to touch that file at the moment of release, which is what makes it the release-time pin. Its changes to the file are confined to the English section; the Slovenian section is unchanged relative to the immediately preceding Slovenian resource state. The pin precedes the post-release edits f2976f2d (2026-07-16) and 8048f8a1 (2026-08-06).",
       "resources_json_sha256": "dbaf5f0c740072df4f0c571c750073c21e5af4d23b277ca590f2b64400a58a84",
       "cache_root": "/mnt/local-hddpool/niveshull/stanza-eval-release114",
       "docker_image": "conllu-stanza:1.14.0",
       "docker_image_id": "sha256:52edf2dff5c8da66ef448be0390728ad3df7a8f9d49f19b94eb3f83d8b83fc14",
+      "torch": "2.6.0+cu118",
       "packages": {
         "default": {
           "tokenize": "combined_nocharlm",
@@ -103,7 +133,10 @@
   },
   "model_artifacts": {
     "record": "experiments/20260811-stanza-release-time-1.13-vs-1.14/model-artifacts.json",
-    "verification": "Every listed Stanza artifact was rehashed and matched the MD5 declared in its pinned historical resources.json; SHA-256 and byte size are recorded in model-artifacts.json."
+    "verification": "Every listed Stanza artifact was rehashed and matched the MD5 declared in its pinned historical resources.json; SHA-256 and byte size are recorded in model-artifacts.json.",
+    "upstream_cross_check": "Both pinned resources.json files were re-fetched from stanfordnlp/stanza-resources at their commits, matched the SHA-256 recorded under release_time_resources, and were compared artifact-by-artifact against model-artifacts.json: 7/7 MD5s match for 1.13.0 (ssj_*) and 11/11 for 1.14.0 (combined_*). The recorded artifact set is exactly the dependency closure of default and default_accurate over tokenize,pos,lemma,depparse in each pinned file. The release-time ssj_* identities are therefore independently corroborated upstream, on the same footing as the combined_* ones. See references/stanza-1.13-vs-1.14-model-provenance.md.",
+    "download_note": "Model downloads must use download_json=False, because stanza.download() defaults to download_json=True and would overwrite the pinned historical resources.json with the present-day file. Downloads were restricted to processors=tokenize,pos,lemma,depparse so each artifact resolves individually through the pinned JSON and is verified against its declared MD5, rather than arriving inside a prebuilt default.zip; this also excludes the ner package that both pinned files map for default and default_accurate.",
+    "prediction_resource_guard": "download_json=False protects the download stage only. stanza.Pipeline() performs its own resource resolution at construction time and by default refreshes resources.json from upstream, which would overwrite the pinned historical file at prediction time. scripts/predict_stanza.py therefore constructs the pipeline with download_method=None. Both guards are required for a run to resolve through the pinned historical file."
   },
   "external_transformer": {
     "model": "EMBEDDIA/crosloengual-bert",
@@ -112,7 +145,9 @@
       "1.13.0 default_accurate",
       "1.14.0 default_accurate"
     ],
-    "offline_during_evaluation": true,
+    "loaded_during": "prediction (the CoNLL evaluator does not use it)",
+    "resolution": "The pinned snapshot was placed in each release's isolated Hugging Face cache (HF_HOME=/cache/huggingface) and refs/main was resolved to commit 750255b6915cf42623143690d8ea79ceab8ee2e8, so the pipeline loads that exact revision rather than whatever main currently points at.",
+    "offline_during_prediction": "The default_accurate prediction runs were executed with HF_HUB_OFFLINE=1 and TRANSFORMERS_OFFLINE=1.",
     "snapshot_files": {
       ".gitattributes": {
         "size_bytes": 391,
@@ -148,21 +183,43 @@
     "main": {
       "left": "release-time 1.13.0",
       "right": "release-time 1.14.0",
-      "meaning": "Primary release-to-release comparison."
+      "meaning": "Primary release-to-release comparison.",
+      "co_varying_factors": [
+        "Stanza library version (1.13.0 vs 1.14.0)",
+        "resolved Slovenian model set (ssj_* vs combined_*), whose training data differs: see model_set_training_data",
+        "checkpoints' declared dependencies, read from the two pinned resources.json files: default POS ssj_nocharlm (pretrain conll17) vs combined_charlm (pretrain conll17 + oscar2023 forward/backward charlm); default lemma ssj_nocharlm (no declared dependencies) vs combined_nocharlm (no declared dependencies); default_accurate POS ssj_crosloengual-bert (pretrain conll17) vs combined_crosloengual-bert (pretrain conll17 + oscar2023 charlm); default_accurate lemma ssj_nocharlm (no declared dependencies) vs combined_charlm (pretrain conll17 + oscar2023 charlm). These are release-time facts from the pinned files and are not attributed to any post-release upstream commit. They describe checkpoint/dependency resolution only and are not the whole of the POS/lemma difference; the POS/lemma difference must not be reduced to charLM dependencies.",
+        "PyTorch version (2.0.1+cu118 vs 2.6.0+cu118)"
+      ],
+      "model_set_training_data": {
+        "source": "stanza/utils/datasets/prepare_tokenizer_treebank.py, prepare_pos_treebank.py, prepare_lemma_treebank.py and prepare_depparse_treebank.py at tag v1.14.0 of stanfordnlp/stanza. The resource JSON gives checkpoint/dependency resolution; this code gives training-data composition. The two are separate axes and must not be conflated.",
+        "sl_combined_train": "build_combined_slovenian_dataset concatenates the train splits of UD_Slovenian-SSJ and UD_Slovenian-SST; dev and test come from SSJ only. sl_combined is registered in COMBINED_FNS and reached via copy_conllu_treebank -> process_treebank -> build_combined_dataset, which POS, lemma and depparse preparation all route through.",
+        "applies_to": "The SSJ+SST training merge applies to POS, lemma and dependency parsing alike, not to the dependency parser alone.",
+        "extra_slovene_data": "build_extra_combined_slovenian_dataset supplies additional Slovene data (SUK: ssj500k-tag.ud.conllu and ambiga.ud.conllu) for the POS and LEMMA model types only.",
+        "consequence": "Release-time 1.13.0 defaults are written-treebank (ssj_*) models applied to spoken text across all three components; release-time 1.14.0 defaults are SSJ+SST-trained, with POS and lemma additionally trained on the extra Slovene resources above."
+      },
+      "causal_note": "None of these factors was tested separately. The move from ssj_* to combined_*, including spoken SST training coverage for POS, lemma and the dependency parser, is a plausible explanation consistent with the large SST gains, but its contribution is not isolated by this experiment. No single factor is identified as the sole cause and no contribution is quantified."
     },
     "resource_drift": {
       "left": "release-time 1.13.0",
       "right": "present-day-resource resolution under Stanza 1.13.0",
-      "meaning": "Effect of the post-release resource/model-set change while keeping the Stanza library at 1.13.0."
+      "meaning": "The post-release resource/model-set change with the Stanza library (1.13.0), the Docker image (sha256:dbbc66d648e4f951022c4511086b9d6cc3f663eb453bb1dfc421772154d6217c) and the PyTorch version (2.0.1+cu118) all held constant; only the resolved Slovenian resource/model set differs.",
+      "held_constant": [
+        "Stanza library version 1.13.0",
+        "Docker image sha256:dbbc66d648e4f951022c4511086b9d6cc3f663eb453bb1dfc421772154d6217c",
+        "PyTorch 2.0.1+cu118"
+      ],
+      "interpretation": "Because only the resolved resource/model set varies, this is a much cleaner contrast for the effect of post-release resource/model resolution than the main release-to-release comparison, which varies several factors at once. It still does not attribute the difference to any individual model change, and no significance testing was performed."
     },
     "original_experiment": {
       "left": "present-day-resource Stanza 1.13.0",
       "right": "Stanza 1.14.0",
-      "meaning": "The 2026-08-10 experiment. It is not a pure library-only comparison because the lemmatizer checkpoints differ between the arms."
+      "right_source": "The original 2026-08-10 1.14 evaluator files (results/output/20260810-stanza-1.13-vs-1.14_*/main/stanza-1.14.0-*_aligned_eval.txt), not the reconstructed release-time 1.14 files. The block reads that run's own artifacts, so its correctness does not depend on the byte-identity check below.",
+      "meaning": "The 2026-08-10 experiment. It is not a pure library-only comparison: the lemmatizer checkpoints differ between the arms, and so does the PyTorch version (see torch_confound)."
     }
   },
   "release_1.14_identity_check": {
     "result": "All four reconstructed release-time 1.14 prediction files and all four evaluator outputs are byte-identical to the original 2026-08-10 Stanza 1.14 artifacts.",
+    "interpretation": "This establishes that, for these four aligned evaluations, the release-time reconstruction reproduces the original 1.14 artifacts exactly. It is a reproduction check on the 1.14 side, not independent model evidence: the Slovenian package mappings in the pinned resources_1.14.0.json at f016b8e9 and in the present-day file the 2026-08-10 run used are the same, and the two runs therefore resolve to the same model binaries (every combined_* SHA-256 in model-artifacts.json matches the value recorded for the 1.14 cache in experiments/20260810-stanza-1.13-vs-1.14-ssj/manifest.json). Agreement was expected before the runs, so the byte-identical output confirms exact reproducibility for these four 1.14 runs rather than constituting an empirical discovery. It says nothing about model quality and does not corroborate the 1.13 side. It concerns only the two 1.14 runs; the 1.13 and 1.14 arms of the main comparison resolve to entirely different model binaries (ssj_* vs combined_*).",
     "conditions": {
       "ssj": {
         "default": {
@@ -324,7 +381,7 @@
   "file_hashes": {
     "scripts/predict_stanza.py": "bdae7194eadbf9d025c38d6e6398d708f78e4401a237471dcec233539e93045c",
     "scripts/conll18_ud_eval_tag-based.py": "e7eb23ce69747e5c9176f55fffe47dcddc8c1774c9703c1f2f16e6848f96fa95",
-    "scripts/compare_stanza_release_time.py": "f6496b32cda89900b1c6cbae3a66d3a110b6b4a2b466e5e683541c3404d8db6e",
+    "scripts/compare_stanza_release_time.py": "e511b7c8a6d705a1ff5d4e98ebdbe6852fa44c028b6b712b8fe8cee2023e57a5",
     "experiments/20260811-stanza-release-time-1.13-vs-1.14/comparison.txt": "bc81b6a93c87ffb4662dadb93a74f7f03db8f2a0f13bd271f0d9d57942dfced8",
     "experiments/20260811-stanza-release-time-1.13-vs-1.14/model-artifacts.json": "f5080f06c479388876bca3989045a15e29898cfd722a1ec9c30b044defd43ea1",
     "data/gold/sl_ssj-ud-test.conllu": "c14d5d2f4f20a7ad43e0f598a2e18c5e41f08364ab36be1c87d6d9eae7f5c8b0",
@@ -362,6 +419,10 @@
     "No statistical significance testing was performed.",
     "Single evaluation run per condition; no new stochastic stability study was performed.",
     "Tokenisation quality is out of scope because gold token boundaries are fixed.",
-    "The reconstruction pins historical Stanza resources/model artifacts, not a complete historical machine image."
+    "The reconstruction pins historical Stanza resources/model artifacts, not a complete historical machine image.",
+    "The two arms differ in PyTorch version; a common-PyTorch control for the release-time comparison was not run, so the contribution of that difference to the observed between-release differences has not been isolated. See torch_confound.",
+    "Library version, model set (whose training data adds spoken SST coverage for POS, lemma and the dependency parser, plus extra Slovene resources for POS and lemma), the checkpoints' declared dependencies, and PyTorch all change together between the arms; none of these factors was tested separately, so no single factor is isolated as a cause and no contribution is quantified. See comparisons.main.co_varying_factors and comparisons.main.model_set_training_data.",
+    "The historical resources.json files and the model binaries are not committed to this repository. Their contents are re-fetchable at the pinned upstream commits and verify against the recorded SHA-256, and every model MD5 has been cross-checked upstream (see model_artifacts.upstream_cross_check), so this is a packaging limitation rather than a provenance gap; rerunning still requires obtaining binaries that match the recorded hashes.",
+    "The exact commands used to retrieve and place the historical resources.json files were not captured at run time; the Reproducing section of the README is derived from the recorded commits, hashes, cache roots and run stamps rather than from a verbatim command log."
   ]
 }

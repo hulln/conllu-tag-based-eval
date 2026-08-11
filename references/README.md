@@ -32,7 +32,10 @@ not here.
   [SST](../experiments/20260810-stanza-1.13-vs-1.14-sst/)). Kept
   here because both runs share one set of caches and one finding. **Read it
   before citing those runs**: the POS and dependency checkpoints are
-  byte-identical across the two Stanza versions.
+  byte-identical across the two Stanza versions. It also carries the upstream
+  chronology and the two pinned release-time resource commits used by the
+  [release-time reconstruction](../experiments/20260811-stanza-release-time-1.13-vs-1.14/),
+  the follow-up experiment that does compare the release-time model sets.
 
 ## External sources
 

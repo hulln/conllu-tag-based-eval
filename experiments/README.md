@@ -105,6 +105,7 @@ experiment README — link to them.
 | [`20260622-0810-tk13`](20260622-0810-tk13/) | v5 run, adds the supplied colloquial SST | SSJ, SST, SST-pog | SPOT-Trankit 1.3, CLASSLA-Stanza 2.2.1 |
 | [`20260810-stanza-1.13-vs-1.14-ssj`](20260810-stanza-1.13-vs-1.14-ssj/) | Stanza 1.13.0 vs 1.14.0, `default` vs `default_accurate` | SSJ written | Stanza 1.13.0, Stanza 1.14.0 |
 | [`20260810-stanza-1.13-vs-1.14-sst`](20260810-stanza-1.13-vs-1.14-sst/) | Same comparison on spoken data — SST follow-up to the row above | SST standardised | Stanza 1.13.0, Stanza 1.14.0 |
+| [`20260811-stanza-release-time-1.13-vs-1.14`](20260811-stanza-release-time-1.13-vs-1.14/) | Reconstructs the Slovenian model sets 1.13.0 and 1.14.0 resolved to **at release time** and re-evaluates both — historical follow-up to the two rows above | SSJ, SST standardised | Stanza 1.13.0, Stanza 1.14.0 |
 
 All runs use aligned mode: gold sentence and token boundaries are fixed, and the
 systems predict lemma, POS/morphology and dependency annotation on top of that
