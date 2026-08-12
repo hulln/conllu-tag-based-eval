@@ -1,0 +1,33 @@
+Stanza 1.12.0 -> 1.14.0 release-time comparison
+
+SSJ / default
+Metric      1.12    1.14    Delta
+LAS        90.55   90.73    +0.18
+UAS        92.41   92.40    -0.01
+Lemmas     97.61   98.76    +1.15
+UPOS       98.29   98.59    +0.30
+UFeats     95.98   96.60    +0.62
+
+SSJ / accurate
+Metric      1.12    1.14    Delta
+LAS        94.78   94.86    +0.08
+UAS        96.07   95.98    -0.09
+Lemmas     97.61   98.89    +1.28
+UPOS       98.29   99.14    +0.85
+UFeats     95.98   98.16    +2.18
+
+SST / default
+Metric      1.12    1.14    Delta
+LAS        68.90   81.95   +13.05
+UAS        73.93   85.06   +11.13
+Lemmas     97.89   99.14    +1.25
+UPOS       92.05   97.90    +5.85
+UFeats     89.82   96.35    +6.53
+
+SST / accurate
+Metric      1.12    1.14    Delta
+LAS        77.48   86.13    +8.65
+UAS        81.70   88.70    +7.00
+Lemmas     97.89   99.29    +1.40
+UPOS       92.05   98.51    +6.46
+UFeats     89.82   97.36    +7.54

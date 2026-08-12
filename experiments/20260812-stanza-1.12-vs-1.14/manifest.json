@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "comparison_id": "stanza-release-time-1.12.0-vs-1.14.0-ssj-sst-2026-08-12",
+  "task": "Aligned comparison of release-time Slovenian Stanza 1.12.0 and 1.14.0 on UD Slovenian SSJ and SST with default and default_accurate packages.",
+  "datasets": {
+    "SSJ": {
+      "path": "data/gold/sl_ssj-ud-test.conllu",
+      "sha256": "c14d5d2f4f20a7ad43e0f598a2e18c5e41f08364ab36be1c87d6d9eae7f5c8b0",
+      "sentences": 1282,
+      "syntactic_words": 25442
+    },
+    "SST": {
+      "path": "data/gold/sl_sst-ud-test.conllu",
+      "sha256": "6824234edf98cbbedb2e981644c324a3058c2920ed6cdcd7f467e835cfe25eeb",
+      "sentences": 432,
+      "syntactic_words": 11443
+    }
+  },
+  "release_time_resources": {
+    "1.12.0": {
+      "release_date": "2026-05-14",
+      "resources_commit": "d3596e4069988fe0829d38f3c3aa3174f8950324",
+      "resources_json_sha256": "2445b58053a96c1fcfd95e9ee977ad7f6313e68994bcd437cc30b4346fab2f0e",
+      "docker_image": "conllu-stanza:1.12.0",
+      "docker_image_id": "sha256:bf4052550b6986ee31efffe54e43fcab6eb3b0cb23daafdf23e6a58e4d25b33e",
+      "cache_root": "/mnt/local-hddpool/niveshull/stanza-eval-release112",
+      "packages": {
+        "default": {
+          "tokenize": "ssj",
+          "lemma": "ssj_nocharlm",
+          "pos": "ssj_nocharlm",
+          "depparse": "ssj_nocharlm"
+        },
+        "default_accurate": {
+          "tokenize": "ssj",
+          "lemma": "ssj_nocharlm",
+          "pos": "ssj_nocharlm",
+          "depparse": "ssj_crosloengual-bert"
+        }
+      }
+    },
+    "1.14.0": {
+      "release_date": "2026-07-15",
+      "resources_commit": "f016b8e92f0ae9dd76729db44c4a582a72db2252",
+      "resources_json_sha256": "dbaf5f0c740072df4f0c571c750073c21e5af4d23b277ca590f2b64400a58a84",
+      "source_experiment": "experiments/20260811-stanza-release-time-1.13-vs-1.14"
+    }
+  },
+  "external_transformer": {
+    "model": "EMBEDDIA/crosloengual-bert",
+    "revision": "750255b6915cf42623143690d8ea79ceab8ee2e8",
+    "offline_during_evaluation": true
+  },
+  "evaluation": {
+    "gold_sentence_boundaries": true,
+    "gold_token_boundaries": true,
+    "reported_metrics": [
+      "LAS",
+      "UAS",
+      "Lemmas",
+      "UPOS",
+      "UFeats"
+    ],
+    "prediction_script": "scripts/predict_stanza.py",
+    "comparison_script": "scripts/compare_stanza_112_114.py"
+  },
+  "derived_files": {
+    "experiments/20260812-stanza-1.12-vs-1.14/comparison.txt": "8f9a02573884b63999f502896a3f5232d20e219459cbe9ce4fa2ce6e2e9e08c6",
+    "experiments/20260812-stanza-1.12-vs-1.14/table.md": "77e69b2ba814589f7c96ae70bfe4c0a21b3ed69bd7d9585da699de3859102321",
+    "scripts/compare_stanza_112_114.py": "f85a590896296884fcf9245cd89031e3aa3d2aeb4e12b51b3ddbb770103203ff",
+    "experiments/20260812-stanza-1.12-vs-1.14/model-artifacts.json": "6e26c38929fa7bf745570d8e97a207946bb134d40dd0d125f2370e78fd249e2a"
+  },
+  "artifacts": [
+    {
+      "version": "1.12.0",
+      "corpus": "SSJ",
+      "package": "default",
+      "kind": "prediction",
+      "path": "predictions/output/20260812-stanza-1.12-release-defaults_sl-ssj-ud-test_full_stanza-1.12.0-release-default_aligned_predicted.conllu",
+      "sha256": "2a424055c464472c9f4d64d7c189d4e71088ef648fd086ded37f388a01f29a11"
+    },
+    {
+      "version": "1.12.0",
+      "corpus": "SSJ",
+      "package": "default",
+      "kind": "evaluation",
+      "path": "results/output/20260812-stanza-1.12-release-defaults_sl-ssj-ud-test_full/main/stanza-1.12.0-release-default_aligned_eval.txt",
+      "sha256": "98f8f0bad532e36932c9daa0551c2cb9a2a5018cf9d5cf5cff4a516853f773de"
+    },
+    {
+      "version": "1.12.0",
+      "corpus": "SSJ",
+      "package": "default_accurate",
+      "kind": "prediction",
+      "path": "predictions/output/20260812-stanza-1.12-release-defaults_sl-ssj-ud-test_full_stanza-1.12.0-release-accurate_aligned_predicted.conllu",
+      "sha256": "b39429102ca3f70a3a41ed813f02e5f79ad540687e8dc14e494ee76f341547ab"
+    },
+    {
+      "version": "1.12.0",
+      "corpus": "SSJ",
+      "package": "default_accurate",
+      "kind": "evaluation",
+      "path": "results/output/20260812-stanza-1.12-release-defaults_sl-ssj-ud-test_full/main/stanza-1.12.0-release-accurate_aligned_eval.txt",
+      "sha256": "78eee917fb4892d77d6c659ee1f805919f2bd300b131480487e519695697f1e7"
+    },
+    {
+      "version": "1.12.0",
+      "corpus": "SST",
+      "package": "default",
+      "kind": "prediction",
+      "path": "predictions/output/20260812-stanza-1.12-release-defaults_sl-sst-ud-test_full_stanza-1.12.0-release-default_aligned_predicted.conllu",
+      "sha256": "6a2fbf01b5cea9d0d67d2dec81233f9d81f7b5f09c921a4dc33d4ae5442b77bf"
+    },
+    {
+      "version": "1.12.0",
+      "corpus": "SST",
+      "package": "default",
+      "kind": "evaluation",
+      "path": "results/output/20260812-stanza-1.12-release-defaults_sl-sst-ud-test_full/main/stanza-1.12.0-release-default_aligned_eval.txt",
+      "sha256": "014f0ec3439fb40051a6ccfbd4da61bc7c44099f37bb8abaf64aec903087cabf"
+    },
+    {
+      "version": "1.12.0",
+      "corpus": "SST",
+      "package": "default_accurate",
+      "kind": "prediction",
+      "path": "predictions/output/20260812-stanza-1.12-release-defaults_sl-sst-ud-test_full_stanza-1.12.0-release-accurate_aligned_predicted.conllu",
+      "sha256": "2d9f39e0576d7788aed4c04042a236c484375732960c7f8b0d15e9609c339fd6"
+    },
+    {
+      "version": "1.12.0",
+      "corpus": "SST",
+      "package": "default_accurate",
+      "kind": "evaluation",
+      "path": "results/output/20260812-stanza-1.12-release-defaults_sl-sst-ud-test_full/main/stanza-1.12.0-release-accurate_aligned_eval.txt",
+      "sha256": "3d28abcc6ae20455ef0d58f33435474c2cb7e0ccaad9e3a761ab313684c053f9"
+    },
+    {
+      "version": "1.14.0",
+      "corpus": "SSJ",
+      "package": "default",
+      "kind": "prediction",
+      "path": "predictions/output/20260811-stanza-1.14-release-defaults_sl-ssj-ud-test_full_stanza-1.14.0-release-default_aligned_predicted.conllu",
+      "sha256": "140482073468f5c33d6a340ea77243575a6acd097eabaf509c3b7e5b234b63d9"
+    },
+    {
+      "version": "1.14.0",
+      "corpus": "SSJ",
+      "package": "default",
+      "kind": "evaluation",
+      "path": "results/output/20260811-stanza-1.14-release-defaults_sl-ssj-ud-test_full/main/stanza-1.14.0-release-default_aligned_eval.txt",
+      "sha256": "13dac16b82ecad9b31d5c2bd2008480148ee8e6eda3a4b5bc38d6a91697bf1ed"
+    },
+    {
+      "version": "1.14.0",
+      "corpus": "SSJ",
+      "package": "default_accurate",
+      "kind": "prediction",
+      "path": "predictions/output/20260811-stanza-1.14-release-defaults_sl-ssj-ud-test_full_stanza-1.14.0-release-accurate_aligned_predicted.conllu",
+      "sha256": "d7fe4ee4c3c820ed9b32b00c040dc9fccaac7e915511907e50b0caaea420afeb"
+    },
+    {
+      "version": "1.14.0",
+      "corpus": "SSJ",
+      "package": "default_accurate",
+      "kind": "evaluation",
+      "path": "results/output/20260811-stanza-1.14-release-defaults_sl-ssj-ud-test_full/main/stanza-1.14.0-release-accurate_aligned_eval.txt",
+      "sha256": "46ca9fad6e5b66b37ad51e7463600f017549cad3bee1f1748568e656f630815b"
+    },
+    {
+      "version": "1.14.0",
+      "corpus": "SST",
+      "package": "default",
+      "kind": "prediction",
+      "path": "predictions/output/20260811-stanza-1.14-release-defaults_sl-sst-ud-test_full_stanza-1.14.0-release-default_aligned_predicted.conllu",
+      "sha256": "ba955acd92c673c435564971330f8227a5a3a2e3b9ebf3ead0b4c10d0c52b867"
+    },
+    {
+      "version": "1.14.0",
+      "corpus": "SST",
+      "package": "default",
+      "kind": "evaluation",
+      "path": "results/output/20260811-stanza-1.14-release-defaults_sl-sst-ud-test_full/main/stanza-1.14.0-release-default_aligned_eval.txt",
+      "sha256": "ae37d004982ad975e79ed34608c863768a0d52878e9d1c7a0df640262a135ae1"
+    },
+    {
+      "version": "1.14.0",
+      "corpus": "SST",
+      "package": "default_accurate",
+      "kind": "prediction",
+      "path": "predictions/output/20260811-stanza-1.14-release-defaults_sl-sst-ud-test_full_stanza-1.14.0-release-accurate_aligned_predicted.conllu",
+      "sha256": "d7ff2519b6205bcc61906cb58b5c3ec9e4eee25589cdc25986679f66eb791969"
+    },
+    {
+      "version": "1.14.0",
+      "corpus": "SST",
+      "package": "default_accurate",
+      "kind": "evaluation",
+      "path": "results/output/20260811-stanza-1.14-release-defaults_sl-sst-ud-test_full/main/stanza-1.14.0-release-accurate_aligned_eval.txt",
+      "sha256": "fcc592b2b501ed089867846e7b6fa222a334007661d016cfaa5b1f6c7a5bc15f"
+    }
+  ]
+}
