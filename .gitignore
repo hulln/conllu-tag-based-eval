@@ -91,3 +91,6 @@ references/*.txt
 
 # Local reference PDFs (keep links in README instead of committing files)
 references/*.pdf
+
+# Local Netlify folder
+.netlify
