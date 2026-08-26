@@ -1,0 +1,1035 @@
+CoNLL-U Source Audit
+====================
+
+Generated: 2026-08-26T12:30:41+02:00
+Source root: source
+Source files were read only; the audit performs no rewriting or cleanup.
+
+1. Overall summary
+==================
+
+Total .conllu files: 257
+EN: 49 total; 1 numbered copies; 25 raw; 24 clean
+NL: 118 total; 58 numbered copies; 59 raw; 59 clean
+SL: 90 total; 38 numbered copies; 45 raw; 45 clean
+Basic validity errors: 0
+Token-ID/HEAD structural errors: 0
+Sentence-level structural anomalies: 174
+Within-language duplicate hash groups: 86
+Cross-language duplicate hash groups: 1
+Raw/clean pairs: 80
+
+Inventory note: numbered-copy status overlaps with raw/clean status. For example, foo_clean(1).conllu is both numbered and clean.
+
+2. EN
+=====
+
+File inventory:
+- Total .conllu files: 49
+- Numbered download-copy files: 1
+- Raw files: 25
+- Clean files: 24
+
+Exact duplicate groups within the language:
+- SHA-256 0f9b02166e5c32728420a60e690124705034e57749d7371da374aac21a6021aa
+  - source/EN/UDpipe2_default_spokentest.conllu
+  - source/EN/UDpipe2_default_spokentest_clean.conllu
+- SHA-256 3e6ed9a368a3fd498b34dd5d6cdac3c13f16b71f838cefdee41d7df39bafd202
+  - source/EN/UDpipe2_default_writtentest.conllu
+  - source/EN/UDpipe2_default_writtentest_clean.conllu
+- SHA-256 306b6a30000be89c24cebe92008002df871caa3bbaf6144935d2adb4012b1213
+  - source/EN/diaparser_writtentrain_spokentest(1).conllu
+  - source/EN/diaparser_writtentrain_spokentest.conllu
+- SHA-256 ec9e09547d54014d4b2da4ab5d688c02512ac9dfd305a93d77bffd759c18499a
+  - source/EN/singletaskXPOS_writtenandspokentrain_spokentest.conllu
+  - source/EN/singletaskXPOS_writtenandspokentrain_spokentest_clean.conllu
+- SHA-256 e8e487b2f6aa6b31cf5d7ea582cbf0653110f6fce94a85d7d0eccd25810dfea6
+  - source/EN/singletaskXPOS_writtenandspokentrain_writtentest.conllu
+  - source/EN/singletaskXPOS_writtenandspokentrain_writtentest_clean.conllu
+- SHA-256 aa5fe1e6da7e0819b3caa1affe8bb135310e4c893e3ac5bd54d66d5014f005b6
+  - source/EN/singletaskXPOSclassification_writtenandspokentrain_spokentest.conllu
+  - source/EN/singletaskXPOSclassification_writtenandspokentrain_spokentest_clean.conllu
+- SHA-256 14c62133fad1bbcf8a9f9e7cbfd7fac09d7130885abb9aa6b345b00086ecdcf4
+  - source/EN/singletaskXPOSclassification_writtenandspokentrain_writtentest.conllu
+  - source/EN/singletaskXPOSclassification_writtenandspokentrain_writtentest_clean.conllu
+- SHA-256 abcc241bf75eae4fb513548df5987293ee17ced0453ef7cb9d8ee59bacbb9c9d
+  - source/EN/spacy_default_spokentest.conllu
+  - source/EN/spacy_default_spokentest_clean.conllu
+- SHA-256 5645cb1840fd50ccdaf338471487a0cbf58e0150f7f6423538eb2a78494f3408
+  - source/EN/stanza_default_spokentest.conllu
+  - source/EN/stanza_default_spokentest_clean.conllu
+- SHA-256 2e9bd3a0bb8e57349fbb5e548680da1a550ad9e203074f8a5d3a9433193f0681
+  - source/EN/stanza_default_writtentest.conllu
+  - source/EN/stanza_default_writtentest_clean.conllu
+- SHA-256 f5cc804fd06442dd1195b2e783a032a8c6a13230ba3b780edef063542482f24a
+  - source/EN/stanza_writtenandspokentrain_spokentest.conllu
+  - source/EN/stanza_writtenandspokentrain_spokentest_clean.conllu
+- SHA-256 cf60f1bbc20b023e73fbd0048dea3d45900311f4f704788b857e366c34f52e24
+  - source/EN/stanza_writtenandspokentrain_writtentest.conllu
+  - source/EN/stanza_writtenandspokentrain_writtentest_clean.conllu
+- SHA-256 c79402eaf00b5be7cfee8af5cd319e739dcda1b1d3cc23e327653b71b28a9f7d
+  - source/EN/stanza_writtentrain_spokentest.conllu
+  - source/EN/stanza_writtentrain_spokentest_clean.conllu
+- SHA-256 5a5ab9e5eadad56710d5e27d1595f13b751a79ddd3b303853debda8b2ed161f0
+  - source/EN/stanza_writtentrain_writtentest.conllu
+  - source/EN/stanza_writtentrain_writtentest_clean.conllu
+- SHA-256 e05d37ad51bb680b07ff7fbcc4cdd711d6a1bf73a1d629ca34e3796352418238
+  - source/EN/trankit_writtenandspokentrain_spokentest.conllu
+  - source/EN/trankit_writtenandspokentrain_spokentest_clean.conllu
+- SHA-256 878d53038302939983ddf31e990ae4e99b7ea8f67b57f9cb1bc3f53908a31d47
+  - source/EN/trankit_writtenandspokentrain_writtentest.conllu
+  - source/EN/trankit_writtenandspokentrain_writtentest_clean.conllu
+
+Numbered download-copy comparisons:
+- source/EN/diaparser_writtentrain_spokentest(1).conllu -> source/EN/diaparser_writtentrain_spokentest.conllu: identical
+
+Basic file validity errors:
+- None
+
+3. NL
+=====
+
+File inventory:
+- Total .conllu files: 118
+- Numbered download-copy files: 58
+- Raw files: 59
+- Clean files: 59
+
+Exact duplicate groups within the language:
+- SHA-256 fbcf24374a97f49c54d17912154b0e69b5dcc4ffe0df069a02a90302ceee0202
+  - source/NL/UDpipe2_default_writtentest(1).conllu
+  - source/NL/UDpipe2_default_writtentest.conllu
+  - source/NL/UDpipe2_default_writtentest_clean(1).conllu
+  - source/NL/UDpipe2_default_writtentest_clean.conllu
+- SHA-256 9d7833ebd37efc4e2f5e258a7c8abd7d6fa014c6939511ddb6860be9f935dd1d
+  - source/NL/diaparser_writtenanddialecttrain_dialecttest(1).conllu
+  - source/NL/diaparser_writtenanddialecttrain_dialecttest.conllu
+- SHA-256 e8d455278fbcbce982b7e0db470888e4631157f16491ecc3fc993823643671ca
+  - source/NL/diaparser_writtenanddialecttrain_dialecttest_clean(1).conllu
+  - source/NL/diaparser_writtenanddialecttrain_dialecttest_clean.conllu
+- SHA-256 0037c0f938106653c22620633fd97fdf27e57ec5a9849cb49f78af10abae3bea
+  - source/NL/diaparser_writtenanddialecttrain_writtentest(1).conllu
+  - source/NL/diaparser_writtenanddialecttrain_writtentest.conllu
+- SHA-256 557015fba8feed68acb11dcff2c985d84a38d3c4019a649b30dc06b2453fe714
+  - source/NL/diaparser_writtenanddialecttrain_writtentest_clean(1).conllu
+  - source/NL/diaparser_writtenanddialecttrain_writtentest_clean.conllu
+- SHA-256 3d3179127cde8d0044673e7c986f133e7ef518e252bdc9f9fdb4d3fbde16e23b
+  - source/NL/diaparser_writtentrain_dialecttest(1).conllu
+  - source/NL/diaparser_writtentrain_dialecttest.conllu
+- SHA-256 d3813208c2e7c8dcf6077abd933a507d08250f0ddc7ad36d4a160dd08c9682e4
+  - source/NL/diaparser_writtentrain_dialecttest_clean(1).conllu
+  - source/NL/diaparser_writtentrain_dialecttest_clean.conllu
+- SHA-256 151fc5549f4d818da02d778b3010e7dc007b8686670249c088d3dea3be238f1f
+  - source/NL/diaparser_writtentrain_writtentest(1).conllu
+  - source/NL/diaparser_writtentrain_writtentest.conllu
+- SHA-256 27e609411b17caaa9d503682acfb9a41e31771e48b472df24c7e7b3d56116b96
+  - source/NL/diaparser_writtentrain_writtentest_clean(1).conllu
+  - source/NL/diaparser_writtentrain_writtentest_clean.conllu
+- SHA-256 70a49ee96452a3624a21889d1d33432c5c3bf2b2d6ff2c9902fc75c2377d40ea
+  - source/NL/singletaskXPOS_writtenandspokentrain_spokentest(1).conllu
+  - source/NL/singletaskXPOS_writtenandspokentrain_spokentest.conllu
+- SHA-256 1164243c2d16ac8950246d91cfa5e3383736be2df1c224e37332800c8a872da2
+  - source/NL/singletaskXPOS_writtenandspokentrain_spokentest_clean(1).conllu
+  - source/NL/singletaskXPOS_writtenandspokentrain_spokentest_clean.conllu
+- SHA-256 4f5b73458d6385f1d0583e3397b77e1b41496c384dd4e58a5a4d9466bf7e2742
+  - source/NL/singletaskXPOS_writtenandspokentrain_writtentest(1).conllu
+  - source/NL/singletaskXPOS_writtenandspokentrain_writtentest.conllu
+  - source/NL/singletaskXPOS_writtenandspokentrain_writtentest_clean(1).conllu
+  - source/NL/singletaskXPOS_writtenandspokentrain_writtentest_clean.conllu
+- SHA-256 77867e6349f8364a6be49abcad22bfc1a523f3d58af40328c3569c06c92dc846
+  - source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest(1).conllu
+  - source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest.conllu
+- SHA-256 6ea356fa97accb316bff1b46827ed7f69c2fb733eda5fd719fcd00ca5c3748c9
+  - source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest_clean(1).conllu
+  - source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest_clean.conllu
+- SHA-256 b1d447679d3c94156eb63caf9032609718d30adaf352e4b97988fde592e5adcc
+  - source/NL/singletaskXPOSclassification_writtenandspokentrain_writtentest(1).conllu
+  - source/NL/singletaskXPOSclassification_writtenandspokentrain_writtentest.conllu
+  - source/NL/singletaskXPOSclassification_writtenandspokentrain_writtentest_clean(1).conllu
+  - source/NL/singletaskXPOSclassification_writtenandspokentrain_writtentest_clean.conllu
+- SHA-256 f38e8767cdc81b3989ef0edcf83bdb5777b94f96d1fea61ffe43e3426de9a704
+  - source/NL/spacy_default_spokentest(1).conllu
+  - source/NL/spacy_default_spokentest.conllu
+- SHA-256 dfbea4425ae03525fd29f7581a8127e630db2365e54425955b9a758743125fa1
+  - source/NL/spacy_default_spokentest_clean(1).conllu
+  - source/NL/spacy_default_spokentest_clean.conllu
+- SHA-256 5dec33904ea3cd6ae91b36c1f6b2b15040d262c10536dd78d0f32024b6d7597c
+  - source/NL/spacy_default_writtentest(1).conllu
+  - source/NL/spacy_default_writtentest.conllu
+- SHA-256 d9d6dc89e9c7122fe2ce8e6f85b306067166fe146846c650e11127001bf422b4
+  - source/NL/spacy_default_writtentest_clean(1).conllu
+  - source/NL/spacy_default_writtentest_clean.conllu
+- SHA-256 2720c040c727240db64276b59f23f67de13e596d020c6b51fda80a80a2edea84
+  - source/NL/spacy_writtenandspokentrain_spokentest(1).conllu
+  - source/NL/spacy_writtenandspokentrain_spokentest.conllu
+- SHA-256 7cc09d26e1cbe0bc58ff803d7beb4a3474df379cd8e21b944a7fd26d9bd7d2aa
+  - source/NL/spacy_writtenandspokentrain_spokentest_clean(1).conllu
+  - source/NL/spacy_writtenandspokentrain_spokentest_clean.conllu
+- SHA-256 557214e0aa2ab48c6bd2fbcfb677a9ecb646f4a8d6cf3849c30023f4d13835a0
+  - source/NL/spacy_writtenandspokentrain_writtentest(1).conllu
+  - source/NL/spacy_writtenandspokentrain_writtentest.conllu
+- SHA-256 9462f8d0301c3db92683d02e1e0615d78250134cf7addad1ba15db86c6c39752
+  - source/NL/spacy_writtenandspokentrain_writtentest_clean(1).conllu
+  - source/NL/spacy_writtenandspokentrain_writtentest_clean.conllu
+- SHA-256 4c45d876a0528bd73c74377ee606a33231553a76ac3566cbbcba323ddb98c5fc
+  - source/NL/spacy_writtentrain_spokentest(1).conllu
+  - source/NL/spacy_writtentrain_spokentest.conllu
+- SHA-256 560c0f3bbfd10284f2720beaa708506568967bf58e94a6b349dfdd6d137ebebd
+  - source/NL/spacy_writtentrain_spokentest_clean(1).conllu
+  - source/NL/spacy_writtentrain_spokentest_clean.conllu
+- SHA-256 a78d72bb075c130889703f974696638620576b772c1f5bc88e2684d7557c7589
+  - source/NL/spacy_writtentrain_writtentest(1).conllu
+  - source/NL/spacy_writtentrain_writtentest.conllu
+- SHA-256 126fd8af4c173da477f9ec88c64dce3138288627836124fdcd57cdff51aeaa73
+  - source/NL/spacy_writtentrain_writtentest_clean(1).conllu
+  - source/NL/spacy_writtentrain_writtentest_clean.conllu
+- SHA-256 41e1768b45ce42b1e40dcc07e62e1854b93e3c5a9c51c07986fca2b5b6fcbea8
+  - source/NL/stanza_default_dialecttest(1).conllu
+  - source/NL/stanza_default_dialecttest.conllu
+  - source/NL/stanza_default_spokentest(1).conllu
+  - source/NL/stanza_default_spokentest.conllu
+- SHA-256 064c7dd53d10ddf1b46f9705f81bb13e628a272094550d8954980ebffbcafc1b
+  - source/NL/stanza_default_dialecttest_clean(1).conllu
+  - source/NL/stanza_default_dialecttest_clean.conllu
+  - source/NL/stanza_default_spokentest_clean(1).conllu
+  - source/NL/stanza_default_spokentest_clean.conllu
+- SHA-256 9044a149d9081e9cde0a1f6d326d93b93120da56a394b298aca6584962e34d50
+  - source/NL/stanza_default_writtentest(1).conllu
+  - source/NL/stanza_default_writtentest.conllu
+  - source/NL/stanza_default_writtentest_clean(1).conllu
+  - source/NL/stanza_default_writtentest_clean.conllu
+- SHA-256 70097694b153c5de791e01b7adcd3d4ffe0bf14daa8c2ef01f8b36e76cc3288d
+  - source/NL/stanza_writtenandspokentrain_spokentest(1).conllu
+  - source/NL/stanza_writtenandspokentrain_spokentest.conllu
+  - source/NL/stanza_writtenandspokentrain_spokentest_clean(1).conllu
+  - source/NL/stanza_writtenandspokentrain_spokentest_clean.conllu
+- SHA-256 78f7ed73e75f240decd7e820f1a3837533450672a841d66ef00f26d6da5563e9
+  - source/NL/stanza_writtenandspokentrain_writtentest(1).conllu
+  - source/NL/stanza_writtenandspokentrain_writtentest.conllu
+  - source/NL/stanza_writtenandspokentrain_writtentest_clean(1).conllu
+  - source/NL/stanza_writtenandspokentrain_writtentest_clean.conllu
+- SHA-256 afe82bdd8f9ecd5083423aad3928b193e0cd5398033596dcd71bd262ffaccfe8
+  - source/NL/stanza_writtentrain_spokentest(1).conllu
+  - source/NL/stanza_writtentrain_spokentest.conllu
+  - source/NL/stanza_writtentrain_spokentest_clean(1).conllu
+  - source/NL/stanza_writtentrain_spokentest_clean.conllu
+- SHA-256 d1301666d459aae5b14ea5835e144b9cb9c984b9627b2bca6b8058be97ffbfa1
+  - source/NL/stanza_writtentrain_writtentest(1).conllu
+  - source/NL/stanza_writtentrain_writtentest.conllu
+  - source/NL/stanza_writtentrain_writtentest_clean(1).conllu
+  - source/NL/stanza_writtentrain_writtentest_clean.conllu
+- SHA-256 578bcdc0913c4f085fa9ce3fa5f6a89493d33e2cc50e7ae4f0661e73aedc5ba2
+  - source/NL/trankit_1epochswrittenandspokentrain_spokentest(1).conllu
+  - source/NL/trankit_1epochswrittenandspokentrain_spokentest.conllu
+  - source/NL/trankit_1epochswrittenandspokentrain_spokentest_clean(1).conllu
+  - source/NL/trankit_1epochswrittenandspokentrain_spokentest_clean.conllu
+- SHA-256 d73aff14f3b99b275eb5d4cfc7f15e605b9af8cd3dd83ca5a2a7af3bc2cdc0fb
+  - source/NL/trankit_1epochswrittenandspokentrain_writtentest(1).conllu
+  - source/NL/trankit_1epochswrittenandspokentrain_writtentest.conllu
+  - source/NL/trankit_1epochswrittenandspokentrain_writtentest_clean(1).conllu
+  - source/NL/trankit_1epochswrittenandspokentrain_writtentest_clean.conllu
+- SHA-256 ff26e6eda27ccc1ac787d1c8ce0662641d7243277dd5013b2ed415e4878cd48b
+  - source/NL/trankit_2epochswrittenandspokentrain_writtentest(1).conllu
+  - source/NL/trankit_2epochswrittenandspokentrain_writtentest.conllu
+  - source/NL/trankit_2epochswrittenandspokentrain_writtentest_clean(1).conllu
+  - source/NL/trankit_2epochswrittenandspokentrain_writtentest_clean.conllu
+- SHA-256 3c82a46cd8068c7424574eebfdaf911c23ab4de52f3bbecfad520a1ae537c573
+  - source/NL/trankit_50epochswrittenandspokentrain_spokentest(1).conllu
+  - source/NL/trankit_50epochswrittenandspokentrain_spokentest.conllu
+  - source/NL/trankit_50epochswrittenandspokentrain_spokentest_clean(1).conllu
+  - source/NL/trankit_50epochswrittenandspokentrain_spokentest_clean.conllu
+- SHA-256 0ace03f3b06428038e39336cd1af28e326f6689f0117556dcbf3f6b2aa59981c
+  - source/NL/trankit_50epochswrittenandspokentrain_writtentest(1).conllu
+  - source/NL/trankit_50epochswrittenandspokentrain_writtentest.conllu
+  - source/NL/trankit_50epochswrittenandspokentrain_writtentest_clean(1).conllu
+  - source/NL/trankit_50epochswrittenandspokentrain_writtentest_clean.conllu
+- SHA-256 16c1c5c3b988579adf7bca63a278bac11cfd1fb5b671f326cc63782c348eb64d
+  - source/NL/trankit_writtenandspokentrain_dialecttest(1).conllu
+  - source/NL/trankit_writtenandspokentrain_dialecttest.conllu
+  - source/NL/trankit_writtenandspokentrain_dialecttest_clean(1).conllu
+  - source/NL/trankit_writtenandspokentrain_dialecttest_clean.conllu
+- SHA-256 e05d37ad51bb680b07ff7fbcc4cdd711d6a1bf73a1d629ca34e3796352418238
+  - source/NL/trankit_writtenandspokentrain_spokentest.conllu
+  - source/NL/trankit_writtenandspokentrain_spokentest_clean.conllu
+- SHA-256 3aa6859ff47228f4fbfcf165046cfbc2ce9375d51202d02c87c9d341239639d0
+  - source/NL/trankit_writtenandspokentrain_writtentest(1).conllu
+  - source/NL/trankit_writtenandspokentrain_writtentest.conllu
+  - source/NL/trankit_writtenandspokentrain_writtentest_clean(1).conllu
+  - source/NL/trankit_writtenandspokentrain_writtentest_clean.conllu
+
+Numbered download-copy comparisons:
+- source/NL/UDpipe2_default_writtentest(1).conllu -> source/NL/UDpipe2_default_writtentest.conllu: identical
+- source/NL/UDpipe2_default_writtentest_clean(1).conllu -> source/NL/UDpipe2_default_writtentest_clean.conllu: identical
+- source/NL/diaparser_writtenanddialecttrain_dialecttest(1).conllu -> source/NL/diaparser_writtenanddialecttrain_dialecttest.conllu: identical
+- source/NL/diaparser_writtenanddialecttrain_dialecttest_clean(1).conllu -> source/NL/diaparser_writtenanddialecttrain_dialecttest_clean.conllu: identical
+- source/NL/diaparser_writtenanddialecttrain_writtentest(1).conllu -> source/NL/diaparser_writtenanddialecttrain_writtentest.conllu: identical
+- source/NL/diaparser_writtenanddialecttrain_writtentest_clean(1).conllu -> source/NL/diaparser_writtenanddialecttrain_writtentest_clean.conllu: identical
+- source/NL/diaparser_writtentrain_dialecttest(1).conllu -> source/NL/diaparser_writtentrain_dialecttest.conllu: identical
+- source/NL/diaparser_writtentrain_dialecttest_clean(1).conllu -> source/NL/diaparser_writtentrain_dialecttest_clean.conllu: identical
+- source/NL/diaparser_writtentrain_writtentest(1).conllu -> source/NL/diaparser_writtentrain_writtentest.conllu: identical
+- source/NL/diaparser_writtentrain_writtentest_clean(1).conllu -> source/NL/diaparser_writtentrain_writtentest_clean.conllu: identical
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest(1).conllu -> source/NL/singletaskXPOS_writtenandspokentrain_spokentest.conllu: identical
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest_clean(1).conllu -> source/NL/singletaskXPOS_writtenandspokentrain_spokentest_clean.conllu: identical
+- source/NL/singletaskXPOS_writtenandspokentrain_writtentest(1).conllu -> source/NL/singletaskXPOS_writtenandspokentrain_writtentest.conllu: identical
+- source/NL/singletaskXPOS_writtenandspokentrain_writtentest_clean(1).conllu -> source/NL/singletaskXPOS_writtenandspokentrain_writtentest_clean.conllu: identical
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest(1).conllu -> source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest.conllu: identical
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest_clean(1).conllu -> source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest_clean.conllu: identical
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_writtentest(1).conllu -> source/NL/singletaskXPOSclassification_writtenandspokentrain_writtentest.conllu: identical
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_writtentest_clean(1).conllu -> source/NL/singletaskXPOSclassification_writtenandspokentrain_writtentest_clean.conllu: identical
+- source/NL/spacy_default_spokentest(1).conllu -> source/NL/spacy_default_spokentest.conllu: identical
+- source/NL/spacy_default_spokentest_clean(1).conllu -> source/NL/spacy_default_spokentest_clean.conllu: identical
+- source/NL/spacy_default_writtentest(1).conllu -> source/NL/spacy_default_writtentest.conllu: identical
+- source/NL/spacy_default_writtentest_clean(1).conllu -> source/NL/spacy_default_writtentest_clean.conllu: identical
+- source/NL/spacy_writtenandspokentrain_spokentest(1).conllu -> source/NL/spacy_writtenandspokentrain_spokentest.conllu: identical
+- source/NL/spacy_writtenandspokentrain_spokentest_clean(1).conllu -> source/NL/spacy_writtenandspokentrain_spokentest_clean.conllu: identical
+- source/NL/spacy_writtenandspokentrain_writtentest(1).conllu -> source/NL/spacy_writtenandspokentrain_writtentest.conllu: identical
+- source/NL/spacy_writtenandspokentrain_writtentest_clean(1).conllu -> source/NL/spacy_writtenandspokentrain_writtentest_clean.conllu: identical
+- source/NL/spacy_writtentrain_spokentest(1).conllu -> source/NL/spacy_writtentrain_spokentest.conllu: identical
+- source/NL/spacy_writtentrain_spokentest_clean(1).conllu -> source/NL/spacy_writtentrain_spokentest_clean.conllu: identical
+- source/NL/spacy_writtentrain_writtentest(1).conllu -> source/NL/spacy_writtentrain_writtentest.conllu: identical
+- source/NL/spacy_writtentrain_writtentest_clean(1).conllu -> source/NL/spacy_writtentrain_writtentest_clean.conllu: identical
+- source/NL/stanza_default_dialecttest(1).conllu -> source/NL/stanza_default_dialecttest.conllu: identical
+- source/NL/stanza_default_dialecttest_clean(1).conllu -> source/NL/stanza_default_dialecttest_clean.conllu: identical
+- source/NL/stanza_default_spokentest(1).conllu -> source/NL/stanza_default_spokentest.conllu: identical
+- source/NL/stanza_default_spokentest_clean(1).conllu -> source/NL/stanza_default_spokentest_clean.conllu: identical
+- source/NL/stanza_default_writtentest(1).conllu -> source/NL/stanza_default_writtentest.conllu: identical
+- source/NL/stanza_default_writtentest_clean(1).conllu -> source/NL/stanza_default_writtentest_clean.conllu: identical
+- source/NL/stanza_writtenandspokentrain_spokentest(1).conllu -> source/NL/stanza_writtenandspokentrain_spokentest.conllu: identical
+- source/NL/stanza_writtenandspokentrain_spokentest_clean(1).conllu -> source/NL/stanza_writtenandspokentrain_spokentest_clean.conllu: identical
+- source/NL/stanza_writtenandspokentrain_writtentest(1).conllu -> source/NL/stanza_writtenandspokentrain_writtentest.conllu: identical
+- source/NL/stanza_writtenandspokentrain_writtentest_clean(1).conllu -> source/NL/stanza_writtenandspokentrain_writtentest_clean.conllu: identical
+- source/NL/stanza_writtentrain_spokentest(1).conllu -> source/NL/stanza_writtentrain_spokentest.conllu: identical
+- source/NL/stanza_writtentrain_spokentest_clean(1).conllu -> source/NL/stanza_writtentrain_spokentest_clean.conllu: identical
+- source/NL/stanza_writtentrain_writtentest(1).conllu -> source/NL/stanza_writtentrain_writtentest.conllu: identical
+- source/NL/stanza_writtentrain_writtentest_clean(1).conllu -> source/NL/stanza_writtentrain_writtentest_clean.conllu: identical
+- source/NL/trankit_1epochswrittenandspokentrain_spokentest(1).conllu -> source/NL/trankit_1epochswrittenandspokentrain_spokentest.conllu: identical
+- source/NL/trankit_1epochswrittenandspokentrain_spokentest_clean(1).conllu -> source/NL/trankit_1epochswrittenandspokentrain_spokentest_clean.conllu: identical
+- source/NL/trankit_1epochswrittenandspokentrain_writtentest(1).conllu -> source/NL/trankit_1epochswrittenandspokentrain_writtentest.conllu: identical
+- source/NL/trankit_1epochswrittenandspokentrain_writtentest_clean(1).conllu -> source/NL/trankit_1epochswrittenandspokentrain_writtentest_clean.conllu: identical
+- source/NL/trankit_2epochswrittenandspokentrain_writtentest(1).conllu -> source/NL/trankit_2epochswrittenandspokentrain_writtentest.conllu: identical
+- source/NL/trankit_2epochswrittenandspokentrain_writtentest_clean(1).conllu -> source/NL/trankit_2epochswrittenandspokentrain_writtentest_clean.conllu: identical
+- source/NL/trankit_50epochswrittenandspokentrain_spokentest(1).conllu -> source/NL/trankit_50epochswrittenandspokentrain_spokentest.conllu: identical
+- source/NL/trankit_50epochswrittenandspokentrain_spokentest_clean(1).conllu -> source/NL/trankit_50epochswrittenandspokentrain_spokentest_clean.conllu: identical
+- source/NL/trankit_50epochswrittenandspokentrain_writtentest(1).conllu -> source/NL/trankit_50epochswrittenandspokentrain_writtentest.conllu: identical
+- source/NL/trankit_50epochswrittenandspokentrain_writtentest_clean(1).conllu -> source/NL/trankit_50epochswrittenandspokentrain_writtentest_clean.conllu: identical
+- source/NL/trankit_writtenandspokentrain_dialecttest(1).conllu -> source/NL/trankit_writtenandspokentrain_dialecttest.conllu: identical
+- source/NL/trankit_writtenandspokentrain_dialecttest_clean(1).conllu -> source/NL/trankit_writtenandspokentrain_dialecttest_clean.conllu: identical
+- source/NL/trankit_writtenandspokentrain_writtentest(1).conllu -> source/NL/trankit_writtenandspokentrain_writtentest.conllu: identical
+- source/NL/trankit_writtenandspokentrain_writtentest_clean(1).conllu -> source/NL/trankit_writtenandspokentrain_writtentest_clean.conllu: identical
+
+Basic file validity errors:
+- None
+
+4. SL
+=====
+
+File inventory:
+- Total .conllu files: 90
+- Numbered download-copy files: 38
+- Raw files: 45
+- Clean files: 45
+
+Exact duplicate groups within the language:
+- SHA-256 6e36c008ccc6e686d9fbc2534fe490d9d42817a4cd23f162f4eac206359938ce
+  - source/SL/UDpipessj_default_spokentest(1).conllu
+  - source/SL/UDpipessj_default_spokentest.conllu
+  - source/SL/UDpipessj_default_spokentest_clean(1).conllu
+  - source/SL/UDpipessj_default_spokentest_clean.conllu
+- SHA-256 dda4b4c4eda0c2705f207cb219ebb16345ed911965eacb6b524441dc9ebd2f34
+  - source/SL/UDpipessj_default_writtentest(1).conllu
+  - source/SL/UDpipessj_default_writtentest.conllu
+  - source/SL/UDpipessj_default_writtentest_clean(1).conllu
+  - source/SL/UDpipessj_default_writtentest_clean.conllu
+- SHA-256 840085c3eb3cc670f2586b870f6adf17192249360b3e62a145589c02258d0d51
+  - source/SL/UDpipesst_default_spokentest(1).conllu
+  - source/SL/UDpipesst_default_spokentest.conllu
+  - source/SL/UDpipesst_default_spokentest_clean(1).conllu
+  - source/SL/UDpipesst_default_spokentest_clean.conllu
+- SHA-256 692d070dfa2b77e795cd4d14c036c34361e9fd1e8c184d4fd918e10286ba92b4
+  - source/SL/UDpipesst_default_writtentest(1).conllu
+  - source/SL/UDpipesst_default_writtentest.conllu
+  - source/SL/UDpipesst_default_writtentest_clean(1).conllu
+  - source/SL/UDpipesst_default_writtentest_clean.conllu
+- SHA-256 0c41f5636ce2c651f624245b327c596418cf0910689b66a619fef3f687d676ce
+  - source/SL/diaparser_writtenandspokentrain_spokentest(1).conllu
+  - source/SL/diaparser_writtenandspokentrain_spokentest.conllu
+- SHA-256 988e3cec11ea7981f2194ae5fa3a868e096301ee444dff1b4647210717917420
+  - source/SL/diaparser_writtenandspokentrain_spokentest_clean(1).conllu
+  - source/SL/diaparser_writtenandspokentrain_spokentest_clean.conllu
+- SHA-256 9da37d12c1cf20769507193a11fbab31fc819bc7f5179fd73fc98deb2ada0efc
+  - source/SL/diaparser_writtenandspokentrain_writtentest(1).conllu
+  - source/SL/diaparser_writtenandspokentrain_writtentest.conllu
+- SHA-256 f021aaec64c98c0ee05c6e351abd54f016a0a9311debaee777d8771fb19d951d
+  - source/SL/diaparser_writtenandspokentrain_writtentest_clean(1).conllu
+  - source/SL/diaparser_writtenandspokentrain_writtentest_clean.conllu
+- SHA-256 e17c7ff96930ebef00f2d7dc974360d8084bbeb35628f932890c242603754f6a
+  - source/SL/diaparser_writtentrain_spokentest(1).conllu
+  - source/SL/diaparser_writtentrain_spokentest.conllu
+- SHA-256 7735d949dbe11de4a24dd2a0bb60ce599c8cb31354a067064099f4499bbb0d7a
+  - source/SL/diaparser_writtentrain_spokentest_clean(1).conllu
+  - source/SL/diaparser_writtentrain_spokentest_clean.conllu
+- SHA-256 c92cd301a75e2fb43109f1df2020f12cab8ee01e54b9f4a6ff2ddc3357eb726e
+  - source/SL/diaparser_writtentrain_writtentest(1).conllu
+  - source/SL/diaparser_writtentrain_writtentest.conllu
+- SHA-256 fa49ef4a226edd793a5c595109136f34954aecaea3e97006ead892ef99b4552e
+  - source/SL/diaparser_writtentrain_writtentest_clean(1).conllu
+  - source/SL/diaparser_writtentrain_writtentest_clean.conllu
+- SHA-256 4c9ac2235d774df1b1ca8c5c260997d05402a1c6ed28ea1bd448cf48123b513b
+  - source/SL/singletaskXPOS_writtenandspokentrain_spokentest(1).conllu
+  - source/SL/singletaskXPOS_writtenandspokentrain_spokentest.conllu
+  - source/SL/singletaskXPOS_writtenandspokentrain_spokentest_clean(1).conllu
+  - source/SL/singletaskXPOS_writtenandspokentrain_spokentest_clean.conllu
+- SHA-256 02bfeb9430afd3751f4554865e1dde08551b0843113af132466663fb6e0e8eec
+  - source/SL/singletaskXPOS_writtenandspokentrain_writtentest(1).conllu
+  - source/SL/singletaskXPOS_writtenandspokentrain_writtentest.conllu
+  - source/SL/singletaskXPOS_writtenandspokentrain_writtentest_clean(1).conllu
+  - source/SL/singletaskXPOS_writtenandspokentrain_writtentest_clean.conllu
+- SHA-256 8ab73595aad54625eae47e1e8a09d12c1131d1396e7a5b702b089860df93ceee
+  - source/SL/singletaskXPOSclassification_writtenandspokentrain_spokentest(1).conllu
+  - source/SL/singletaskXPOSclassification_writtenandspokentrain_spokentest.conllu
+  - source/SL/singletaskXPOSclassification_writtenandspokentrain_spokentest_clean(1).conllu
+  - source/SL/singletaskXPOSclassification_writtenandspokentrain_spokentest_clean.conllu
+- SHA-256 cab26fd88a37368eae1c0e99b26a4fe2507f58d71df070b82ef6f322d3588eeb
+  - source/SL/singletaskXPOSclassification_writtenandspokentrain_writtentest(1).conllu
+  - source/SL/singletaskXPOSclassification_writtenandspokentrain_writtentest.conllu
+  - source/SL/singletaskXPOSclassification_writtenandspokentrain_writtentest_clean(1).conllu
+  - source/SL/singletaskXPOSclassification_writtenandspokentrain_writtentest_clean.conllu
+- SHA-256 b0549fcd821ddbac38791235300af366e9785e64135c51d508a87e52c7cad22f
+  - source/SL/spacy_default_spokentest(1).conllu
+  - source/SL/spacy_default_spokentest.conllu
+- SHA-256 63393faa27b90afcd5e70d7a48734b33dbb009b88ee55980091471cbe64c3be9
+  - source/SL/spacy_default_spokentest_clean(1).conllu
+  - source/SL/spacy_default_spokentest_clean.conllu
+- SHA-256 9d89d2abc7a67e3ba31c26605c0a7b8041d6d0c696c30da6f3f1d40b6ba2fc9e
+  - source/SL/spacy_default_writtentest(1).conllu
+  - source/SL/spacy_default_writtentest.conllu
+- SHA-256 74a2e3716f450b09a5e231d80281b422329264e8d273b178dabb3b138190b23d
+  - source/SL/spacy_default_writtentest_clean(1).conllu
+  - source/SL/spacy_default_writtentest_clean.conllu
+- SHA-256 7db1eca3d1b9ea74b578a0bc9ec17f7cf71271bef14421a93f65444483f6ee1a
+  - source/SL/stanza_default_spokentest(1).conllu
+  - source/SL/stanza_default_spokentest.conllu
+  - source/SL/stanza_default_spokentest_clean(1).conllu
+  - source/SL/stanza_default_spokentest_clean.conllu
+- SHA-256 d295a00a790e85e8980a0182f1bfa2551a3fe14e94a5c502defcd124e9ca7640
+  - source/SL/stanza_default_writtentest(1).conllu
+  - source/SL/stanza_default_writtentest.conllu
+  - source/SL/stanza_default_writtentest_clean(1).conllu
+  - source/SL/stanza_default_writtentest_clean.conllu
+- SHA-256 1907b52b5cdde7fc661300f0c928269298b50eb8e927328685a409a8d33863d6
+  - source/SL/stanza_writtenandspokentrain_spokentest.conllu
+  - source/SL/stanza_writtenandspokentrain_spokentest_clean.conllu
+- SHA-256 b67903261d58f59f200fe89452b1b0b83e18e8f0037907bfc0c5b3a920d1e756
+  - source/SL/stanza_writtenandspokentrain_writtentest(1).conllu
+  - source/SL/stanza_writtenandspokentrain_writtentest.conllu
+  - source/SL/stanza_writtenandspokentrain_writtentest_clean(1).conllu
+  - source/SL/stanza_writtenandspokentrain_writtentest_clean.conllu
+- SHA-256 0b71a162219a1f69e377a85393eb3f5c4acd47a337879b8cfa8da8557f80b870
+  - source/SL/stanza_writtentrain_spokentest.conllu
+  - source/SL/stanza_writtentrain_spokentest_clean.conllu
+- SHA-256 c4712d50b040d67a08cd85d7cf3bc8a39e224ce1b352e05573ea2624e518b568
+  - source/SL/stanza_writtentrain_writtentest(1).conllu
+  - source/SL/stanza_writtentrain_writtentest.conllu
+  - source/SL/stanza_writtentrain_writtentest_clean(1).conllu
+  - source/SL/stanza_writtentrain_writtentest_clean.conllu
+- SHA-256 aea2a111a1384b0c7aebe4f1116b8525efa6a4d2f4d3136ac136921806f1b10b
+  - source/SL/trankit_writtenandspokentrain_spokentest.conllu
+  - source/SL/trankit_writtenandspokentrain_spokentest_clean.conllu
+- SHA-256 59ca37650d0d4e8335e974e179ef67be31811752ade627b7147c04a76c2a2c99
+  - source/SL/trankit_writtenandspokentrain_writtentest(1).conllu
+  - source/SL/trankit_writtenandspokentrain_writtentest.conllu
+  - source/SL/trankit_writtenandspokentrain_writtentest_clean(1).conllu
+  - source/SL/trankit_writtenandspokentrain_writtentest_clean.conllu
+
+Numbered download-copy comparisons:
+- source/SL/UDpipessj_default_spokentest(1).conllu -> source/SL/UDpipessj_default_spokentest.conllu: identical
+- source/SL/UDpipessj_default_spokentest_clean(1).conllu -> source/SL/UDpipessj_default_spokentest_clean.conllu: identical
+- source/SL/UDpipessj_default_writtentest(1).conllu -> source/SL/UDpipessj_default_writtentest.conllu: identical
+- source/SL/UDpipessj_default_writtentest_clean(1).conllu -> source/SL/UDpipessj_default_writtentest_clean.conllu: identical
+- source/SL/UDpipesst_default_spokentest(1).conllu -> source/SL/UDpipesst_default_spokentest.conllu: identical
+- source/SL/UDpipesst_default_spokentest_clean(1).conllu -> source/SL/UDpipesst_default_spokentest_clean.conllu: identical
+- source/SL/UDpipesst_default_writtentest(1).conllu -> source/SL/UDpipesst_default_writtentest.conllu: identical
+- source/SL/UDpipesst_default_writtentest_clean(1).conllu -> source/SL/UDpipesst_default_writtentest_clean.conllu: identical
+- source/SL/diaparser_writtenandspokentrain_spokentest(1).conllu -> source/SL/diaparser_writtenandspokentrain_spokentest.conllu: identical
+- source/SL/diaparser_writtenandspokentrain_spokentest_clean(1).conllu -> source/SL/diaparser_writtenandspokentrain_spokentest_clean.conllu: identical
+- source/SL/diaparser_writtenandspokentrain_writtentest(1).conllu -> source/SL/diaparser_writtenandspokentrain_writtentest.conllu: identical
+- source/SL/diaparser_writtenandspokentrain_writtentest_clean(1).conllu -> source/SL/diaparser_writtenandspokentrain_writtentest_clean.conllu: identical
+- source/SL/diaparser_writtentrain_spokentest(1).conllu -> source/SL/diaparser_writtentrain_spokentest.conllu: identical
+- source/SL/diaparser_writtentrain_spokentest_clean(1).conllu -> source/SL/diaparser_writtentrain_spokentest_clean.conllu: identical
+- source/SL/diaparser_writtentrain_writtentest(1).conllu -> source/SL/diaparser_writtentrain_writtentest.conllu: identical
+- source/SL/diaparser_writtentrain_writtentest_clean(1).conllu -> source/SL/diaparser_writtentrain_writtentest_clean.conllu: identical
+- source/SL/singletaskXPOS_writtenandspokentrain_spokentest(1).conllu -> source/SL/singletaskXPOS_writtenandspokentrain_spokentest.conllu: identical
+- source/SL/singletaskXPOS_writtenandspokentrain_spokentest_clean(1).conllu -> source/SL/singletaskXPOS_writtenandspokentrain_spokentest_clean.conllu: identical
+- source/SL/singletaskXPOS_writtenandspokentrain_writtentest(1).conllu -> source/SL/singletaskXPOS_writtenandspokentrain_writtentest.conllu: identical
+- source/SL/singletaskXPOS_writtenandspokentrain_writtentest_clean(1).conllu -> source/SL/singletaskXPOS_writtenandspokentrain_writtentest_clean.conllu: identical
+- source/SL/singletaskXPOSclassification_writtenandspokentrain_spokentest(1).conllu -> source/SL/singletaskXPOSclassification_writtenandspokentrain_spokentest.conllu: identical
+- source/SL/singletaskXPOSclassification_writtenandspokentrain_spokentest_clean(1).conllu -> source/SL/singletaskXPOSclassification_writtenandspokentrain_spokentest_clean.conllu: identical
+- source/SL/singletaskXPOSclassification_writtenandspokentrain_writtentest(1).conllu -> source/SL/singletaskXPOSclassification_writtenandspokentrain_writtentest.conllu: identical
+- source/SL/singletaskXPOSclassification_writtenandspokentrain_writtentest_clean(1).conllu -> source/SL/singletaskXPOSclassification_writtenandspokentrain_writtentest_clean.conllu: identical
+- source/SL/spacy_default_spokentest(1).conllu -> source/SL/spacy_default_spokentest.conllu: identical
+- source/SL/spacy_default_spokentest_clean(1).conllu -> source/SL/spacy_default_spokentest_clean.conllu: identical
+- source/SL/spacy_default_writtentest(1).conllu -> source/SL/spacy_default_writtentest.conllu: identical
+- source/SL/spacy_default_writtentest_clean(1).conllu -> source/SL/spacy_default_writtentest_clean.conllu: identical
+- source/SL/stanza_default_spokentest(1).conllu -> source/SL/stanza_default_spokentest.conllu: identical
+- source/SL/stanza_default_spokentest_clean(1).conllu -> source/SL/stanza_default_spokentest_clean.conllu: identical
+- source/SL/stanza_default_writtentest(1).conllu -> source/SL/stanza_default_writtentest.conllu: identical
+- source/SL/stanza_default_writtentest_clean(1).conllu -> source/SL/stanza_default_writtentest_clean.conllu: identical
+- source/SL/stanza_writtenandspokentrain_writtentest(1).conllu -> source/SL/stanza_writtenandspokentrain_writtentest.conllu: identical
+- source/SL/stanza_writtenandspokentrain_writtentest_clean(1).conllu -> source/SL/stanza_writtenandspokentrain_writtentest_clean.conllu: identical
+- source/SL/stanza_writtentrain_writtentest(1).conllu -> source/SL/stanza_writtentrain_writtentest.conllu: identical
+- source/SL/stanza_writtentrain_writtentest_clean(1).conllu -> source/SL/stanza_writtentrain_writtentest_clean.conllu: identical
+- source/SL/trankit_writtenandspokentrain_writtentest(1).conllu -> source/SL/trankit_writtenandspokentrain_writtentest.conllu: identical
+- source/SL/trankit_writtenandspokentrain_writtentest_clean(1).conllu -> source/SL/trankit_writtenandspokentrain_writtentest_clean.conllu: identical
+
+Basic file validity errors:
+- None
+
+5. Cross-language duplicate hashes
+==================================
+
+- SHA-256 e05d37ad51bb680b07ff7fbcc4cdd711d6a1bf73a1d629ca34e3796352418238
+  - EN: source/EN/trankit_writtenandspokentrain_spokentest.conllu
+  - EN: source/EN/trankit_writtenandspokentrain_spokentest_clean.conllu
+  - NL: source/NL/trankit_writtenandspokentrain_spokentest.conllu
+  - NL: source/NL/trankit_writtenandspokentrain_spokentest_clean.conllu
+
+6. Raw-vs-clean differences
+===========================
+
+- source/EN/UDpipe2_default_spokentest.conllu
+  clean: source/EN/UDpipe2_default_spokentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/EN/UDpipe2_default_writtentest.conllu
+  clean: source/EN/UDpipe2_default_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/EN/diaparser_writtenandspokentrain_spokentest.conllu
+  clean: source/EN/diaparser_writtenandspokentrain_spokentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=583 sentences/11382 token rows; clean=583 sentences/11382 token rows
+- source/EN/diaparser_writtenandspokentrain_writtentest.conllu
+  clean: source/EN/diaparser_writtenandspokentrain_writtentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=881 sentences/17441 token rows; clean=881 sentences/17441 token rows
+- source/EN/diaparser_writtentrain_spokentest.conllu
+  clean: source/EN/diaparser_writtentrain_spokentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=583 sentences/11382 token rows; clean=583 sentences/11382 token rows
+- source/EN/diaparser_writtentrain_writtentest.conllu
+  clean: source/EN/diaparser_writtentrain_writtentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=881 sentences/17441 token rows; clean=881 sentences/17441 token rows
+- source/EN/singletaskXPOS_writtenandspokentrain_spokentest.conllu
+  clean: source/EN/singletaskXPOS_writtenandspokentrain_spokentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/EN/singletaskXPOS_writtenandspokentrain_writtentest.conllu
+  clean: source/EN/singletaskXPOS_writtenandspokentrain_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/EN/singletaskXPOSclassification_writtenandspokentrain_spokentest.conllu
+  clean: source/EN/singletaskXPOSclassification_writtenandspokentrain_spokentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/EN/singletaskXPOSclassification_writtenandspokentrain_writtentest.conllu
+  clean: source/EN/singletaskXPOSclassification_writtenandspokentrain_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/EN/spacy_default_spokentest.conllu
+  clean: source/EN/spacy_default_spokentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/EN/spacy_default_writtentest.conllu
+  clean: source/EN/spacy_default_writtentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=881 sentences/17441 token rows; clean=881 sentences/17441 token rows
+- source/EN/spacy_writtenandspokentrain_spokentest.conllu
+  clean: source/EN/spacy_writtenandspokentrain_spokentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=583 sentences/11112 token rows; clean=583 sentences/11112 token rows
+- source/EN/spacy_writtenandspokentrain_writtentest.conllu
+  clean: source/EN/spacy_writtenandspokentrain_writtentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=881 sentences/17285 token rows; clean=881 sentences/17285 token rows
+- source/EN/spacy_writtentrain_spokentest.conllu
+  clean: source/EN/spacy_writtentrain_spokentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=583 sentences/11112 token rows; clean=583 sentences/11112 token rows
+- source/EN/spacy_writtentrain_writtentest.conllu
+  clean: source/EN/spacy_writtentrain_writtentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=881 sentences/17285 token rows; clean=881 sentences/17285 token rows
+- source/EN/stanza_default_spokentest.conllu
+  clean: source/EN/stanza_default_spokentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/EN/stanza_default_writtentest.conllu
+  clean: source/EN/stanza_default_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/EN/stanza_writtenandspokentrain_spokentest.conllu
+  clean: source/EN/stanza_writtenandspokentrain_spokentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/EN/stanza_writtenandspokentrain_writtentest.conllu
+  clean: source/EN/stanza_writtenandspokentrain_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/EN/stanza_writtentrain_spokentest.conllu
+  clean: source/EN/stanza_writtentrain_spokentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/EN/stanza_writtentrain_writtentest.conllu
+  clean: source/EN/stanza_writtentrain_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/EN/trankit_writtenandspokentrain_spokentest.conllu
+  clean: source/EN/trankit_writtenandspokentrain_spokentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/EN/trankit_writtenandspokentrain_writtentest.conllu
+  clean: source/EN/trankit_writtenandspokentrain_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/NL/UDpipe2_default_writtentest.conllu
+  clean: source/NL/UDpipe2_default_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/NL/diaparser_writtenanddialecttrain_dialecttest.conllu
+  clean: source/NL/diaparser_writtenanddialecttrain_dialecttest_clean.conllu
+  bytes: different
+  basic sentence/token structure: different
+  counts: raw=6196 sentences/53078 token rows; clean=6196 sentences/53078 token rows
+- source/NL/diaparser_writtenanddialecttrain_writtentest.conllu
+  clean: source/NL/diaparser_writtenanddialecttrain_writtentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=2357 sentences/40155 token rows; clean=2357 sentences/40155 token rows
+- source/NL/diaparser_writtentrain_dialecttest.conllu
+  clean: source/NL/diaparser_writtentrain_dialecttest_clean.conllu
+  bytes: different
+  basic sentence/token structure: different
+  counts: raw=6196 sentences/53078 token rows; clean=6196 sentences/53078 token rows
+- source/NL/diaparser_writtentrain_writtentest.conllu
+  clean: source/NL/diaparser_writtentrain_writtentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=2357 sentences/40155 token rows; clean=2357 sentences/40155 token rows
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest.conllu
+  clean: source/NL/singletaskXPOS_writtenandspokentrain_spokentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: different
+  counts: raw=6196 sentences/53078 token rows; clean=6196 sentences/53078 token rows
+- source/NL/singletaskXPOS_writtenandspokentrain_writtentest.conllu
+  clean: source/NL/singletaskXPOS_writtenandspokentrain_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest.conllu
+  clean: source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: different
+  counts: raw=6196 sentences/53078 token rows; clean=6196 sentences/53078 token rows
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_writtentest.conllu
+  clean: source/NL/singletaskXPOSclassification_writtenandspokentrain_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/NL/spacy_default_spokentest.conllu
+  clean: source/NL/spacy_default_spokentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: different
+  counts: raw=6196 sentences/53078 token rows; clean=6196 sentences/53078 token rows
+- source/NL/spacy_default_writtentest.conllu
+  clean: source/NL/spacy_default_writtentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=2357 sentences/40155 token rows; clean=2357 sentences/40155 token rows
+- source/NL/spacy_writtenandspokentrain_spokentest.conllu
+  clean: source/NL/spacy_writtenandspokentrain_spokentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=6196 sentences/53069 token rows; clean=6196 sentences/53069 token rows
+- source/NL/spacy_writtenandspokentrain_writtentest.conllu
+  clean: source/NL/spacy_writtenandspokentrain_writtentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=2357 sentences/40041 token rows; clean=2357 sentences/40041 token rows
+- source/NL/spacy_writtentrain_spokentest.conllu
+  clean: source/NL/spacy_writtentrain_spokentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=6196 sentences/53069 token rows; clean=6196 sentences/53069 token rows
+- source/NL/spacy_writtentrain_writtentest.conllu
+  clean: source/NL/spacy_writtentrain_writtentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=2357 sentences/40041 token rows; clean=2357 sentences/40041 token rows
+- source/NL/stanza_default_dialecttest.conllu
+  clean: source/NL/stanza_default_dialecttest_clean.conllu
+  bytes: different
+  basic sentence/token structure: different
+  counts: raw=6196 sentences/53078 token rows; clean=6196 sentences/53078 token rows
+- source/NL/stanza_default_spokentest.conllu
+  clean: source/NL/stanza_default_spokentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: different
+  counts: raw=6196 sentences/53078 token rows; clean=6196 sentences/53078 token rows
+- source/NL/stanza_default_writtentest.conllu
+  clean: source/NL/stanza_default_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/NL/stanza_writtenandspokentrain_spokentest.conllu
+  clean: source/NL/stanza_writtenandspokentrain_spokentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/NL/stanza_writtenandspokentrain_writtentest.conllu
+  clean: source/NL/stanza_writtenandspokentrain_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/NL/stanza_writtentrain_spokentest.conllu
+  clean: source/NL/stanza_writtentrain_spokentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/NL/stanza_writtentrain_writtentest.conllu
+  clean: source/NL/stanza_writtentrain_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/NL/trankit_1epochswrittenandspokentrain_spokentest.conllu
+  clean: source/NL/trankit_1epochswrittenandspokentrain_spokentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/NL/trankit_1epochswrittenandspokentrain_writtentest.conllu
+  clean: source/NL/trankit_1epochswrittenandspokentrain_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/NL/trankit_2epochswrittenandspokentrain_writtentest.conllu
+  clean: source/NL/trankit_2epochswrittenandspokentrain_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/NL/trankit_50epochswrittenandspokentrain_spokentest.conllu
+  clean: source/NL/trankit_50epochswrittenandspokentrain_spokentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/NL/trankit_50epochswrittenandspokentrain_writtentest.conllu
+  clean: source/NL/trankit_50epochswrittenandspokentrain_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/NL/trankit_writtenandspokentrain_dialecttest.conllu
+  clean: source/NL/trankit_writtenandspokentrain_dialecttest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/NL/trankit_writtenandspokentrain_spokentest.conllu
+  clean: source/NL/trankit_writtenandspokentrain_spokentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/NL/trankit_writtenandspokentrain_writtentest.conllu
+  clean: source/NL/trankit_writtenandspokentrain_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/SL/UDpipessj_default_spokentest.conllu
+  clean: source/SL/UDpipessj_default_spokentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/SL/UDpipessj_default_writtentest.conllu
+  clean: source/SL/UDpipessj_default_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/SL/UDpipesst_default_spokentest.conllu
+  clean: source/SL/UDpipesst_default_spokentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/SL/UDpipesst_default_writtentest.conllu
+  clean: source/SL/UDpipesst_default_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/SL/diaparser_writtenandspokentrain_spokentest.conllu
+  clean: source/SL/diaparser_writtenandspokentrain_spokentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=432 sentences/11443 token rows; clean=432 sentences/11443 token rows
+- source/SL/diaparser_writtenandspokentrain_writtentest.conllu
+  clean: source/SL/diaparser_writtenandspokentrain_writtentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=1282 sentences/25442 token rows; clean=1282 sentences/25442 token rows
+- source/SL/diaparser_writtentrain_spokentest.conllu
+  clean: source/SL/diaparser_writtentrain_spokentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=432 sentences/11443 token rows; clean=432 sentences/11443 token rows
+- source/SL/diaparser_writtentrain_writtentest.conllu
+  clean: source/SL/diaparser_writtentrain_writtentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=1282 sentences/25442 token rows; clean=1282 sentences/25442 token rows
+- source/SL/singletaskXPOS_writtenandspokentrain_spokentest.conllu
+  clean: source/SL/singletaskXPOS_writtenandspokentrain_spokentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/SL/singletaskXPOS_writtenandspokentrain_writtentest.conllu
+  clean: source/SL/singletaskXPOS_writtenandspokentrain_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/SL/singletaskXPOSclassification_writtenandspokentrain_spokentest.conllu
+  clean: source/SL/singletaskXPOSclassification_writtenandspokentrain_spokentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/SL/singletaskXPOSclassification_writtenandspokentrain_writtentest.conllu
+  clean: source/SL/singletaskXPOSclassification_writtenandspokentrain_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/SL/spacy_default_spokentest.conllu
+  clean: source/SL/spacy_default_spokentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=432 sentences/11443 token rows; clean=432 sentences/11443 token rows
+- source/SL/spacy_default_writtentest.conllu
+  clean: source/SL/spacy_default_writtentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=1282 sentences/25442 token rows; clean=1282 sentences/25442 token rows
+- source/SL/spacy_writtenandspokentrain_spokentest.conllu
+  clean: source/SL/spacy_writtenandspokentrain_spokentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=432 sentences/11443 token rows; clean=432 sentences/11443 token rows
+- source/SL/spacy_writtenandspokentrain_writtentest.conllu
+  clean: source/SL/spacy_writtenandspokentrain_writtentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=1282 sentences/25442 token rows; clean=1282 sentences/25442 token rows
+- source/SL/spacy_writtentrain_spokentest.conllu
+  clean: source/SL/spacy_writtentrain_spokentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=432 sentences/11443 token rows; clean=432 sentences/11443 token rows
+- source/SL/spacy_writtentrain_writtentest.conllu
+  clean: source/SL/spacy_writtentrain_writtentest_clean.conllu
+  bytes: different
+  basic sentence/token structure: same
+  counts: raw=1282 sentences/25442 token rows; clean=1282 sentences/25442 token rows
+- source/SL/stanza_default_spokentest.conllu
+  clean: source/SL/stanza_default_spokentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/SL/stanza_default_writtentest.conllu
+  clean: source/SL/stanza_default_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/SL/stanza_writtenandspokentrain_spokentest.conllu
+  clean: source/SL/stanza_writtenandspokentrain_spokentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/SL/stanza_writtenandspokentrain_writtentest.conllu
+  clean: source/SL/stanza_writtenandspokentrain_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/SL/stanza_writtentrain_spokentest.conllu
+  clean: source/SL/stanza_writtentrain_spokentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/SL/stanza_writtentrain_writtentest.conllu
+  clean: source/SL/stanza_writtentrain_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/SL/trankit_writtenandspokentrain_spokentest.conllu
+  clean: source/SL/trankit_writtenandspokentrain_spokentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+- source/SL/trankit_writtenandspokentrain_writtentest.conllu
+  clean: source/SL/trankit_writtenandspokentrain_writtentest_clean.conllu
+  bytes: identical
+  basic sentence/token structure: identical
+
+7. Structural anomalies
+=======================
+
+Token-ID and HEAD errors:
+These violate the row-level structural rules used by this audit.
+- None
+
+Sentence-level warnings:
+These are observations, not automatic claims that a source file is corrupt.
+- source/NL/diaparser_writtenanddialecttrain_dialecttest(1).conllu: sentence 104: duplicate ordinary ID(s): 10
+- source/NL/diaparser_writtenanddialecttrain_dialecttest(1).conllu: sentence 851: gap(s) in ordinary IDs; missing: 4
+- source/NL/diaparser_writtenanddialecttrain_dialecttest(1).conllu: sentence 2647: gap(s) in ordinary IDs; missing: 18
+- source/NL/diaparser_writtenanddialecttrain_dialecttest(1).conllu: sentence 2964: gap(s) in ordinary IDs; missing: 5
+- source/NL/diaparser_writtenanddialecttrain_dialecttest(1).conllu: sentence 3100: gap(s) in ordinary IDs; missing: 1, 2
+- source/NL/diaparser_writtenanddialecttrain_dialecttest(1).conllu: sentence 3132: gap(s) in ordinary IDs; missing: 3
+- source/NL/diaparser_writtenanddialecttrain_dialecttest(1).conllu: sentence 4163: duplicate ordinary ID(s): 11
+- source/NL/diaparser_writtenanddialecttrain_dialecttest(1).conllu: sentence 4895: duplicate ordinary ID(s): 7
+- source/NL/diaparser_writtenanddialecttrain_dialecttest(1).conllu: sentence 5296: gap(s) in ordinary IDs; missing: 11
+- source/NL/diaparser_writtenanddialecttrain_dialecttest(1).conllu: sentence 5623: gap(s) in ordinary IDs; missing: 11
+- source/NL/diaparser_writtenanddialecttrain_dialecttest(1).conllu: sentence 6158: gap(s) in ordinary IDs; missing: 5
+- source/NL/diaparser_writtenanddialecttrain_dialecttest(1).conllu:83545: sentence 6158: token 7 has HEAD 5, but ordinary ID 5 does not exist in the sentence
+- source/NL/diaparser_writtenanddialecttrain_dialecttest.conllu: sentence 104: duplicate ordinary ID(s): 10
+- source/NL/diaparser_writtenanddialecttrain_dialecttest.conllu: sentence 851: gap(s) in ordinary IDs; missing: 4
+- source/NL/diaparser_writtenanddialecttrain_dialecttest.conllu: sentence 2647: gap(s) in ordinary IDs; missing: 18
+- source/NL/diaparser_writtenanddialecttrain_dialecttest.conllu: sentence 2964: gap(s) in ordinary IDs; missing: 5
+- source/NL/diaparser_writtenanddialecttrain_dialecttest.conllu: sentence 3100: gap(s) in ordinary IDs; missing: 1, 2
+- source/NL/diaparser_writtenanddialecttrain_dialecttest.conllu: sentence 3132: gap(s) in ordinary IDs; missing: 3
+- source/NL/diaparser_writtenanddialecttrain_dialecttest.conllu: sentence 4163: duplicate ordinary ID(s): 11
+- source/NL/diaparser_writtenanddialecttrain_dialecttest.conllu: sentence 4895: duplicate ordinary ID(s): 7
+- source/NL/diaparser_writtenanddialecttrain_dialecttest.conllu: sentence 5296: gap(s) in ordinary IDs; missing: 11
+- source/NL/diaparser_writtenanddialecttrain_dialecttest.conllu: sentence 5623: gap(s) in ordinary IDs; missing: 11
+- source/NL/diaparser_writtenanddialecttrain_dialecttest.conllu: sentence 6158: gap(s) in ordinary IDs; missing: 5
+- source/NL/diaparser_writtenanddialecttrain_dialecttest.conllu:83545: sentence 6158: token 7 has HEAD 5, but ordinary ID 5 does not exist in the sentence
+- source/NL/diaparser_writtentrain_dialecttest(1).conllu: sentence 104: duplicate ordinary ID(s): 10
+- source/NL/diaparser_writtentrain_dialecttest(1).conllu: sentence 851: gap(s) in ordinary IDs; missing: 4
+- source/NL/diaparser_writtentrain_dialecttest(1).conllu: sentence 2647: gap(s) in ordinary IDs; missing: 18
+- source/NL/diaparser_writtentrain_dialecttest(1).conllu: sentence 2964: gap(s) in ordinary IDs; missing: 5
+- source/NL/diaparser_writtentrain_dialecttest(1).conllu: sentence 3100: gap(s) in ordinary IDs; missing: 1, 2
+- source/NL/diaparser_writtentrain_dialecttest(1).conllu: sentence 3132: gap(s) in ordinary IDs; missing: 3
+- source/NL/diaparser_writtentrain_dialecttest(1).conllu: sentence 4163: duplicate ordinary ID(s): 11
+- source/NL/diaparser_writtentrain_dialecttest(1).conllu: sentence 4895: duplicate ordinary ID(s): 7
+- source/NL/diaparser_writtentrain_dialecttest(1).conllu: sentence 5296: gap(s) in ordinary IDs; missing: 11
+- source/NL/diaparser_writtentrain_dialecttest(1).conllu: sentence 5623: gap(s) in ordinary IDs; missing: 11
+- source/NL/diaparser_writtentrain_dialecttest(1).conllu: sentence 6158: gap(s) in ordinary IDs; missing: 5
+- source/NL/diaparser_writtentrain_dialecttest(1).conllu:83540: sentence 6158: token 1 has HEAD 5, but ordinary ID 5 does not exist in the sentence
+- source/NL/diaparser_writtentrain_dialecttest(1).conllu:83541: sentence 6158: token 2 has HEAD 5, but ordinary ID 5 does not exist in the sentence
+- source/NL/diaparser_writtentrain_dialecttest(1).conllu:83542: sentence 6158: token 3 has HEAD 5, but ordinary ID 5 does not exist in the sentence
+- source/NL/diaparser_writtentrain_dialecttest(1).conllu:83543: sentence 6158: token 4 has HEAD 5, but ordinary ID 5 does not exist in the sentence
+- source/NL/diaparser_writtentrain_dialecttest(1).conllu:83555: sentence 6158: token 17 has HEAD 5, but ordinary ID 5 does not exist in the sentence
+- source/NL/diaparser_writtentrain_dialecttest.conllu: sentence 104: duplicate ordinary ID(s): 10
+- source/NL/diaparser_writtentrain_dialecttest.conllu: sentence 851: gap(s) in ordinary IDs; missing: 4
+- source/NL/diaparser_writtentrain_dialecttest.conllu: sentence 2647: gap(s) in ordinary IDs; missing: 18
+- source/NL/diaparser_writtentrain_dialecttest.conllu: sentence 2964: gap(s) in ordinary IDs; missing: 5
+- source/NL/diaparser_writtentrain_dialecttest.conllu: sentence 3100: gap(s) in ordinary IDs; missing: 1, 2
+- source/NL/diaparser_writtentrain_dialecttest.conllu: sentence 3132: gap(s) in ordinary IDs; missing: 3
+- source/NL/diaparser_writtentrain_dialecttest.conllu: sentence 4163: duplicate ordinary ID(s): 11
+- source/NL/diaparser_writtentrain_dialecttest.conllu: sentence 4895: duplicate ordinary ID(s): 7
+- source/NL/diaparser_writtentrain_dialecttest.conllu: sentence 5296: gap(s) in ordinary IDs; missing: 11
+- source/NL/diaparser_writtentrain_dialecttest.conllu: sentence 5623: gap(s) in ordinary IDs; missing: 11
+- source/NL/diaparser_writtentrain_dialecttest.conllu: sentence 6158: gap(s) in ordinary IDs; missing: 5
+- source/NL/diaparser_writtentrain_dialecttest.conllu:83540: sentence 6158: token 1 has HEAD 5, but ordinary ID 5 does not exist in the sentence
+- source/NL/diaparser_writtentrain_dialecttest.conllu:83541: sentence 6158: token 2 has HEAD 5, but ordinary ID 5 does not exist in the sentence
+- source/NL/diaparser_writtentrain_dialecttest.conllu:83542: sentence 6158: token 3 has HEAD 5, but ordinary ID 5 does not exist in the sentence
+- source/NL/diaparser_writtentrain_dialecttest.conllu:83543: sentence 6158: token 4 has HEAD 5, but ordinary ID 5 does not exist in the sentence
+- source/NL/diaparser_writtentrain_dialecttest.conllu:83555: sentence 6158: token 17 has HEAD 5, but ordinary ID 5 does not exist in the sentence
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest(1).conllu: sentence 104: duplicate ordinary ID(s): 10
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest(1).conllu: sentence 851: gap(s) in ordinary IDs; missing: 4
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest(1).conllu: sentence 2647: gap(s) in ordinary IDs; missing: 18
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest(1).conllu: sentence 2964: gap(s) in ordinary IDs; missing: 5
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest(1).conllu: sentence 3100: gap(s) in ordinary IDs; missing: 1, 2
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest(1).conllu: sentence 3132: gap(s) in ordinary IDs; missing: 3
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest(1).conllu: sentence 4163: duplicate ordinary ID(s): 11
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest(1).conllu: sentence 4895: duplicate ordinary ID(s): 7
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest(1).conllu: sentence 5296: gap(s) in ordinary IDs; missing: 11
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest(1).conllu: sentence 5623: gap(s) in ordinary IDs; missing: 11
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest(1).conllu: sentence 6158: gap(s) in ordinary IDs; missing: 5
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest.conllu: sentence 104: duplicate ordinary ID(s): 10
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest.conllu: sentence 851: gap(s) in ordinary IDs; missing: 4
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest.conllu: sentence 2647: gap(s) in ordinary IDs; missing: 18
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest.conllu: sentence 2964: gap(s) in ordinary IDs; missing: 5
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest.conllu: sentence 3100: gap(s) in ordinary IDs; missing: 1, 2
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest.conllu: sentence 3132: gap(s) in ordinary IDs; missing: 3
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest.conllu: sentence 4163: duplicate ordinary ID(s): 11
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest.conllu: sentence 4895: duplicate ordinary ID(s): 7
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest.conllu: sentence 5296: gap(s) in ordinary IDs; missing: 11
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest.conllu: sentence 5623: gap(s) in ordinary IDs; missing: 11
+- source/NL/singletaskXPOS_writtenandspokentrain_spokentest.conllu: sentence 6158: gap(s) in ordinary IDs; missing: 5
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest(1).conllu: sentence 104: duplicate ordinary ID(s): 10
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest(1).conllu: sentence 851: gap(s) in ordinary IDs; missing: 4
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest(1).conllu: sentence 2647: gap(s) in ordinary IDs; missing: 18
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest(1).conllu: sentence 2964: gap(s) in ordinary IDs; missing: 5
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest(1).conllu: sentence 3100: gap(s) in ordinary IDs; missing: 1, 2
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest(1).conllu: sentence 3132: gap(s) in ordinary IDs; missing: 3
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest(1).conllu: sentence 4163: duplicate ordinary ID(s): 11
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest(1).conllu: sentence 4895: duplicate ordinary ID(s): 7
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest(1).conllu: sentence 5296: gap(s) in ordinary IDs; missing: 11
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest(1).conllu: sentence 5623: gap(s) in ordinary IDs; missing: 11
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest(1).conllu: sentence 6158: gap(s) in ordinary IDs; missing: 5
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest.conllu: sentence 104: duplicate ordinary ID(s): 10
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest.conllu: sentence 851: gap(s) in ordinary IDs; missing: 4
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest.conllu: sentence 2647: gap(s) in ordinary IDs; missing: 18
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest.conllu: sentence 2964: gap(s) in ordinary IDs; missing: 5
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest.conllu: sentence 3100: gap(s) in ordinary IDs; missing: 1, 2
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest.conllu: sentence 3132: gap(s) in ordinary IDs; missing: 3
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest.conllu: sentence 4163: duplicate ordinary ID(s): 11
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest.conllu: sentence 4895: duplicate ordinary ID(s): 7
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest.conllu: sentence 5296: gap(s) in ordinary IDs; missing: 11
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest.conllu: sentence 5623: gap(s) in ordinary IDs; missing: 11
+- source/NL/singletaskXPOSclassification_writtenandspokentrain_spokentest.conllu: sentence 6158: gap(s) in ordinary IDs; missing: 5
+- source/NL/spacy_default_spokentest(1).conllu: sentence 104: duplicate ordinary ID(s): 10
+- source/NL/spacy_default_spokentest(1).conllu: sentence 851: gap(s) in ordinary IDs; missing: 4
+- source/NL/spacy_default_spokentest(1).conllu: sentence 2647: gap(s) in ordinary IDs; missing: 18
+- source/NL/spacy_default_spokentest(1).conllu: sentence 2964: gap(s) in ordinary IDs; missing: 5
+- source/NL/spacy_default_spokentest(1).conllu: sentence 3100: gap(s) in ordinary IDs; missing: 1, 2
+- source/NL/spacy_default_spokentest(1).conllu: sentence 3132: gap(s) in ordinary IDs; missing: 3
+- source/NL/spacy_default_spokentest(1).conllu: sentence 4163: duplicate ordinary ID(s): 11
+- source/NL/spacy_default_spokentest(1).conllu: sentence 4895: duplicate ordinary ID(s): 7
+- source/NL/spacy_default_spokentest(1).conllu: sentence 5296: gap(s) in ordinary IDs; missing: 11
+- source/NL/spacy_default_spokentest(1).conllu: sentence 5623: gap(s) in ordinary IDs; missing: 11
+- source/NL/spacy_default_spokentest(1).conllu: sentence 6158: gap(s) in ordinary IDs; missing: 5
+- source/NL/spacy_default_spokentest(1).conllu:83543: sentence 6158: token 4 has HEAD 5, but ordinary ID 5 does not exist in the sentence
+- source/NL/spacy_default_spokentest(1).conllu:83545: sentence 6158: token 7 has HEAD 5, but ordinary ID 5 does not exist in the sentence
+- source/NL/spacy_default_spokentest.conllu: sentence 104: duplicate ordinary ID(s): 10
+- source/NL/spacy_default_spokentest.conllu: sentence 851: gap(s) in ordinary IDs; missing: 4
+- source/NL/spacy_default_spokentest.conllu: sentence 2647: gap(s) in ordinary IDs; missing: 18
+- source/NL/spacy_default_spokentest.conllu: sentence 2964: gap(s) in ordinary IDs; missing: 5
+- source/NL/spacy_default_spokentest.conllu: sentence 3100: gap(s) in ordinary IDs; missing: 1, 2
+- source/NL/spacy_default_spokentest.conllu: sentence 3132: gap(s) in ordinary IDs; missing: 3
+- source/NL/spacy_default_spokentest.conllu: sentence 4163: duplicate ordinary ID(s): 11
+- source/NL/spacy_default_spokentest.conllu: sentence 4895: duplicate ordinary ID(s): 7
+- source/NL/spacy_default_spokentest.conllu: sentence 5296: gap(s) in ordinary IDs; missing: 11
+- source/NL/spacy_default_spokentest.conllu: sentence 5623: gap(s) in ordinary IDs; missing: 11
+- source/NL/spacy_default_spokentest.conllu: sentence 6158: gap(s) in ordinary IDs; missing: 5
+- source/NL/spacy_default_spokentest.conllu:83543: sentence 6158: token 4 has HEAD 5, but ordinary ID 5 does not exist in the sentence
+- source/NL/spacy_default_spokentest.conllu:83545: sentence 6158: token 7 has HEAD 5, but ordinary ID 5 does not exist in the sentence
+- source/NL/stanza_default_dialecttest(1).conllu: sentence 104: duplicate ordinary ID(s): 10
+- source/NL/stanza_default_dialecttest(1).conllu: sentence 851: gap(s) in ordinary IDs; missing: 4
+- source/NL/stanza_default_dialecttest(1).conllu: sentence 2647: gap(s) in ordinary IDs; missing: 18
+- source/NL/stanza_default_dialecttest(1).conllu: sentence 2964: gap(s) in ordinary IDs; missing: 5
+- source/NL/stanza_default_dialecttest(1).conllu: sentence 3100: gap(s) in ordinary IDs; missing: 1, 2
+- source/NL/stanza_default_dialecttest(1).conllu: sentence 3132: gap(s) in ordinary IDs; missing: 3
+- source/NL/stanza_default_dialecttest(1).conllu: sentence 4163: duplicate ordinary ID(s): 11
+- source/NL/stanza_default_dialecttest(1).conllu: sentence 4895: duplicate ordinary ID(s): 7
+- source/NL/stanza_default_dialecttest(1).conllu: sentence 5296: gap(s) in ordinary IDs; missing: 11
+- source/NL/stanza_default_dialecttest(1).conllu: sentence 5623: gap(s) in ordinary IDs; missing: 11
+- source/NL/stanza_default_dialecttest(1).conllu: sentence 6158: gap(s) in ordinary IDs; missing: 5
+- source/NL/stanza_default_dialecttest(1).conllu:83545: sentence 6158: token 7 has HEAD 5, but ordinary ID 5 does not exist in the sentence
+- source/NL/stanza_default_dialecttest.conllu: sentence 104: duplicate ordinary ID(s): 10
+- source/NL/stanza_default_dialecttest.conllu: sentence 851: gap(s) in ordinary IDs; missing: 4
+- source/NL/stanza_default_dialecttest.conllu: sentence 2647: gap(s) in ordinary IDs; missing: 18
+- source/NL/stanza_default_dialecttest.conllu: sentence 2964: gap(s) in ordinary IDs; missing: 5
+- source/NL/stanza_default_dialecttest.conllu: sentence 3100: gap(s) in ordinary IDs; missing: 1, 2
+- source/NL/stanza_default_dialecttest.conllu: sentence 3132: gap(s) in ordinary IDs; missing: 3
+- source/NL/stanza_default_dialecttest.conllu: sentence 4163: duplicate ordinary ID(s): 11
+- source/NL/stanza_default_dialecttest.conllu: sentence 4895: duplicate ordinary ID(s): 7
+- source/NL/stanza_default_dialecttest.conllu: sentence 5296: gap(s) in ordinary IDs; missing: 11
+- source/NL/stanza_default_dialecttest.conllu: sentence 5623: gap(s) in ordinary IDs; missing: 11
+- source/NL/stanza_default_dialecttest.conllu: sentence 6158: gap(s) in ordinary IDs; missing: 5
+- source/NL/stanza_default_dialecttest.conllu:83545: sentence 6158: token 7 has HEAD 5, but ordinary ID 5 does not exist in the sentence
+- source/NL/stanza_default_spokentest(1).conllu: sentence 104: duplicate ordinary ID(s): 10
+- source/NL/stanza_default_spokentest(1).conllu: sentence 851: gap(s) in ordinary IDs; missing: 4
+- source/NL/stanza_default_spokentest(1).conllu: sentence 2647: gap(s) in ordinary IDs; missing: 18
+- source/NL/stanza_default_spokentest(1).conllu: sentence 2964: gap(s) in ordinary IDs; missing: 5
+- source/NL/stanza_default_spokentest(1).conllu: sentence 3100: gap(s) in ordinary IDs; missing: 1, 2
+- source/NL/stanza_default_spokentest(1).conllu: sentence 3132: gap(s) in ordinary IDs; missing: 3
+- source/NL/stanza_default_spokentest(1).conllu: sentence 4163: duplicate ordinary ID(s): 11
+- source/NL/stanza_default_spokentest(1).conllu: sentence 4895: duplicate ordinary ID(s): 7
+- source/NL/stanza_default_spokentest(1).conllu: sentence 5296: gap(s) in ordinary IDs; missing: 11
+- source/NL/stanza_default_spokentest(1).conllu: sentence 5623: gap(s) in ordinary IDs; missing: 11
+- source/NL/stanza_default_spokentest(1).conllu: sentence 6158: gap(s) in ordinary IDs; missing: 5
+- source/NL/stanza_default_spokentest(1).conllu:83545: sentence 6158: token 7 has HEAD 5, but ordinary ID 5 does not exist in the sentence
+- source/NL/stanza_default_spokentest.conllu: sentence 104: duplicate ordinary ID(s): 10
+- source/NL/stanza_default_spokentest.conllu: sentence 851: gap(s) in ordinary IDs; missing: 4
+- source/NL/stanza_default_spokentest.conllu: sentence 2647: gap(s) in ordinary IDs; missing: 18
+- source/NL/stanza_default_spokentest.conllu: sentence 2964: gap(s) in ordinary IDs; missing: 5
+- source/NL/stanza_default_spokentest.conllu: sentence 3100: gap(s) in ordinary IDs; missing: 1, 2
+- source/NL/stanza_default_spokentest.conllu: sentence 3132: gap(s) in ordinary IDs; missing: 3
+- source/NL/stanza_default_spokentest.conllu: sentence 4163: duplicate ordinary ID(s): 11
+- source/NL/stanza_default_spokentest.conllu: sentence 4895: duplicate ordinary ID(s): 7
+- source/NL/stanza_default_spokentest.conllu: sentence 5296: gap(s) in ordinary IDs; missing: 11
+- source/NL/stanza_default_spokentest.conllu: sentence 5623: gap(s) in ordinary IDs; missing: 11
+- source/NL/stanza_default_spokentest.conllu: sentence 6158: gap(s) in ordinary IDs; missing: 5
+- source/NL/stanza_default_spokentest.conllu:83545: sentence 6158: token 7 has HEAD 5, but ordinary ID 5 does not exist in the sentence

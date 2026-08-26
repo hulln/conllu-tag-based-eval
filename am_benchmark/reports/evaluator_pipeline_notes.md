@@ -1,0 +1,142 @@
+# Evaluator pipeline engineering notes
+
+> Historical note: This document predates the local UI prototype. Current
+> implementation status is documented in `ui_prototype_notes.md`.
+
+## Practical flow
+
+~~~text
+gold CoNLL-U + prediction CoNLL-U
+    -> scripts/conll18_ud_eval_tag-based.py
+    -> metric objects / verbose plain-text table
+    -> run-level result rows and optional error aggregation
+    -> generated JavaScript data bundle
+    -> static interactive table
+~~~
+
+## Evaluator and invocation
+
+The repository evaluator is `scripts/conll18_ud_eval_tag-based.py`. It is the
+CoNLL-2018 UD Shared Task evaluator with local regex-filtered UPOS, XPOS, UAS,
+and LAS breakdowns. It has no third-party dependencies and can be used either
+through its `load_conllu_file()` and `evaluate()` Python functions or through
+the command line:
+
+~~~text
+python3 scripts/conll18_ud_eval_tag-based.py GOLD.conllu PREDICTION.conllu -v
+~~~
+
+Verbose mode emits Precision, Recall, F1, and, where defined, aligned accuracy
+for these base metrics: Tokens, Sentences, Words, UPOS, XPOS, UFeats, AllTags,
+Lemmas, UAS, LAS, CLAS, MLAS, and BLEX. The optional `--upos`, `--xpos`, `--uas`,
+and `--las` regexes add per-tag or per-relation rows. Without `-v`, the command
+prints only LAS, MLAS, and BLEX F1.
+
+The evaluator rejects malformed CoNLL-U, files without a final sentence-ending
+blank line, and gold/prediction pairs whose concatenated token text differs.
+Dependency relation subtypes are ignored, following its inherited scoring
+rules.
+
+## Existing wrappers and result storage
+
+`scripts/run_pipeline.py` is the main old workflow. Its `eval_and_analyze()`
+function invokes the evaluator twice per prediction: once for the 13 base
+metrics and once with all four regex breakdowns. It then runs error analysis,
+cross-system comparison, optional table generation, and QA.
+
+That wrapper is not directly reusable for this benchmark because it assumes a
+paired Trankit/CLASSLA run, defaults to Slovenian SSJ inputs, can generate model
+predictions, and writes to the production `predictions/output/`,
+`results/output/`, and `tables/` trees. Existing results use:
+
+~~~text
+results/output/<run_id>/
+    main/          base metric tables, comparisons, QA
+    diagnostics/   expanded tag/relation metrics and error analyses
+~~~
+
+The evaluator itself is reusable unchanged. The new
+`am_benchmark/scripts/run_benchmark_evaluation.py` imports that implementation
+and adds manifest selection, gold-status gates, isolated output, hashes, and an
+optional repeat check. It does not generate predictions, reimplement metrics,
+run error analysis, or write to the production result tree.
+
+## Interactive table data flow
+
+The current v5 table is built by
+`scripts/build_interactive_comparison_table_v5.py`. It reads hard-coded gold,
+prediction, and expanded evaluator-output paths, reuses parsing/profile helpers
+from the v2 builder, and writes `tables/comparison_table_v5_data.js`. The static
+HTML page loads that file as `window.TABLE_DATA_V5` and renders selectors,
+metric cards, accuracy tables, error tables, examples, exports, and deep links.
+
+The current payload is corpus-centric: it has two fixed models (`trankit` and
+`classla`) and three fixed Slovenian corpora (`ssj`, `sst`, `pog`). Each corpus
+contains metrics indexed by model plus precomputed error and accuracy rows. The
+page assumes exactly one comparison model through a two-model toggle.
+
+Reusable unchanged or with a thin adapter:
+
+- the evaluator and its exact metric definitions;
+- the existing CoNLL-U parsing/error-profile helpers;
+- the static generated-data-bundle pattern;
+- frontend filtering, sorting, export, example-panel, and deep-link behaviour.
+
+Hard-coded to the old comparison:
+
+- Trankit/CLASSLA model names and two-model comparison logic;
+- Slovenian SSJ/SST/POG corpus definitions and provenance prose;
+- result and prediction paths embedded in the v5 builder;
+- the model/corpus-only selector state and URL hash;
+- Slovenian-specific XPOS terminology and some page copy;
+- the five displayed overview metrics, despite the evaluator producing 13.
+
+## Provisional SL smoke-test outcome
+
+The manifest contains 12 stable SL spaCy/Stanza runs: 6 written and 6 spoken.
+Four default representative cases were run first, followed by all 12. Every run
+completed successfully through the existing evaluator. Tokens, Sentences, and
+Words were 100% for every pair, so there were no token or sentence alignment
+errors. All 13 base metrics were returned.
+
+Every run was then evaluated a second time from freshly loaded inputs. All
+numeric fields were exactly identical. No evaluator/prediction incompatibility
+was found. The only observed constraints are expected evaluator contracts:
+matching underlying token text, valid CoNLL-U, and a final blank line.
+
+These checks use provisional fixtures. Their scores are engineering evidence
+only, not benchmark findings.
+
+## Work boundary after this smoke test
+
+### A. Completed without external input
+
+- Prediction resolution and manifest creation.
+- Gold-cohort inventory and status gating.
+- Existing evaluator and frontend pipeline inspection.
+- Manifest-driven dry-run and execution wrapper.
+- Deterministic end-to-end smoke test of all 12 stable SL spaCy/Stanza runs.
+- Stable multilingual result-row schema.
+
+### B. Can continue without external input
+
+- Unit/integration tests for manifest selection, status gates, evaluator errors,
+  and TSV serialization.
+- A manifest/result-driven frontend data adapter.
+- Generic language/model/training/test selectors populated only from valid rows.
+- UI work on loading, filtering, empty states, metric formatting, and provisional
+  banners using fixture data.
+- Optional error-analysis aggregation for the isolated provisional SL fixtures.
+
+Production UI implementation was intentionally not started in this task.
+
+### C. Blocked until gold or provenance is provided
+
+- Any EN or NL scoring.
+- Treating the SL scores as authoritative or publishing them as benchmark
+  results.
+- Complete official multilingual result population, comparisons, or rankings.
+- Final gold citations, release declarations, and benchmark reproducibility
+  manifest.
+- Evaluation of the excluded NL Trankit spoken run also requires a corrected
+  prediction or an explicit decision to omit it.

@@ -79,6 +79,13 @@ results/output/20260604-0843-tk13_*/
 # Private run comparison notes (local only)
 references/run-comparison-*.md
 
+# AM benchmark transferred/private inputs and provisional generated artifacts
+/am_benchmark/source/
+/am_benchmark/gold/
+/am_benchmark/data/gold/
+/am_benchmark/ui/data/results.js
+/am_benchmark/reports/smoke_test/*.tsv
+
 # Local text notes (not part of the reproducible repository)
 references/*.txt
 
