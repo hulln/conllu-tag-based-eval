@@ -72,6 +72,11 @@
     training_condition: "training"
   };
 
+  const SORT_LABELS = {
+    model: "System",
+    training_condition: "Training data"
+  };
+
   /* Own-property lookup only: an inherited key such as "constructor" or
      "toString" must never be treated as a display name. */
   function lookup(table, key) {
@@ -186,25 +191,40 @@
   }
 
   function sortRows(rows, sort, data) {
-    if (!sort || !sort.key) return rows;
-    const direction = sort.direction === "asc" ? 1 : -1;
+    const dimensionOrder = (field, a, b) =>
+      orderIndex(data, field, a[field]) - orderIndex(data, field, b[field]);
+    const naturalOrder = (a, b) =>
+      dimensionOrder("model", a, b) || dimensionOrder("training_condition", a, b);
     const copy = rows.slice();
+    if (!sort || !sort.key) return copy.sort(naturalOrder);
+
+    const direction = sort.direction === "asc" ? 1 : -1;
     copy.sort((a, b) => {
-      if (sort.key === "model" || sort.key === "training_condition") {
-        const left = label(sort.key, a[sort.key]);
-        const right = label(sort.key, b[sort.key]);
-        return left.localeCompare(right) * direction ||
-          orderIndex(data, "model", a.model) - orderIndex(data, "model", b.model);
+      if (sort.key === "model") {
+        return dimensionOrder("model", a, b) * direction ||
+          dimensionOrder("training_condition", a, b);
+      }
+      if (sort.key === "training_condition") {
+        return dimensionOrder("training_condition", a, b) * direction ||
+          dimensionOrder("model", a, b);
       }
       const left = metricValue(a, sort.key, "f1");
       const right = metricValue(b, sort.key, "f1");
       /* Rows without a value always sink, in either direction. */
-      if (left == null && right == null) return 0;
+      if (left == null && right == null) return naturalOrder(a, b);
       if (left == null) return 1;
       if (right == null) return -1;
-      return (left - right) * direction;
+      return (left - right) * direction || naturalOrder(a, b);
     });
     return copy;
+  }
+
+  function firstSortDirection(key) {
+    return key === "model" || key === "training_condition" ? "asc" : "desc";
+  }
+
+  function sortLabel(key) {
+    return SORT_LABELS[key] || key;
   }
 
   function parseRequest(search) {
@@ -257,7 +277,7 @@
     let context = resolveContext(data, requested);
     let state = context.state;
     let invalidRequest = context.invalid;
-    let sort = { key: null, direction: "desc" };
+    let sort = { key: null, direction: null };
     let openRun = "";
     let urlSyncBlocked = false;
 
@@ -435,8 +455,11 @@
       }
       th.append(cell("span", active ? (sort.direction === "asc" ? "▲" : "▼") : "", "sort-mark"));
       const activate = () => {
-        if (sort.key === key) sort.direction = sort.direction === "desc" ? "asc" : "desc";
-        else sort = { key: key, direction: key === "model" || key === "training_condition" ? "asc" : "desc" };
+        const firstDirection = firstSortDirection(key);
+        if (sort.key !== key) sort = { key: key, direction: firstDirection };
+        else if (sort.direction === firstDirection) {
+          sort = { key: key, direction: firstDirection === "asc" ? "desc" : "asc" };
+        } else sort = { key: null, direction: null };
         render();
       };
       th.addEventListener("click", activate);
@@ -454,13 +477,15 @@
       body.replaceChildren();
       const best = bestValues(rows, metrics);
       const ordered = sortRows(rows, sort, data);
-      const grouped = !sort.key;
+      const grouped = !sort.key || sort.key === "model";
       let previousModel = null;
 
       for (const row of ordered) {
         const tr = doc.createElement("tr");
         tr.className = "row-select";
-        if (grouped && row.model !== previousModel) tr.classList.add("group-start");
+        if (grouped && previousModel !== null && row.model !== previousModel) {
+          tr.classList.add("group-start");
+        }
         previousModel = row.model;
         if (runId(row) === openRun) tr.classList.add("is-open");
         tr.tabIndex = 0;
@@ -644,8 +669,22 @@
 
       doc.getElementById("table-heading").textContent =
         "Systems compared — " + contextDescription(state);
-      doc.getElementById("row-count").textContent =
-        rows.length + (rows.length === 1 ? " run" : " runs");
+      const count = doc.getElementById("row-count");
+      count.replaceChildren();
+      if (sort.key) {
+        const indicator = cell(
+          "span",
+          "Sorted by " + sortLabel(sort.key) + " " + (sort.direction === "asc" ? "↑" : "↓"),
+          "sort-status"
+        );
+        indicator.setAttribute("aria-hidden", "true");
+        count.appendChild(indicator);
+      }
+      count.appendChild(cell(
+        "span",
+        rows.length + (rows.length === 1 ? " run" : " runs"),
+        "run-total"
+      ));
 
       const empty = doc.getElementById("empty");
       const wrap = doc.getElementById("table-wrap");

@@ -172,10 +172,19 @@ tr.row-select:focus-visible {
 }
 
 .section-head .count {
+  display: inline-flex;
+  align-items: baseline;
   font-family: var(--mono);
   font-size: 10.5px;
   color: var(--muted);
   letter-spacing: .02em;
+  white-space: nowrap;
+}
+
+.sort-status::after {
+  content: "·";
+  margin: 0 7px;
+  color: var(--faint);
 }
 
 /* Provisional notice: a stated property of the data, not an alarm. */
@@ -311,9 +320,11 @@ td.grp-start { border-left: 1px solid var(--rule); }
 td.model { font-weight: 500; }
 td.train { color: var(--muted); }
 
-/* A rule between model groups, suppressed while a metric sort is active. */
-tbody tr.group-start td { border-top: 1px solid #c6c6c6; }
-tbody tr.group-start:first-child td { border-top: none; }
+/* A restrained break between system blocks in default and system-sorted views. */
+tbody tr.group-start td {
+  border-top: 2px solid #a8a8a8;
+  padding-top: 7px;
+}
 
 tbody tr.row-select td { cursor: pointer; }
 tbody tr.row-select:hover td { background: var(--hover); }
