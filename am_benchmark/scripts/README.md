@@ -249,3 +249,63 @@ LAS-correct totals equal the evaluator's, that the per-relation and per-tag coun
 sum to the evaluator's totals, and that the three error categories sum to exactly
 the run's labelled attachment errors. Any disagreement raises; a gold and prediction
 pair whose underlying text differs already fails earlier, inside the evaluator.
+
+## Sentence examples for the Slovenian runs
+
+`build_examples_data.py` writes the example layer the analysis page opens when a
+reader selects an error row. It is a separate layer on purpose: the aggregate
+diagnostics stay text-free, and only cohorts whose corpus licence permits
+redistribution get examples at all.
+
+~~~text
+python3 scripts/build_examples_data.py --dry-run
+python3 scripts/build_examples_data.py
+~~~
+
+A full run takes about eight seconds and writes 13 files (12 Slovenian runs plus
+`index.json`, about 2.2 MiB) to `../tables/am_benchmark/data/examples/`. It never
+writes to `data/diagnostics/`, `ui/data/results.js` or any result TSV.
+
+### Allowlist
+
+`COHORT_SOURCES` names the two cohorts that may be republished as sentences —
+`SL:writtentest` (UD Slovenian SSJ, r2.17) and `SL:spokentest` (UD Slovenian SST,
+r2.16/r2.17), both CC BY-SA 4.0 — together with the attribution the panel shows.
+Run selection reuses `build_diagnostics_data.stable_runs`, then any run whose gold
+cohort is absent from that table raises instead of producing a file. English and
+Dutch therefore have no example layer, and adding one is a deliberate edit here.
+
+### What is stored
+
+Which token is an example of which error comes from the same CJVT profiler that
+defines the aggregate error categories, called with a cap of 25:
+`collect_model_profile(gold, prediction, 25)`. This script only materialises the
+display fields, so an example can never belong to a pattern the aggregate file
+does not report — and `check_against_aggregate` compares the profiler's counters
+with the published `data/diagnostics/<run>.json` before anything is written.
+
+Each file holds a pool of the referenced sentences (`sent_id` and token forms,
+nothing else) and positional example rows into it:
+
+- dependency — `[sentence, token, gold_head, predicted_head]`, heads as token
+  indices, `-1` for root;
+- UPOS and XPOS — `[sentence, token]`, since the gold and predicted tags are the
+  pattern key itself;
+- `relation_errors` — one sample per **gold relation**, for the clickable relation
+  score rows: `[sentence, token, gold_head, predicted_head, category, predicted_relation]`,
+  where `category` indexes the three dependency buckets, so the panel can say which
+  kind of LAS failure each example is;
+- `upos_errors` — one sample per **gold tag**, for the clickable tag score rows:
+  `[sentence, token, predicted]`.
+
+The two accuracy indices come from a second traversal that restates the profiler's
+own head/relation comparison; `check_relation_totals` then requires their totals to
+equal `gold − correct` for every relation and tag in the aggregate table, which is
+what proves the restatement agrees with the evaluator.
+
+Every pattern also carries its full occurrence `total`, so the panel can say
+`Showing 25 of 143 examples` rather than implying the sample is exhaustive.
+
+No speaker, document, audio, MISC or `# text` field is read: the CJVT reader takes
+`sent_id` and token columns, and the Slovenian spoken gold's speaker and recording
+comments never reach the output.
