@@ -84,6 +84,7 @@ references/run-comparison-*.md
 /am_benchmark/gold/
 /am_benchmark/data/gold/
 /am_benchmark/ui/data/results.js
+/am_benchmark/ui/data/diagnostics/
 /am_benchmark/reports/smoke_test/*.tsv
 
 # Local text notes (not part of the reproducible repository)

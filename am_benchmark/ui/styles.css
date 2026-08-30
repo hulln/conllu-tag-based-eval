@@ -517,3 +517,196 @@ tr.no-data td {
   #metrics { min-width: 380px; }
   .detail-grid { gap: 16px; }
 }
+
+/* ---------- route out of the detail section ---------- */
+
+.detail-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.detail-link {
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .04em;
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 2px;
+  transition: color .14s ease, border-color .14s ease;
+}
+
+.detail-link:hover { color: var(--accent); border-color: var(--accent); }
+.detail-link:focus-visible { outline: 2px solid rgba(22, 22, 22, 0.22); outline-offset: 2px; }
+
+/* ---------- analysis page ---------- */
+
+/* The selected run is the page's subject, so it is stated once, in full, above
+   everything else rather than repeated in each section heading. */
+.run-identity {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px 24px;
+  flex-wrap: wrap;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 8px;
+}
+
+.run-titles { min-width: 0; }
+
+.run-context {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: .01em;
+}
+
+.run-system {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: .02em;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.back-link {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .04em;
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 2px;
+  transition: color .14s ease, border-color .14s ease;
+}
+
+.back-link:hover { color: var(--accent); border-color: var(--accent); }
+.back-link:focus-visible { outline: 2px solid rgba(22, 22, 22, 0.22); outline-offset: 2px; }
+
+.analysis-section { margin-top: 30px; }
+.analysis-section .dep-intro { margin: 0 0 12px; max-width: 780px; }
+
+/* Same reasoning as the comparison table: cap the measure so a count stays next
+   to the label it belongs to instead of drifting to the far edge. */
+.analysis-section .table-wrap.cols-2 { max-width: 360px; }
+.analysis-section .table-wrap.cols-3 { max-width: 500px; }
+.analysis-section .table-wrap.cols-4 { max-width: 560px; }
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 420px) minmax(0, 310px);
+  justify-content: start;
+  gap: 22px;
+  align-items: start;
+}
+
+#summary-metrics { min-width: 340px; }
+#summary-metrics td.metric-name { font-weight: 500; }
+
+.metric-gloss {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 400;
+  color: var(--faint);
+}
+
+.analysis-table { min-width: 340px; }
+.analysis-table td { font-variant-numeric: tabular-nums; }
+
+.subsection { margin-top: 18px; }
+.subsection:first-child { margin-top: 0; }
+
+.subsection-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 18px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.subsection.cols-2 .subsection-head { max-width: 360px; }
+.subsection.cols-3 .subsection-head { max-width: 500px; }
+.subsection.cols-4 .subsection-head { max-width: 560px; }
+
+.subsection-head h3 {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: .01em;
+}
+
+.subsection-head .count {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--muted);
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+
+/* A long tail of single-count confusions is real data, not noise; it is folded
+   rather than dropped, and the control says exactly how much is folded. */
+.row-toggle {
+  margin-top: 7px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: var(--surface);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .04em;
+  padding: 4px 9px;
+  cursor: pointer;
+  transition: color .14s ease, border-color .14s ease;
+}
+
+.row-toggle:hover { color: var(--accent); border-color: #c6c6c6; }
+
+/* Shown only when the address names no run, or names one with no diagnostics. */
+.run-choices {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px 24px;
+  max-width: 950px;
+}
+
+.run-choices h2 {
+  grid-column: 1 / -1;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.choice-group h3 {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+.choice-group ul { list-style: none; }
+.choice-group li { padding: 2px 0; }
+
+.choice-group a {
+  color: var(--ink);
+  font-size: 12px;
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule);
+}
+
+.choice-group a:hover { color: var(--accent); border-color: var(--accent); }
+
+@media (max-width: 900px) {
+  .summary-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 640px) {
+  #summary-metrics, .analysis-table { min-width: 300px; }
+  .summary-grid { gap: 16px; }
+}

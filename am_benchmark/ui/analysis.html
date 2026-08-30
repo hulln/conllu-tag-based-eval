@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Detailed analysis — multilingual tagging and parsing benchmark</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-ui="analysis">
+  <noscript>
+    <div class="fatal">JavaScript is required to read the diagnostic set.</div>
+  </noscript>
+
+  <header class="masthead">
+    <h1>Detailed analysis</h1>
+    <span class="scope">Aggregate CoNLL-U diagnostics &middot; one benchmark run</span>
+  </header>
+
+  <p class="intro">
+    Error and accuracy breakdowns for a single run of the benchmark, derived from its
+    authoritative gold file and its canonical prediction. Counts and labels only: no
+    corpus sentence, fragment or token appears on this page or in the file behind it.
+  </p>
+
+  <div class="run-identity" id="run-identity" hidden>
+    <div class="run-titles">
+      <p class="run-context" id="run-context"></p>
+      <p class="run-system" id="run-system"></p>
+    </div>
+    <a class="back-link" id="back-link" href="index.html">&larr; Benchmark overview</a>
+  </div>
+
+  <div id="notice" class="empty" hidden></div>
+  <div id="run-choices" class="run-choices" hidden></div>
+
+  <main id="analysis" hidden>
+    <section class="analysis-section">
+      <div class="section-head">
+        <h2>Run summary</h2>
+        <span class="count" id="summary-count"></span>
+      </div>
+      <div class="summary-grid">
+        <div class="table-wrap">
+          <table id="summary-metrics">
+            <caption class="sr-only">Evaluator F1 and aligned word counts for this run.</caption>
+            <thead id="summary-head"></thead>
+            <tbody id="summary-body"></tbody>
+          </table>
+        </div>
+        <aside class="provenance" id="summary-provenance">
+          <h3>Reproducibility</h3>
+          <dl id="provenance-summary"></dl>
+          <details class="technical-details">
+            <summary>Technical details</summary>
+            <dl id="provenance-list"></dl>
+          </details>
+        </aside>
+      </div>
+      <p class="table-note" id="summary-note"></p>
+    </section>
+
+    <section class="analysis-section">
+      <div class="section-head">
+        <h2>LAS by dependency relation</h2>
+        <span class="count" id="las-count"></span>
+      </div>
+      <div id="las-table"></div>
+      <p class="table-note">
+        Gold instances of each relation, how many the system attached with both the
+        correct head and the correct relation, and that share as a percentage. Relations
+        the gold never uses are not listed; a system that invents one appears in the
+        error tables below.
+      </p>
+    </section>
+
+    <section class="analysis-section">
+      <div class="section-head">
+        <h2>UPOS accuracy</h2>
+        <span class="count" id="upos-count"></span>
+      </div>
+      <div id="upos-table"></div>
+      <p class="table-note">
+        Gold instances of each universal part-of-speech tag and how many the system
+        assigned correctly.
+      </p>
+    </section>
+
+    <section class="analysis-section">
+      <div class="section-head">
+        <h2>Dependency parsing errors</h2>
+        <span class="count" id="dep-count"></span>
+      </div>
+      <p class="table-note dep-intro">
+        Every word whose labelled attachment is wrong falls into exactly one of three
+        categories, so the three totals sum to the run&rsquo;s labelled attachment errors.
+      </p>
+      <div id="dep-tables"></div>
+    </section>
+
+    <section class="analysis-section">
+      <div class="section-head">
+        <h2>Tagging errors</h2>
+        <span class="count" id="tag-count"></span>
+      </div>
+      <div id="tag-tables"></div>
+    </section>
+  </main>
+
+  <footer class="colophon">
+    <p>
+      Per-relation and per-tag scores come from the same CoNLL 2018 evaluation script that
+      produced the benchmark; error categories use the published comparison-table definitions.
+      This page reads one precomputed file and does not parse CoNLL-U in the browser.
+    </p>
+    <p class="meta" id="source-meta"></p>
+  </footer>
+
+  <div id="app-error" class="fatal" hidden></div>
+
+  <script src="app.js"></script>
+  <script src="analysis.js"></script>
+</body>
+</html>

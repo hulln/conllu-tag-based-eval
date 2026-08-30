@@ -183,3 +183,69 @@ keys, discovers evaluator metric families and available score/count fields from
 the TSV header, and writes `ui/data/results.js`. It preserves row-level gold and
 result statuses so the UI can show or hide provisional warnings without
 language-specific assumptions. The browser never parses CoNLL-U inputs.
+
+## Run diagnostics for the detailed-analysis page
+
+`build_diagnostics_data.py` derives aggregate error and accuracy breakdowns for the
+36 stable spaCy/Stanza runs. It resolves nothing of its own: the run list, the
+authoritative gold paths and the canonical prediction paths all come from
+`run_benchmark_evaluation.py`, and the scores come from the unmodified repository
+evaluator. It never writes to the result TSVs or to `ui/data/results.js`.
+
+~~~text
+python3 scripts/build_diagnostics_data.py --dry-run
+python3 scripts/build_diagnostics_data.py
+~~~
+
+A full run takes roughly three and a half minutes and writes 37 files (36 runs plus
+`index.json`, about 870 KiB) to both `ui/data/diagnostics/` — the working copy,
+gitignored like `ui/data/results.js` — and `../tables/am_benchmark/data/diagnostics/`,
+the deployable copy that is committed. `--output-dir` overrides the destinations,
+`--language`/`--model`/`--training-condition`/`--test-condition` narrow the selection.
+
+### What each file holds
+
+One JSON file per run, named `LANGUAGE-TEST-MODEL-TRAINING.json`, because the page
+analyses one run at a time and a per-run file keeps the worst-case load at about
+55 KiB instead of the roughly 300 KiB a per-context file would require. Comparing
+two runs later means fetching two files through the same loader.
+
+- `las_by_relation` — gold count, correct count and predicted count for every
+  dependency relation the gold attests, from the evaluator's `--las` mode;
+- `upos_accuracy` — the same three counts per universal part-of-speech tag, from
+  the evaluator's `--upos` mode;
+- `dependency_errors` — the three CJVT error categories, unchanged in definition:
+  wrong relation and wrong head, correct head with wrong relation, correct relation
+  with wrong head;
+- `tag_errors` — UPOS and XPOS confusion pairs, and a lemma error count.
+
+Percentages are not stored. The page divides `correct` by `gold`, so the file holds
+integers only and cannot drift from its own totals.
+
+### Refusal to emit corpus text
+
+Redistribution permission has not been established for every supplied gold source,
+so the diagnostic set carries derived counts and annotation labels and nothing else.
+This is enforced where the data is produced, not where it is displayed:
+
+- `collect_model_profile` is called with `max_examples=0`, so the CJVT profiler's
+  example lists stay empty;
+- only its counters are read; the `*_examples` structures are never touched;
+- the lemma layer is reduced to one count, because gold and predicted lemmas are
+  themselves corpus text;
+- `assert_aggregate_only` then walks the finished payload and refuses to write a
+  string that is not a short, single-field annotation label, or that appears outside
+  a table or a known provenance field.
+
+The data model leaves room for examples for individually licensed cohorts later.
+The generator does not produce them.
+
+### Consistency gate
+
+Nothing is written unless the evaluator's alignment and the CJVT profiler's
+position-by-position comparison describe the same token population. `reconcile`
+requires that the profiler skipped no sentence or token, that its compared and
+LAS-correct totals equal the evaluator's, that the per-relation and per-tag counts
+sum to the evaluator's totals, and that the three error categories sum to exactly
+the run's labelled attachment errors. Any disagreement raises; a gold and prediction
+pair whose underlying text differs already fails earlier, inside the evaluator.
