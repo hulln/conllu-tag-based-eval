@@ -101,13 +101,13 @@ After the basic audit, run the complete source-resolution workflow from
 python3 scripts/resolve_source.py
 ```
 
-This workflow treats each language/model/training/test filename stem as one
-logical prediction run. It associates raw, clean, numbered-copy, and nonstandard
+This workflow associates each language/model/training/test filename stem with
+its raw, clean, numbered-copy, and nonstandard
 alternate files; applies stronger evaluator-oriented checks to clean candidates;
 summarises raw-to-clean field changes; checks cross-language byte and ID/FORM
-identity; and compares local gold candidates by exact sentence, ID, FORM, and
-`sent_id` signatures. It does not compute model scores and does not claim full UD
-validation.
+identity; canonicalises NL dialect/spoken test labels; deduplicates only justified
+collisions; and compares supplied/local gold by exact sentence, ID, FORM, and
+`sent_id` signatures. It does not compute model scores or claim full UD validation.
 
 It writes:
 
@@ -132,35 +132,43 @@ run-to-cohort mapping with:
 python3 scripts/build_gold_requirements.py
 ~~~
 
-This is a targeted follow-up: it reads canonical_predictions.tsv, selected
-prediction structure, repository documentation-backed local gold candidates, and
-their structural signatures. It does not repeat duplicate/source resolution and
-does not run scoring. It writes gold_requirements.tsv,
-prediction_gold_mapping.tsv, and gold_questions.md under reports/.
+This follow-up reads `canonical_predictions.tsv`, Aaron's six authoritative files
+under `source/gold/`, selected prediction structure, and local SL comparison files.
+It checks exact structure/surface identity plus the unchanged evaluator's required
+underlying text and sentence spans. It writes `gold_requirements.tsv`,
+`prediction_gold_mapping.tsv`, and `gold_questions.md`.
 
 ## Manifest-driven evaluation wrapper
 
 `run_benchmark_evaluation.py` calls the existing repository evaluator without
-reimplementing its metrics. An explicit action is required. Normal mode accepts
-only authoritative gold, so the current stable SL subset is blocked:
+reimplementing its metrics. An explicit action is required. The authoritative
+output requires the stable-subset selector, which is restricted to mapping rows
+marked stable and to the spaCy/Stanza systems:
 
 ~~~text
-python3 scripts/run_benchmark_evaluation.py --dry-run --initial-debugging-only --language SL --model spacy --model stanza
+python3 scripts/run_benchmark_evaluation.py --dry-run --initial-debugging-only --model spacy --model stanza
+python3 scripts/run_benchmark_evaluation.py --execute --initial-debugging-only --model spacy --model stanza --repeat-check
 ~~~
 
-The two named local SL candidates may be used only through the explicit,
-isolated engineering-smoke-test gate:
+Without `--initial-debugging-only`, general evaluation writes
+`reports/general_evaluation_results.tsv`; authoritative gold is still used, but
+the 42 non-stable systems receive an explicit result-may-change notice and cannot
+be written to `authoritative_spacy_stanza_results.tsv`.
+
+The historical local SL fixtures remain available only through the explicit,
+isolated engineering-smoke-test gate. Smoke mode substitutes the local SSJ/SST
+fixtures for the authoritative handoff paths:
 
 ~~~text
 python3 scripts/run_benchmark_evaluation.py --dry-run --smoke-test --initial-debugging-only --language SL --model spacy --model stanza
 python3 scripts/run_benchmark_evaluation.py --execute --smoke-test --initial-debugging-only --language SL --model spacy --model stanza --repeat-check
 ~~~
 
-Smoke-test output is restricted to reports/smoke_test/. Result rows include
-input/evaluator hashes, all 13 base evaluator metric families, repeat status,
-and explicit warnings that the gold provenance is unconfirmed and the values
-are not benchmark results. The wrapper never writes to the production
-predictions/, results/, or tables/ directories.
+Stable-subset output is `reports/authoritative_spacy_stanza_results.tsv`; general
+output is `reports/general_evaluation_results.tsv`; smoke-test output is restricted
+to `reports/smoke_test/`. Result rows include input/evaluator hashes, all 13 base
+metric families, repeat status, and provenance. The wrapper never writes to the
+production `predictions/`, `results/`, or `tables/` trees.
 
 ## Local UI data bundle
 

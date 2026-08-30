@@ -1,9 +1,14 @@
 # Test-set identification
 
-Source-identification only. Nothing was modified: no benchmark file, manifest, evaluator
-output, UI file or source datum was touched, and no model was run. Public reference files
+Source-identification evidence, updated with Aaron's later clarification. The original
+investigation modified no benchmark file, manifest, evaluator output, UI file or source
+datum, and no model was run. Public reference files
 were downloaded to session scratch space for comparison and then discarded; none was added
 to the repository.
+
+Aaron subsequently supplied all six authoritative gold files and confirmed that Dutch
+`spoken` and `dialect` are inconsistent names for one test cohort. The canonical condition
+is now `spokentest`; the earlier naming uncertainty is resolved.
 
 ## Method
 
@@ -25,7 +30,8 @@ Candidates were accepted only when that whole-sequence hash reproduced exactly; 
 | SL written | 1282 | 25442 | 0 | `0fcfd1befeef9905f0e1cb39a28d1018fd7c4f5ce50bebad261b0191531d0497` |
 | SL spoken | 432 | 11443 | 0 | `433a46f2561b5dac611f4e5f47ac060bef753eff2f7c475cfada774218889233` |
 
-NL spoken and NL dialect share one fingerprint. Every other cohort is distinct.
+The two source-named NL spoken/dialect cohorts share one fingerprint and now map to one
+canonical NL spoken cohort. Every other cohort is distinct.
 
 ## Findings
 
@@ -115,15 +121,9 @@ the southern Netherlands; Kloeke codes in its metadata; POS, lemma and syntax pr
 the Alpino parser. Its full parsed corpus requires a CLARIN login, so **no exact comparison
 was possible** and it is recorded as WEAK, not as an identification.
 
-**On the special NL check.** GCND provides two transcription layers, one closer to the
-dialect and one closer to Standard Dutch. That design could in principle justify two test
-conditions over one set of recordings. It does not, however, explain what was supplied:
-two transcription layers would produce *different* token sequences, exactly as the Slovene
-SST `-pog` and `-stan` files do. Here the token sequences and the sentence identifiers are
-identical. So the evidence is consistent with either (a) two gold annotation layers over one
-identical token stream, or (b) the same file having been supplied for both conditions. The
-prediction files alone cannot distinguish these, and this is not called a mix-up. It is a
-question for AM/KD.
+**Resolved NL check.** The structural evidence originally showed that the two labels used
+identical material. Aaron later confirmed that this was inconsistent naming, not two
+intended benchmark cohorts. Both labels now map to `NL:spokentest`.
 
 ## Dataset identity, split, release, and provenance
 
@@ -138,10 +138,9 @@ These are four separate claims and only the first three were tested here.
   `data/gold/sl_ssj-ud-test.conllu` is byte-identical to UD_Slovenian-SSJ **r2.17** (and
   differs from r2.16), and `data/gold/sl_sst-ud-test.conllu` is byte-identical to
   UD_Slovenian-SST at r2.16 and r2.17, which ship the same file.
-- **Authoritative benchmark provenance** — *not established, and not establishable here.*
-  Identifying the public source of the text does not confirm which release AM/KD intend as
-  authoritative for this benchmark, nor which genre partition or concatenation order they
-  consider canonical. That still requires their written confirmation.
+- **Authoritative benchmark provenance** — established later by Aaron's supplied six-file
+  handoff. Exact release labels remain descriptive metadata where text alone cannot
+  distinguish releases; the supplied file checksums are authoritative.
 
 ## Reference files used
 

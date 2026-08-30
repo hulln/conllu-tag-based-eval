@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Run manifest-selected benchmark evaluations through the existing evaluator.
 
-Normal execution accepts only confirmed gold. ``--smoke-test`` explicitly
-permits the two provisional Slovenian fixtures named in this project. Results
-remain under ``am_benchmark/reports/`` and are never written to the
-repository's production ``results/`` tree.
+Authoritative output is restricted to the stable spaCy/Stanza subset. General
+execution may evaluate other systems against authoritative gold, but labels
+their results provisional and writes them to a separate output. ``--smoke-test``
+uses only the two historical provisional Slovenian fixtures. Results remain
+under ``am_benchmark/reports/`` and never enter the production ``results/`` tree.
 """
 
 from __future__ import annotations
@@ -23,8 +24,11 @@ REPO_DIR = BENCHMARK_DIR.parent
 REPORT_DIR = BENCHMARK_DIR / "reports"
 MAPPING_PATH = REPORT_DIR / "prediction_gold_mapping.tsv"
 EVALUATOR_PATH = REPO_DIR / "scripts" / "conll18_ud_eval_tag-based.py"
+AUTHORITATIVE_RESULTS_PATH = REPORT_DIR / "authoritative_spacy_stanza_results.tsv"
+GENERAL_RESULTS_PATH = REPORT_DIR / "general_evaluation_results.tsv"
 
 AUTHORITATIVE_GOLD_STATUSES = {"CONFIRMED", "AUTHORITATIVE"}
+STABLE_MODELS = {"spacy", "stanza"}
 PROVISIONAL_FIXTURES = {
     "SL:writtentest": (REPO_DIR / "data/gold/sl_ssj-ud-test.conllu").resolve(),
     "SL:spokentest": (REPO_DIR / "data/gold/sl_sst-ud-test.conllu").resolve(),
@@ -49,6 +53,8 @@ SCORE_FIELDS = ["precision", "recall", "f1", "aligned_accuracy"]
 PROVISIONAL_SCOPE = "PROVISIONAL ENGINEERING SMOKE TEST"
 PROVISIONAL_GOLD_NOTICE = "GOLD PROVENANCE NOT YET CONFIRMED"
 PROVISIONAL_USE_NOTICE = "DO NOT TREAT AS BENCHMARK RESULT"
+GENERAL_PROVISIONAL_SCOPE = "PROVISIONAL GENERAL EVALUATION"
+GENERAL_PROVISIONAL_USE_NOTICE = "SYSTEM RESULT MAY CHANGE; DO NOT TREAT AS FINAL"
 
 
 def parse_args() -> argparse.Namespace:
@@ -70,7 +76,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--initial-debugging-only",
         action="store_true",
-        help="Select only rows marked for initial debugging in the mapping.",
+        help="Select only the stable spaCy/Stanza rows; required for authoritative output.",
     )
     parser.add_argument("--language", action="append", help="Filter by language.")
     parser.add_argument("--model", action="append", help="Filter by model/system.")
@@ -88,8 +94,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output",
         help=(
-            "TSV output path under am_benchmark/reports/. Smoke-test output "
-            "must be under reports/smoke_test/."
+            "TSV output path under am_benchmark/reports/. The authoritative filename "
+            "requires --initial-debugging-only; smoke output must be under reports/smoke_test/."
         ),
     )
     return parser.parse_args()
@@ -103,7 +109,7 @@ def load_mapping() -> list[dict[str, str]]:
 def selected_by_filters(row: dict[str, str], args: argparse.Namespace) -> bool:
     if not row["selected_prediction"]:
         return False
-    if args.initial_debugging_only and row["initial_debugging"] != "true":
+    if args.initial_debugging_only and not is_stable_result(row):
         return False
     filters = {
         "language": args.language,
@@ -114,24 +120,37 @@ def selected_by_filters(row: dict[str, str], args: argparse.Namespace) -> bool:
     return all(not allowed or row[field] in allowed for field, allowed in filters.items())
 
 
+def is_stable_result(row: dict[str, str]) -> bool:
+    """Return whether Aaron has designated this system result as stable."""
+    return row.get("initial_debugging") == "true" and row.get("model") in STABLE_MODELS
+
+
 def resolve_manifest_path(value: str) -> Path:
     return (BENCHMARK_DIR / value).resolve()
 
 
 def permission_reason(row: dict[str, str], smoke_test: bool) -> tuple[bool, str]:
     gold_status = row["gold_status"].strip().upper()
-    gold_path = resolve_manifest_path(row["gold_file"]) if row["gold_file"] else None
+
+    if smoke_test:
+        fixture = PROVISIONAL_FIXTURES.get(row["gold_cohort"])
+        if fixture is not None and fixture.is_file():
+            return True, "explicitly permitted provisional SL engineering fixture"
+        return False, "not one of the two configured provisional SL fixtures"
+
+    if row.get("evaluation_ready") != "true":
+        return False, row.get("blocking_reason") or "mapping is not evaluation-ready"
 
     if gold_status in AUTHORITATIVE_GOLD_STATUSES:
         return True, "authoritative gold status"
 
-    if smoke_test:
-        expected = PROVISIONAL_FIXTURES.get(row["gold_cohort"])
-        if expected is not None and gold_path == expected:
-            return True, "explicitly permitted provisional SL engineering fixture"
-        return False, "not one of the two configured provisional SL fixtures"
-
     return False, f"gold status is {row['gold_status'] or 'missing'}"
+
+
+def selected_gold_path(row: dict[str, str], smoke_test: bool) -> Path:
+    if smoke_test:
+        return PROVISIONAL_FIXTURES[row["gold_cohort"]]
+    return resolve_manifest_path(row["gold_file"])
 
 
 def load_evaluator():
@@ -179,13 +198,19 @@ def output_path(args: argparse.Namespace) -> Path:
             path = BENCHMARK_DIR / path
     elif args.smoke_test:
         path = REPORT_DIR / "smoke_test/sl_spacy_stanza_results.tsv"
+    elif args.initial_debugging_only:
+        path = AUTHORITATIVE_RESULTS_PATH
     else:
-        path = REPORT_DIR / "evaluation_results.tsv"
+        path = GENERAL_RESULTS_PATH
 
     path = path.resolve()
     allowed_root = (REPORT_DIR / "smoke_test").resolve() if args.smoke_test else REPORT_DIR.resolve()
     if path != allowed_root and allowed_root not in path.parents:
         raise ValueError(f"Output must stay under {allowed_root}")
+    if path == AUTHORITATIVE_RESULTS_PATH.resolve() and not args.initial_debugging_only:
+        raise ValueError(
+            "authoritative_spacy_stanza_results.tsv requires --initial-debugging-only"
+        )
     return path
 
 
@@ -198,6 +223,7 @@ def result_fieldnames() -> list[str]:
         "model",
         "training_condition",
         "test_condition",
+        "source_test_condition",
         "gold_cohort",
         "gold_file",
         "prediction_file",
@@ -236,7 +262,12 @@ def main() -> int:
         allowed, reason = permission_reason(row, args.smoke_test)
         (permitted if allowed else blocked).append(row if allowed else (row, reason))
 
-    mode = "PROVISIONAL SMOKE TEST" if args.smoke_test else "AUTHORITATIVE"
+    if args.smoke_test:
+        mode = "PROVISIONAL SMOKE TEST"
+    elif args.initial_debugging_only:
+        mode = "AUTHORITATIVE STABLE SUBSET"
+    else:
+        mode = "GENERAL EVALUATION (NON-STABLE SYSTEMS REMAIN PROVISIONAL)"
     print(f"Mode: {mode}")
     print(f"Selected manifest rows: {len(candidates)}")
     print(f"Permitted: {len(permitted)}")
@@ -254,6 +285,16 @@ def main() -> int:
             f"{row['test_condition']}: {reason}"
         )
 
+    destination = output_path(args)
+    if destination == AUTHORITATIVE_RESULTS_PATH.resolve():
+        nonstable = [row for row in permitted if not is_stable_result(row)]
+        if nonstable:
+            raise RuntimeError(
+                "Authoritative output rejected non-stable system rows: "
+                + ", ".join(f"{row['language']}:{row['model']}" for row in nonstable)
+            )
+    print(f"Output: {display_path(destination)}")
+
     if args.dry_run:
         print("Dry run only; evaluator was not invoked.")
         return 0
@@ -266,20 +307,37 @@ def main() -> int:
     results: list[dict[str, object]] = []
     deterministic = True
     for row in permitted:
-        gold_path = resolve_manifest_path(row["gold_file"])
+        stable_result = is_stable_result(row)
+        gold_path = selected_gold_path(row, args.smoke_test)
         prediction_path = resolve_manifest_path(row["selected_prediction"])
+        if args.smoke_test:
+            result_scope = PROVISIONAL_SCOPE
+            gold_notice = PROVISIONAL_GOLD_NOTICE
+            use_notice = PROVISIONAL_USE_NOTICE
+            gold_status = "PROVISIONAL FIXTURE"
+        elif stable_result:
+            result_scope = "BENCHMARK EVALUATION"
+            gold_notice = "AUTHORITATIVE GOLD CONFIRMED"
+            use_notice = ""
+            gold_status = row["gold_status"]
+        else:
+            result_scope = GENERAL_PROVISIONAL_SCOPE
+            gold_notice = "AUTHORITATIVE GOLD CONFIRMED"
+            use_notice = GENERAL_PROVISIONAL_USE_NOTICE
+            gold_status = row["gold_status"]
         result: dict[str, object] = {
-            "result_scope": PROVISIONAL_SCOPE if args.smoke_test else "BENCHMARK EVALUATION",
-            "gold_provenance_notice": PROVISIONAL_GOLD_NOTICE if args.smoke_test else "AUTHORITATIVE GOLD CONFIRMED",
-            "benchmark_use_notice": PROVISIONAL_USE_NOTICE if args.smoke_test else "",
+            "result_scope": result_scope,
+            "gold_provenance_notice": gold_notice,
+            "benchmark_use_notice": use_notice,
             "language": row["language"],
             "model": row["model"],
             "training_condition": row["training_condition"],
             "test_condition": row["test_condition"],
+            "source_test_condition": row.get("source_test_condition", row["test_condition"]),
             "gold_cohort": row["gold_cohort"],
             "gold_file": display_path(gold_path),
             "prediction_file": display_path(prediction_path),
-            "gold_status": row["gold_status"],
+            "gold_status": gold_status,
             "result_status": "success",
             "repeat_deterministic": "not_checked",
             "evaluator_file": display_path(EVALUATOR_PATH),
@@ -302,7 +360,6 @@ def main() -> int:
             deterministic = False
         results.append(result)
 
-    destination = output_path(args)
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(tsv_text(results), encoding="utf-8")
     successes = sum(row["result_status"] == "success" for row in results)

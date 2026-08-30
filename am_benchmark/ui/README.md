@@ -15,8 +15,8 @@ python3 -m http.server 8000 --bind 127.0.0.1
 
 Then open `http://127.0.0.1:8000/ui/`.
 
-`build_ui_data.py` defaults to the provisional smoke-test TSV. Point it at another
-result file with `--input PATH_TO_RESULTS.tsv` once authoritative results exist.
+`build_ui_data.py` defaults to the 36-row authoritative spaCy/Stanza TSV. Point it
+at another result file with `--input PATH_TO_RESULTS.tsv` when needed.
 
 **Serve it over HTTP, do not open `index.html` from the file system.** A page loaded
 over `file://` has an opaque origin, and Firefox and Safari refuse `history.replaceState`
@@ -85,5 +85,5 @@ TSV appear on their own. Only two things are optional additions:
   `isAuthoritative`, `unavailableReason`, `parseRequest`, `label`) is exported.
 - `data/results.js` — generated bundle, gitignored. Do not edit by hand.
 
-This is a local prototype. It is not deployed and carries no authoritative
-benchmark claims.
+This local prototype contains the authoritative stable subset but is not deployed
+as the production benchmark interface.

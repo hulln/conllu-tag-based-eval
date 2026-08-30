@@ -3,11 +3,8 @@
 ## Scope and status
 
 The prototype is under `am_benchmark/ui/` and is separate from the deployed
-tables in the repository root. It displays only the 12 provisional SL
-spaCy/Stanza engineering-smoke-test rows.
-
-**Provisional engineering results — gold provenance not yet confirmed.** These
-values are not authoritative benchmark results or rankings.
+tables in the repository root. It displays 36 authoritative spaCy/Stanza rows:
+six each for EN/NL/SL written and spoken conditions.
 
 ## Existing interface inspection
 
@@ -33,13 +30,12 @@ options, status text, and result lookup need to be data-driven.
 - `ui/index.html`, `ui/styles.css`, and `ui/app.js` implement the local page.
 - `ui/README.md` contains local run instructions.
 
-The builder uses
-`reports/smoke_test/sl_spacy_stanza_results.tsv` by default. It validates
+The builder uses `reports/authoritative_spacy_stanza_results.tsv` by default. It validates
 required identifiers, rejects duplicate
 `language + model + training_condition + test_condition` keys, discovers metric
 families and fields from the TSV header, converts numeric cells to numbers and
 empty cells to `null`, and preserves statuses, notices, file identifiers, and
-hashes. It emits 12 rows and 13 evaluator metric families. The frontend does
+hashes. It emits 36 rows and 13 evaluator metric families. The frontend does
 not load any CoNLL-U file.
 
 ## Selector and URL logic
@@ -84,15 +80,12 @@ benchmark-use notice is present. Future rows with missing gold, excluded status,
 or evaluator errors receive an appropriate empty-state message and no invented
 scores.
 
-## Adding future EN/NL results
+## Adding future results
 
-Once authoritative gold is available:
-
-1. update the gold mapping to an authoritative status;
-2. run `scripts/run_benchmark_evaluation.py` in normal mode;
-3. produce one result TSV using the existing result schema;
-4. run `scripts/build_ui_data.py --input PATH_TO_RESULTS.tsv`;
-5. reload the local UI and validate the newly derived combinations.
+Run the evaluation wrapper with `--initial-debugging-only` for authoritative
+stable output, then run `scripts/build_ui_data.py --input PATH_TO_RESULTS.tsv`.
+General evaluation output keeps non-stable systems explicitly provisional. New
+model or condition identifiers appear without changes to the HTML.
 
 No HTML/JavaScript combination list needs to change. New model or condition
 labels fall back to their manifest values; presentation labels can be added
@@ -102,29 +95,24 @@ separately without changing result lookup.
 
 Passed checks:
 
-- Python builder syntax and deterministic 12-row/13-metric generation.
+- Python builder syntax and deterministic 36-row/13-metric generation.
 - Exact reconciliation of every generated numeric metric and status against the
   source TSV.
 - JavaScript syntax.
 - State resolution for all four required selections.
 - Dynamic-option membership and fallback from an invalid EN/missing-model URL.
-- Provisional classification for every current row.
+- Authoritative classification for every current row; no provisional warning.
 - HTTP 200 responses for the page, scripts, data bundle, and four parameterized
   local URLs on a loopback-only static server.
-- Headless Chrome rendered the four requested selections plus an invalid URL
-  fallback. Every page reached the ready state, resolved to the expected source
-  prediction, displayed the provisional warning and six-row comparison,
-  preserved all metric sections, and kept the application-error panel hidden.
-  The invalid URL displayed its fallback explanation. No browser dependency was
-  installed.
+- The prior headless-browser layout pass covered selection, fallback, metric
+  sections, and error-panel behavior. The current authoritative bundle preserves
+  the same schema and was rechecked programmatically for all dimensions.
 - A 1440-pixel desktop screenshot was inspected for hierarchy, overflow,
   selector/status readability, metric-card alignment, and table layout; no
   obvious visual defect was found. The temporary screenshot was not retained.
 
 ## Before production integration
 
-- Confirm authoritative SL gold provenance and obtain EN/NL gold.
-- Generate authoritative multilingual result rows.
 - Complete manual visual, accessibility, keyboard, and narrow-width review.
 - Review language-specific XPOS terminology and user-facing labels.
 - Decide how detailed error/example data will be generated and represented.

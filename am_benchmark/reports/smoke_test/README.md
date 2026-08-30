@@ -9,6 +9,10 @@ evaluator. It uses the local SSJ and unsuffixed SST files only as engineering
 fixtures. No artifact here belongs in the repository's production `results/`
 tree or in an authoritative benchmark report.
 
+Smoke mode explicitly substitutes these historical local fixtures for the
+authoritative handoff gold paths; authoritative gold status does not bypass the
+smoke-fixture gate.
+
 `sl_spacy_stanza_results.tsv` contains the 12 stable SL spaCy/Stanza manifest
 runs: 6 written and 6 spoken. All completed successfully, returned all 13 base
 evaluator metrics, and produced exactly identical numeric fields on a second

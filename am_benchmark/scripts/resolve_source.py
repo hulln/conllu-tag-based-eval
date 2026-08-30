@@ -420,6 +420,13 @@ def parse_run_name(root: str) -> tuple[str, str, str]:
     raise ValueError(f"Cannot parse logical run name: {root}")
 
 
+def canonical_test_condition(language: str, source_test_condition: str) -> str:
+    """Apply Aaron's authoritative NL spoken/dialect naming clarification."""
+    if language == "NL" and source_test_condition == "dialecttest":
+        return "spokentest"
+    return source_test_condition
+
+
 def data_rows(path: Path) -> list[list[str]]:
     rows = []
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -491,7 +498,8 @@ def build_runs(
             [path for path in files if path.name.endswith(".conllu_")],
             key=display_path,
         )
-        model, training, test = parse_run_name(root)
+        model, training, source_test = parse_run_name(root)
+        test = canonical_test_condition(language, source_test)
         numbered_comparisons = []
         for copy in numbered:
             match = NUMBERED_RE.fullmatch(copy.name)
@@ -532,6 +540,7 @@ def build_runs(
                 "model": model,
                 "training_condition": training,
                 "test_condition": test,
+                "source_test_condition": source_test,
                 "raw": raw,
                 "clean": clean,
                 "numbered": numbered,
@@ -543,6 +552,75 @@ def build_runs(
             }
         )
     return runs
+
+
+def collapse_canonical_runs(
+    runs: list[dict[str, object]], profiles: dict[Path, dict[str, object]]
+) -> list[dict[str, object]]:
+    """Collapse only justified aliases after NL test-condition normalisation.
+
+    Exact usable duplicates prefer the source spelling ``spokentest``. If one
+    member is unusable, the usable member is retained. Distinct usable outputs
+    are never silently discarded.
+    """
+    grouped: dict[tuple[str, str, str, str], list[dict[str, object]]] = defaultdict(list)
+    for run in runs:
+        key = (
+            str(run["language"]),
+            str(run["model"]),
+            str(run["training_condition"]),
+            str(run["test_condition"]),
+        )
+        grouped[key].append(run)
+
+    canonical: list[dict[str, object]] = []
+    for key, group in sorted(grouped.items()):
+        usable = [run for run in group if run["selected"] is not None]
+        if len(group) == 1:
+            chosen = group[0]
+        elif len(usable) == 1:
+            chosen = usable[0]
+        elif len(usable) > 1:
+            hashes = {str(profiles[run["selected"]]["sha256"]) for run in usable}
+            if len(hashes) != 1:
+                roots = ", ".join(str(run["root"]) for run in usable)
+                raise RuntimeError(
+                    "NL spoken/dialect normalisation produced distinct usable "
+                    f"outputs for {key}: {roots}"
+                )
+            chosen = min(
+                usable,
+                key=lambda run: (
+                    str(run["source_test_condition"]) != "spokentest",
+                    str(run["root"]),
+                ),
+            )
+        else:
+            chosen = min(group, key=lambda run: str(run["root"]))
+
+        roots = [str(run["root"]) for run in group]
+        source_conditions = sorted({str(run["source_test_condition"]) for run in group})
+        chosen["canonical"] = True
+        chosen["source_roots"] = roots
+        chosen["source_test_conditions"] = source_conditions
+        canonical.append(chosen)
+
+        for run in group:
+            if run is chosen:
+                continue
+            run["canonical"] = False
+            run["duplicate_of"] = str(chosen["root"])
+            if run["selected"] is not None:
+                run["selected"] = None
+                run["usable_now"] = False
+                run["recommended"] = False
+                run["status"] = "DEDUPLICATED EXACT NL TEST ALIAS"
+                run["reason"] = (
+                    "Aaron confirmed NL dialecttest and spokentest are one cohort; "
+                    f"this clean file is byte-identical to {chosen['root']}_clean.conllu."
+                )
+
+    return canonical
 
 
 def cross_language_groups(
@@ -698,18 +776,19 @@ def alternate_findings(
 
 
 def gold_candidates() -> list[Path]:
-    gold_dir = REPO_DIR / "data" / "gold"
-    if not gold_dir.is_dir():
-        return []
-    return sorted(gold_dir.glob("*.conllu"))
+    candidates = []
+    for gold_dir in (SOURCE_DIR / "gold", REPO_DIR / "data" / "gold"):
+        if gold_dir.is_dir():
+            candidates.extend(gold_dir.glob("*.conllu"))
+    return sorted(candidates, key=display_path)
 
 
 def infer_gold_scope(path: Path) -> tuple[str, str]:
     name = path.name.lower()
     language = name[:2].upper() if len(name) >= 2 else ""
-    if "_ssj" in name:
+    if "_written_" in name or "_ssj" in name:
         test_condition = "writtentest"
-    elif "_sst" in name:
+    elif "_spoken_" in name or "_sst" in name:
         test_condition = "spokentest"
     else:
         test_condition = ""
@@ -811,6 +890,9 @@ def canonical_tsv(runs: list[dict[str, object]]) -> str:
                 "model": run["model"],
                 "training_condition": run["training_condition"],
                 "test_condition": run["test_condition"],
+                "source_test_condition": run["source_test_condition"],
+                "source_test_conditions": ";".join(run.get("source_test_conditions", [])),
+                "source_roots": ";".join(run.get("source_roots", [str(run["root"])])),
                 "raw_file": display_path(run["raw"]) if run["raw"] else "",
                 "clean_file": display_path(run["clean"]) if run["clean"] else "",
                 "selected_file": display_path(run["selected"]) if run["selected"] else "",
@@ -830,6 +912,9 @@ def canonical_tsv(runs: list[dict[str, object]]) -> str:
         "model",
         "training_condition",
         "test_condition",
+        "source_test_condition",
+        "source_test_conditions",
+        "source_roots",
         "raw_file",
         "clean_file",
         "selected_file",
@@ -840,8 +925,8 @@ def canonical_tsv(runs: list[dict[str, object]]) -> str:
         "status",
         "usable_now",
         "recommended_for_initial_debugging",
-        "reason",
         "notes",
+        "reason",
     ]
     return tsv_text(rows, fields)
 
@@ -885,6 +970,23 @@ def excluded_tsv(
                 category = "nonstandard_alternate"
                 reason = "Unexplained .conllu_ alternate; canonical raw/clean files exist."
                 identical_to = ""
+            elif path == run["clean"] and run["wrong_language"]:
+                category = "wrong_language"
+                reason = str(run["reason"])
+                identical_to = ""
+            elif not run.get("canonical", True) and path == run["clean"]:
+                category = "canonical_alias_duplicate"
+                reason = str(run["reason"])
+                chosen_clean = path.with_name(
+                    str(run.get("duplicate_of", "")) + "_clean.conllu"
+                )
+                identical_to = (
+                    display_path(chosen_clean)
+                    if chosen_clean in profiles
+                    and run["clean"] is not None
+                    and profiles[run["clean"]]["sha256"] == profiles[chosen_clean]["sha256"]
+                    else ""
+                )
             elif path == run["raw"]:
                 category = "raw_superseded"
                 if run["wrong_language"]:
@@ -892,10 +994,6 @@ def excluded_tsv(
                 else:
                     reason = "Raw version is superseded by AM's instructed _clean canonical version."
                 identical_to = display_path(run["clean"]) if run["raw_equals_clean"] and run["clean"] else ""
-            elif path == run["clean"] and run["wrong_language"]:
-                category = "wrong_language"
-                reason = str(run["reason"])
-                identical_to = ""
             elif path == run["clean"]:
                 category = "blocked_clean"
                 reason = str(run["reason"])
@@ -937,9 +1035,10 @@ def report_markdown(
     gold_comparisons: list[dict[str, object]],
     evaluator_loader_failures: list[tuple[Path, str]],
 ) -> str:
-    usable = [run for run in runs if run["usable_now"]]
-    recommended = [run for run in runs if run["recommended"]]
-    blocked = [run for run in runs if not run["usable_now"]]
+    canonical_runs = [run for run in runs if run.get("canonical", True)]
+    usable = [run for run in canonical_runs if run["usable_now"]]
+    recommended = [run for run in canonical_runs if run["recommended"]]
+    blocked = [run for run in runs if run["wrong_language"]]
     provisional = [run for run in usable if not run["recommended"]]
     clean_pass = [
         run
@@ -971,18 +1070,18 @@ def report_markdown(
         "",
         "## A. Executive conclusion",
         "",
-        f"The 261 physical source files resolve to **{len(runs)} logical prediction runs**. "
+        f"The 261 physical prediction files encode **{len(runs)} source-named runs** and resolve to "
+        f"**{len(canonical_runs)} canonical logical prediction runs** after Aaron's NL naming clarification. "
         f"AM's `_clean` choice is available for every run, and **{len(clean_pass)}/{len(runs)} clean files pass** "
         "the strengthened CoNLL-U/evaluator structural gate.",
         "",
         f"**Use {len(usable)} canonical clean predictions structurally:** {len(recommended)} spaCy/Stanza runs are "
         f"the recommended initial-debugging subset, while {len(provisional)} other structurally usable runs remain "
-        "provisional because their results may change. One logical run is excluded: the NL Trankit "
-        "written+spoken-training/spoken-test clean file contains EN corpus content.",
+        "provisional because their results may change. The known NL Trankit English-content source file remains "
+        "excluded, while its valid dialect-named counterpart supplies the canonical NL spoken run.",
         "",
-        "Prediction inputs are therefore resolved, but evaluation is **not gold-ready**: no matching EN or NL gold "
-        "CoNLL-U files were found, and local SL candidates require explicit provenance/correspondence confirmation "
-        "even where surface structure matches.",
+        "Aaron's six supplied gold files are authoritative for this handoff. All six canonical language/test "
+        "cohorts are therefore gold-ready.",
         "",
         "## B. Physical source-file inventory",
         "",
@@ -1006,6 +1105,8 @@ def report_markdown(
             f"| **{len(runs)}** | **{len(numbered_comparisons)}** | **{len(alternates)}** |",
             "",
             "The complete one-row-per-run inventory and selection decision is in `canonical_predictions.tsv`.",
+            "The two source-name collisions created by NL normalisation are recorded in "
+            "`excluded_or_ambiguous_files.tsv`; no distinct usable output was silently discarded.",
             "",
             "## C. Duplicate and copy analysis",
             "",
@@ -1081,7 +1182,15 @@ def report_markdown(
             f"**{len(runs) - len(evaluator_loader_failures)}/{len(runs)}** clean candidates. Only its load/validation "
             "path was called; no evaluation or scoring function was run.",
             "",
-            "## F. Suspicious and invalid files",
+            "## F. Dutch normalisation, duplicates, and invalid files",
+            "",
+            "Aaron confirmed that NL `dialecttest` and `spokentest` name the same test cohort, so both are "
+            "canonicalised to `spokentest`. This creates two duplicate logical keys:",
+            "",
+            "- Stanza/default: the dialect- and spoken-named clean files are byte-identical; the spoken-named "
+            "file is retained and the dialect-named copy is an audited exact alias.",
+            "- Trankit/written+spoken training: the spoken-named file is the known English-content invalid file; "
+            "the distinct, valid Dutch dialect-named file is retained as the canonical spoken run.",
             "",
         ]
     )
@@ -1095,7 +1204,7 @@ def report_markdown(
                 f"  - Clean file: `{display_path(run['clean']) if run['clean'] else ''}`",
                 f"  - Evidence: {run['reason']}",
                 f"  - Opening token sample: `{sample}`",
-                "  - Action: obtain a replacement or explicit clarification; do not repair or evaluate this file as NL.",
+                "  - Action: keep excluded under Aaron's invalid-file decision; do not repair or evaluate this file as NL.",
             ]
         )
     if not blocked:
@@ -1128,8 +1237,8 @@ def report_markdown(
             "",
             "## H. Gold-file readiness",
             "",
-            "Repository-wide discovery found local gold candidates only for SL. EN and NL have no candidate gold "
-            "CoNLL-U files outside AM's prediction source tree.",
+            "The six files under `source/gold/` are Aaron's authoritative benchmark handoff. Existing repository "
+            "gold files are retained below only for comparison.",
             "",
             "| Candidate | Intended cohort inferred from repository docs | Sentences | Ordinary tokens | "
             "Structure matches | ID/FORM surface matches | `sent_id` matches |",
@@ -1149,28 +1258,26 @@ def report_markdown(
     lines.extend(
         [
             "",
-            "An exact structural/surface match is evidence of alignment, but it does not prove that the local gold "
-            "annotation version is the one AM intended. Exact source treebank/release mapping still needs written "
-            "confirmation. Evaluation of the three-language benchmark must not start until EN and NL gold files and "
-            "all prediction-to-gold mappings are supplied or confirmed.",
+            "The handoff itself establishes benchmark authority. Dataset identities and exact/compatible alignment "
+            "evidence are recorded more fully by `build_gold_requirements.py`.",
             "",
             "## I. Exact recommendation for what to use",
             "",
             f"1. Use the **{len(recommended)} selected spaCy/Stanza `_clean.conllu` files** marked "
-            "`USE FOR INITIAL DEBUGGING` in `canonical_predictions.tsv` for pipeline debugging once matching gold is confirmed.",
+            "`USE FOR INITIAL DEBUGGING` in `canonical_predictions.tsv` for the authoritative stable evaluation.",
             f"2. Retain the **{len(provisional)} other selected clean files** as structurally usable but provisional; "
             "their status is `DEFER / RESULT MAY CHANGE` pending result-stability confirmation.",
             "3. Exclude every numbered copy, every raw file, and every `.conllu_` alternate from canonical selection.",
-            "4. Exclude the NL Trankit written+spoken-training/spoken-test run entirely until a Dutch replacement is supplied.",
-            "5. Do not run evaluation yet: gold readiness is incomplete.",
+            "4. Keep the English-content NL Trankit source file excluded; use its valid dialect-named counterpart "
+            "for the canonical NL spoken run.",
+            "5. Use the six Aaron-supplied gold files for authoritative evaluation.",
             "",
-            "## J. Remaining questions for AM/KD",
+            "## J. Resolved decisions and remaining metadata",
             "",
-            "1. Please provide or identify the exact EN and NL gold CoNLL-U files for written, spoken, and Dutch dialect test conditions.",
-            "2. Please confirm the exact treebank/version mapping for the SL written and spoken prediction cohorts, including whether any local SSJ/SST candidate is authoritative for this handoff.",
-            "3. Please replace or explain the NL `trankit_writtenandspokentrain_spokentest_clean.conllu`, whose content matches EN rather than NL.",
-            "4. Please explain the provenance of the four EN `.conllu_` Stanza files; they are excluded unless explicitly established as intended results.",
-            "5. Which non-spaCy/Stanza result families are now frozen, and which should remain deferred because outputs may change?",
+            "Gold availability, NL spoken/dialect naming, and treatment of the wrong-language Trankit file are "
+            "resolved. The exact source release for EN and NL gold remains descriptive metadata rather than an "
+            "evaluation blocker; the handoff files and their checksums are authoritative. The four EN `.conllu_` "
+            "alternates remain excluded, and non-spaCy/Stanza families remain provisional.",
             "",
             "### Reproducibility note",
             "",
@@ -1186,27 +1293,29 @@ def print_summary(
     profiles: dict[Path, dict[str, object]],
     evaluator_loader_failures: list[tuple[Path, str]],
 ) -> None:
-    usable = [run for run in runs if run["usable_now"]]
-    recommended = [run for run in runs if run["recommended"]]
+    canonical = [run for run in runs if run.get("canonical", True)]
+    usable = [run for run in canonical if run["usable_now"]]
+    recommended = [run for run in canonical if run["recommended"]]
     provisional = [run for run in usable if not run["recommended"]]
-    blocked = [run for run in runs if not run["usable_now"]]
+    blocked = [run for run in runs if run["wrong_language"]]
     clean_pass = sum(
         run["clean"] is not None and not profiles[run["clean"]]["issues"] for run in runs
     )
     print("AM benchmark source resolution complete")
-    print(f"Logical prediction runs: {len(runs)}")
+    print(f"Source-named prediction runs: {len(runs)}")
+    print(f"Canonical logical prediction runs: {len(canonical)}")
     print(f"Canonical prediction files structurally usable: {len(usable)}")
     print(f"Recommended initial spaCy/Stanza debugging files: {len(recommended)}")
     print(f"Other structurally usable but provisional files: {len(provisional)}")
     print(f"Blocked/excluded logical runs: {len(blocked)}")
     for run in blocked:
-        print(f"  NEEDS REPLACEMENT/CLARIFICATION: {run['language']} {run['root']} — {run['reason']}")
+        print(f"  EXCLUDED BY AARON'S INVALID-FILE DECISION: {run['language']} {run['root']} — {run['reason']}")
     print(f"Clean structural gate: {clean_pass}/{len(runs)} pass")
     print(
         "Existing evaluator loader: "
         f"{len(runs) - len(evaluator_loader_failures)}/{len(runs)} clean files accepted"
     )
-    print("Gold readiness: NOT READY — EN/NL gold missing; SL correspondence still needs confirmation")
+    print("Gold readiness: READY — six Aaron-supplied authoritative cohorts mapped")
     print("Reports created:")
     print("  reports/source_resolution.md")
     print("  reports/canonical_predictions.tsv")
@@ -1226,6 +1335,7 @@ def main() -> int:
     profiles = {path: profile_conllu(path) for path in physical_files}
     runs = build_runs(physical_files, profiles)
     classify_runs(runs, profiles)
+    canonical_runs = collapse_canonical_runs(runs, profiles)
 
     exact_cross_groups = cross_language_groups(profiles, "sha256")
     surface_cross_groups = cross_language_groups(profiles, "surface_hash")
@@ -1234,13 +1344,13 @@ def main() -> int:
     candidates = gold_candidates()
     gold_profiles = {path: profile_conllu(path) for path in candidates}
     gold_comparisons = compare_gold_candidates(
-        candidates, gold_profiles, runs, profiles
+        candidates, gold_profiles, canonical_runs, profiles
     )
     evaluator_loader_failures = check_with_existing_evaluator_loader(runs)
 
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     (REPORT_DIR / "canonical_predictions.tsv").write_text(
-        canonical_tsv(runs), encoding="utf-8"
+        canonical_tsv(canonical_runs), encoding="utf-8"
     )
     (REPORT_DIR / "excluded_or_ambiguous_files.tsv").write_text(
         excluded_tsv(physical_files, runs, profiles), encoding="utf-8"

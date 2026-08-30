@@ -18,9 +18,9 @@ The Slovene block is therefore the third (reddish-purple) block. Two independent
 confirmations: it is the only block containing `UDpipessj` and `UDpipesst` — the SSJ
 and SST Slovene treebanks — and its LAS values coincide with the SL results.
 
-Compared against `am_benchmark/reports/smoke_test/sl_spacy_stanza_results.tsv`
-(rows with `language=SL`, `test_condition=writtentest`). The generated UI bundle
-`ui/data/results.js` was confirmed to carry byte-identical values for these rows.
+Compared against `am_benchmark/reports/authoritative_spacy_stanza_results.tsv`
+(rows with `language=SL`, `test_condition=writtentest`). These values are also
+present in the generated `ui/data/results.js` bundle.
 
 ## Comparison
 
@@ -112,15 +112,12 @@ low MLAS (5.04 / 5.07) visible for the same runs, since MLAS requires FEATS to m
 
 ## What this does not establish
 
-- **Not gold provenance, version or authority.** The agreement shows our gold has the
-  same content as whatever KD scored against. It does not document which UD release
-  that is, nor that it is the file AM/KD consider authoritative. If KD used the same
-  unconfirmed file, the agreement is circular with respect to provenance. Written
-  confirmation is still required and the results stay provisional.
-- **Nothing about EN or NL.** Those blocks exist in the image, but we hold no EN/NL
-  gold and produced no EN/NL results, so nothing was compared.
-- **Nothing about the spoken or dialect conditions.** This is the written-test table
-  only; the SL spoken gold candidate `sl_sst-ud-test.conllu` is untested here.
+- **Not the exact UD release label by itself.** The numerical agreement establishes
+  content compatibility, while Aaron's supplied file independently establishes
+  benchmark authority. The supplied SL written file is byte-identical to local SSJ.
+- **Nothing about EN or NL scores.** Authoritative results now exist, but this KD
+  cross-check covers only the Slovene block of the reference table.
+- **Nothing about spoken conditions.** This remains a written-test table check.
 - **Nothing, in this section, about the deferred families** (trankit, UDpipe, diaparser,
   singletask*). The addendum extends the check to trankit and the two UDpipe runs;
   diaparser and the singletask* families remain uncompared, as KD's table has no rows
@@ -133,7 +130,7 @@ All 30 comparable values for the six stable SL written spaCy/Stanza runs reprodu
 KD's table exactly after rounding, independent of rounding convention. KD's "Feats"
 column is the evaluator's AllTags. No mismatch was found, and no problem was
 identified in prediction selection, training-condition mapping, or evaluator
-integration. Gold provenance remains the open item and is unaffected by this check.
+integration. Aaron's later authoritative handoff resolves the former provenance gate.
 
 ---
 

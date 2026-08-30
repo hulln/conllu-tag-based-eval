@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 BENCHMARK_DIR = Path(__file__).resolve().parents[1]
-DEFAULT_INPUT = BENCHMARK_DIR / "reports/smoke_test/sl_spacy_stanza_results.tsv"
+DEFAULT_INPUT = BENCHMARK_DIR / "reports/authoritative_spacy_stanza_results.tsv"
 DEFAULT_OUTPUT = BENCHMARK_DIR / "ui/data/results.js"
 
 REQUIRED_FIELDS = [

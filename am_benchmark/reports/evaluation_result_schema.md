@@ -6,8 +6,9 @@ One TSV row represents one logical prediction run evaluated against one gold
 cohort with one pinned evaluator file. The schema is language-independent and
 can hold future EN, NL, and SL runs without adding identifying columns.
 
-The provisional implementation is demonstrated by
-`reports/smoke_test/sl_spacy_stanza_results.tsv`. A failed evaluator invocation
+The current implementation is represented by
+`reports/authoritative_spacy_stanza_results.tsv`; historical provisional examples
+remain under `reports/smoke_test/`. A failed evaluator invocation
 still has one row: `result_status` is `error`, `error_message` is populated, and
 metric fields are empty.
 
@@ -22,6 +23,7 @@ metric fields are empty.
 | `model` | string | Manifest model/system name. |
 | `training_condition` | string | Manifest training condition. |
 | `test_condition` | string | Manifest test condition. |
+| `source_test_condition` | string | Original source-filename condition before canonical normalisation. |
 | `gold_cohort` | string | Shared language/test gold requirement. |
 | `gold_file` | path string | Repository-relative gold path. |
 | `prediction_file` | path string | Repository-relative canonical prediction path. |
@@ -64,10 +66,9 @@ two decimals, matching the evaluator CLI. Aligned accuracy is empty for Tokens,
 Sentences, and Words because the evaluator does not set `aligned_total` on those
 three alignment scores.
 
-The current frontend displays F1 for Lemmas, UPOS, XPOS, UAS, and LAS. It can
-read those columns directly while retaining the other evaluator metrics for
-future views. Tokens, Sentences, and Words are alignment diagnostics in this
-pretokenised setup and must not be presented as model-quality findings.
+The current frontend displays F1 for Lemmas, UPOS, XPOS, UAS, LAS, MLAS, and
+BLEX while retaining every base evaluator metric. Tokens, Sentences, and Words
+are alignment diagnostics and must not be presented as annotation-quality findings.
 
 ## Consumer rules
 
@@ -77,6 +78,9 @@ pretokenised setup and must not be presented as model-quality findings.
 - Only rows with `result_status=success` may feed metric displays.
 - Official views must additionally require authoritative `gold_status` and must
   reject a non-empty `benchmark_use_notice`.
+- Authoritative gold establishes the reference data, not system-result stability.
+  Non-stable systems must retain a non-empty `benchmark_use_notice` even when
+  evaluated successfully against authoritative gold.
 - Selector values must be derived from available rows, not from a presumed full
   cross-product.
 - Raw numeric values should remain unchanged during aggregation; rounding is a

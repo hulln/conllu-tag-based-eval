@@ -1,7 +1,7 @@
 # Evaluator pipeline engineering notes
 
-> Historical note: This document predates the local UI prototype. Current
-> implementation status is documented in `ui_prototype_notes.md`.
+> Historical design notes. The current authoritative implementation status is
+> documented in `../README.md` and `ui_prototype_notes.md`.
 
 ## Practical flow
 
@@ -91,52 +91,20 @@ Hard-coded to the old comparison:
 - Slovenian-specific XPOS terminology and some page copy;
 - the five displayed overview metrics, despite the evaluator producing 13.
 
-## Provisional SL smoke-test outcome
+## Current authoritative stable outcome
 
-The manifest contains 12 stable SL spaCy/Stanza runs: 6 written and 6 spoken.
-Four default representative cases were run first, followed by all 12. Every run
-completed successfully through the existing evaluator. Tokens, Sentences, and
-Words were 100% for every pair, so there were no token or sentence alignment
-errors. All 13 base metrics were returned.
+Aaron's six supplied gold files resolved the former provenance and availability
+gates. The canonical manifest now contains 36 stable spaCy/Stanza runs: six per
+language/test cohort across EN, NL, and SL. All 36 completed through the existing
+evaluator and produced identical numeric output on a second execution.
 
-Every run was then evaluated a second time from freshly loaded inputs. All
-numeric fields were exactly identical. No evaluator/prediction incompatibility
-was found. The only observed constraints are expected evaluator contracts:
-matching underlying token text, valid CoNLL-U, and a final blank line.
+Every pair has matching underlying character text and exact sentence spans.
+Eight tokenizer-varying runs have token-boundary F1 below 100%, which is an
+evaluated model/tokenizer difference rather than a mapping error. All aligned
+word scores are 100%, and all 13 base metric families are present.
 
-These checks use provisional fixtures. Their scores are engineering evidence
-only, not benchmark findings.
-
-## Work boundary after this smoke test
-
-### A. Completed without external input
-
-- Prediction resolution and manifest creation.
-- Gold-cohort inventory and status gating.
-- Existing evaluator and frontend pipeline inspection.
-- Manifest-driven dry-run and execution wrapper.
-- Deterministic end-to-end smoke test of all 12 stable SL spaCy/Stanza runs.
-- Stable multilingual result-row schema.
-
-### B. Can continue without external input
-
-- Unit/integration tests for manifest selection, status gates, evaluator errors,
-  and TSV serialization.
-- A manifest/result-driven frontend data adapter.
-- Generic language/model/training/test selectors populated only from valid rows.
-- UI work on loading, filtering, empty states, metric formatting, and provisional
-  banners using fixture data.
-- Optional error-analysis aggregation for the isolated provisional SL fixtures.
-
-Production UI implementation was intentionally not started in this task.
-
-### C. Blocked until gold or provenance is provided
-
-- Any EN or NL scoring.
-- Treating the SL scores as authoritative or publishing them as benchmark
-  results.
-- Complete official multilingual result population, comparisons, or rankings.
-- Final gold citations, release declarations, and benchmark reproducibility
-  manifest.
-- Evaluation of the excluded NL Trankit spoken run also requires a corrected
-  prediction or an explicit decision to omit it.
+The authoritative result is
+`authoritative_spacy_stanza_results.tsv`. Historical provisional SL fixtures
+remain under `smoke_test/` for regression context only. The known NL Trankit
+English-content file is excluded under Aaron's explicit invalid-file decision;
+its valid dialect-named counterpart supplies the canonical NL spoken run.
