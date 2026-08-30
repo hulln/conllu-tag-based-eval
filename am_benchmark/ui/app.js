@@ -18,6 +18,16 @@
     { name: "Content words", metrics: ["MLAS", "BLEX"] }
   ];
 
+  const METRIC_DESCRIPTIONS = {
+    UPOS: "Universal part-of-speech",
+    XPOS: "Language-specific part-of-speech",
+    Lemmas: "Lemmatization",
+    UAS: "Unlabelled Attachment Score",
+    LAS: "Labelled Attachment Score",
+    MLAS: "Morphology-Aware Labelled Attachment Score",
+    BLEX: "Bi-lexical Dependency Score"
+  };
+
   /* Layers used to separate the full evaluator output in the detail table. */
   const METRIC_LAYERS = [
     ["Tokens", "Sentences", "Words"],
@@ -218,10 +228,6 @@
     return value == null ? "—" : String(value);
   }
 
-  function shortHash(value) {
-    return value ? String(value).slice(0, 12) : "";
-  }
-
   function cell(tag, text, className) {
     const node = document.createElement(tag);
     if (text != null) node.textContent = text;
@@ -396,23 +402,37 @@
       const columnRow = doc.createElement("tr");
       columnRow.className = "cols";
       columnRow.appendChild(sortableHeader("model", "System", ""));
-      columnRow.appendChild(sortableHeader("training_condition", "Training", ""));
+      columnRow.appendChild(sortableHeader("training_condition", "Training data", ""));
       for (const group of groups) {
         group.metrics.forEach((metric, index) => {
-          columnRow.appendChild(sortableHeader(metric, metric, "num" + (index === 0 ? " grp-start" : "")));
+          columnRow.appendChild(sortableHeader(
+            metric,
+            metric,
+            "num" + (index === 0 ? " grp-start" : ""),
+            METRIC_DESCRIPTIONS[metric]
+          ));
         });
       }
       head.appendChild(columnRow);
     }
 
-    function sortableHeader(key, text, className) {
+    function sortableHeader(key, text, className, description) {
       const th = cell("th", null, (className + " sortable").trim());
       th.scope = "col";
       th.tabIndex = 0;
       th.setAttribute("role", "columnheader");
       const active = sort.key === key;
       th.setAttribute("aria-sort", active ? (sort.direction === "asc" ? "ascending" : "descending") : "none");
-      th.append(doc.createTextNode(text));
+      if (description) {
+        th.classList.add("metric-explained");
+        th.dataset.tooltip = description;
+        th.setAttribute("aria-label", text + " — " + description + ". Activate to sort.");
+        const abbreviation = cell("abbr", text, "metric-help");
+        abbreviation.setAttribute("aria-hidden", "true");
+        th.append(abbreviation);
+      } else {
+        th.append(doc.createTextNode(text));
+      }
       th.append(cell("span", active ? (sort.direction === "asc" ? "▲" : "▼") : "", "sort-mark"));
       const activate = () => {
         if (sort.key === key) sort.direction = sort.direction === "desc" ? "asc" : "desc";
@@ -581,24 +601,31 @@
         }
       }
 
-      const list = doc.getElementById("provenance-list");
-      list.replaceChildren();
-      const entries = [
+      const summaryList = doc.getElementById("provenance-summary");
+      const technicalList = doc.getElementById("provenance-list");
+      summaryList.replaceChildren();
+      technicalList.replaceChildren();
+      const summaryEntries = [
         ["Gold cohort", row.gold_cohort, false],
         ["Gold status", row.gold_status, false],
-        ["Gold file", row.gold_file, true],
-        ["Gold SHA", shortHash(row.gold_sha256), true],
-        ["Prediction", row.prediction_file, true],
-        ["Prediction SHA", shortHash(row.prediction_sha256), true],
-        ["Evaluator", row.evaluator_file, true],
-        ["Evaluator SHA", shortHash(row.evaluator_sha256), true],
         ["Repeat check", row.repeat_deterministic, false]
       ];
-      for (const [term, value, mono] of entries) {
-        if (!value) continue;
-        const dd = cell("dd", value, mono ? "mono" : "");
-        if (/SHA$/.test(term)) dd.title = "SHA-256, first 12 characters";
-        list.append(cell("dt", term), dd);
+      const technicalEntries = [
+        ["Gold file", row.gold_file, true],
+        ["Gold SHA-256", row.gold_sha256, true],
+        ["Prediction", row.prediction_file, true],
+        ["Prediction SHA-256", row.prediction_sha256, true],
+        ["Evaluator", row.evaluator_file, true],
+        ["Evaluator SHA-256", row.evaluator_sha256, true]
+      ];
+      for (const [list, entries] of [
+        [summaryList, summaryEntries],
+        [technicalList, technicalEntries]
+      ]) {
+        for (const [term, value, mono] of entries) {
+          if (!value) continue;
+          list.append(cell("dt", term), cell("dd", value, mono ? "mono" : ""));
+        }
       }
 
       const note = doc.getElementById("detail-note");

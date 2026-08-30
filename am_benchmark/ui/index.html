@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
-  <title>Benchmark evaluation results</title>
+  <title>Multilingual tagging and parsing benchmark</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -13,9 +13,14 @@
   </noscript>
 
   <header class="masthead">
-    <h1>Benchmark evaluation results</h1>
-    <span class="scope">Multilingual CoNLL-U tagging and parsing &middot; test</span>
+    <h1>Multilingual tagging and parsing benchmark</h1>
+    <span class="scope">CoNLL-U evaluation &middot; English, Dutch and Slovenian</span>
   </header>
+
+  <p class="intro">
+    These results compare spaCy and Stanza&mdash;the currently published stable subset&mdash;across
+    training conditions on written and spoken test data; additional systems remain under evaluation.
+  </p>
 
   <div class="context" id="context">
     <div class="field">
@@ -64,18 +69,22 @@
           <tbody id="metrics-body"></tbody>
         </table>
       </div>
-      <div class="provenance" id="provenance">
-        <h3>Run provenance</h3>
-        <dl id="provenance-list"></dl>
-      </div>
+      <aside class="provenance" id="provenance">
+        <h3>Reproducibility</h3>
+        <dl id="provenance-summary"></dl>
+        <details class="technical-details">
+          <summary>Technical details</summary>
+          <dl id="provenance-list"></dl>
+        </details>
+      </aside>
     </div>
     <p class="table-note" id="detail-note"></p>
   </section>
 
   <footer class="colophon">
     <p>
-      Values are produced by <code>scripts/conll18_ud_eval_tag-based.py</code> and read from a
-      generated bundle. This page does not parse CoNLL-U and does not compute metrics.
+      Scores were computed with the CoNLL 2018 CoNLL-U evaluation script and loaded here as
+      precomputed results; this page does not parse data or calculate metrics in the browser.
     </p>
     <p class="meta" id="source-meta"></p>
     <p class="env-note" id="url-note" hidden></p>

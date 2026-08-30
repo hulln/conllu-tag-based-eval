@@ -1,4 +1,4 @@
-# Local benchmark result interface
+# Benchmark result interface
 
 A static, data-driven page for comparing evaluator output across systems. It reads
 one generated bundle and nothing else — no CoNLL-U parsing, no metric computation,
@@ -39,12 +39,14 @@ combination is ever offered without a backing row.
 F1 for UPOS, XPOS, Lemmas (Tagging), UAS, LAS (Dependencies) and MLAS, BLEX
 (Content words). Column groups follow the evaluator's own metric semantics.
 Any header sorts; the highest value in each column is bold. Rows without a usable
-result show the reason instead of numbers — no value is ever invented.
+result show the reason instead of numbers — no value is ever invented. Metric
+abbreviations expose concise definitions on pointer hover and keyboard focus.
 
 **Detail** — selecting a row (click, Enter or Space) reveals the complete evaluator
 output below the table: all 13 metric families × precision, recall, F1 and aligned
-accuracy, plus the gold cohort, gold and prediction paths, and the SHA-256 of the
-gold, prediction and evaluator files. It is a section on the page, not a modal.
+accuracy. Gold cohort, status and repeat-check state remain visible; implementation
+paths and full SHA-256 checksums are available in a native Technical details
+disclosure. The detail view is a section on the page, not a modal.
 
 **Status** — a single line under the heading, derived from the rows. Every run
 provisional gives one statement; a mix marks the unconfirmed runs with `†`; all
@@ -58,7 +60,7 @@ notice removes the line entirely. Nothing is hard-coded to a language.
 ?lang=SL&test=spokentest&model=stanza&training=default     with a run open
 ~~~
 
-`language=` from the first prototype is still accepted as an alias for `lang=`, so
+`language=` from the first interface version is still accepted as an alias for `lang=`, so
 older links restore the same context and run and are rewritten to the current form.
 An unavailable value falls back to the nearest existing result and says so. Sort
 order is deliberately not in the URL.
@@ -78,12 +80,19 @@ TSV appear on their own. Only two things are optional additions:
 
 - `index.html` — page structure, no data.
 - `styles.css` — house style shared with `tables/comparison_table_v5.html`:
-  IBM Plex Sans/Mono, `#161616` on `#f5f5f5`, hairline rules, 2px radius,
-  CJVT accent `#e12a26`.
+  system sans-serif/monospace stacks, `#161616` on `#f5f5f5`, hairline rules,
+  2px radius, CJVT accent `#e12a26`. No external font request is made.
 - `app.js` — UMD module. Loads in Node for testing; every pure function
   (`contextValues`, `resolveContext`, `rowsFor`, `sortRows`, `bestValues`,
   `isAuthoritative`, `unavailableReason`, `parseRequest`, `label`) is exported.
 - `data/results.js` — generated bundle, gitignored. Do not edit by hand.
 
-This local prototype contains the authoritative stable subset but is not deployed
-as the production benchmark interface.
+The local source files are kept synchronized with the deployable copy under
+`../../tables/am_benchmark/`; only their generated `results.js` paths differ in
+version-control policy.
+
+## Indexing and publication
+
+Both interface copies retain `<meta name="robots" content="noindex,nofollow">`
+while this Netlify surface remains a staging/interface-development deployment.
+That directive should be reconsidered before an actual CJVT/CLARIN publication.
