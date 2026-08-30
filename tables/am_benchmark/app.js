@@ -588,6 +588,19 @@
         label("training_condition", row.training_condition) + " training"));
       heading.append(cell("span", " — " + contextDescription(state) + " test", "qualifier"));
 
+      /* A route to the diagnostic page, not a second view of this one. The link
+         carries the same four parameters the overview already uses, so the target
+         opens on exactly the run that is open here. */
+      const analysisLink = doc.getElementById("detail-analysis-link");
+      if (analysisLink) {
+        const params = new URLSearchParams();
+        params.set(QUERY_NAMES.language, state.language);
+        params.set(QUERY_NAMES.test_condition, state.test_condition);
+        params.set(QUERY_NAMES.model, row.model);
+        params.set(QUERY_NAMES.training_condition, row.training_condition);
+        analysisLink.href = "analysis.html?" + params.toString();
+      }
+
       const fieldsPresent = new Set((data.metrics || []).flatMap(metric => metric.fields));
       const fields = SCORE_FIELDS.concat(COUNT_FIELDS).filter(field => fieldsPresent.has(field));
 
@@ -760,6 +773,9 @@
 
 if (typeof window !== "undefined") {
   window.addEventListener("DOMContentLoaded", function () {
+    /* This module is also loaded by the analysis page purely for its display names
+       and URL helpers, so the comparison interface only starts on its own page. */
+    if (document.body.dataset.ui !== "overview") return;
     try {
       window.AMBenchmarkUI.start(window.AM_BENCHMARK_RESULTS, document, window);
     } catch (error) {
