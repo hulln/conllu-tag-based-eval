@@ -1165,19 +1165,24 @@ kbd {
   flex-direction: column;
   background: var(--surface);
   border: 1px solid var(--border-strong);
+  border-top: 3px solid var(--accent);
   border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
 .examples-panel-header {
+  position: relative;
   flex: none;
   display: flex;
   align-items: flex-start;
-  gap: var(--s3);
-  padding: var(--s5) var(--s5) var(--s3);
+  padding: var(--s4) var(--s5) var(--s2);
 }
 
-.examples-titles { min-width: 0; }
+.examples-titles {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-right: 40px;
+}
 .examples-panel-title {
   font-size: 18px;
   line-height: 24px;
@@ -1226,14 +1231,26 @@ kbd {
 .examples-panel-action:hover:not(:disabled),
 .examples-panel-close:hover { background: var(--surface-sub); color: var(--text); }
 .examples-panel-action:disabled { opacity: .4; cursor: default; }
-.examples-panel-action.nav { font-size: 16px; line-height: 1; }
+.examples-panel-action.nav { font-size: 16px; line-height: 1; color: var(--accent); }
+.examples-panel-action.nav:hover:not(:disabled) { color: var(--accent-strong); }
 /* Row navigation and exports are two jobs, so a gap separates the pairs. */
 .examples-panel-action.nav + .examples-panel-action:not(.nav) { margin-left: var(--s2); }
-.examples-panel-close { font-size: 18px; line-height: 1; }
+.examples-panel-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  padding: 0;
+  font-size: 18px;
+  line-height: 1;
+}
 
 .examples-count {
   display: flex;
   flex-wrap: wrap;
+  align-items: baseline;
   gap: 0 var(--s2);
   font-size: 13px;
 }
