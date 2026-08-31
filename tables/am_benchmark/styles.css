@@ -1165,7 +1165,6 @@ kbd {
   flex-direction: column;
   background: var(--surface);
   border: 1px solid var(--border-strong);
-  border-top: 3px solid var(--accent);
   border-radius: var(--radius-lg);
   overflow: hidden;
 }
