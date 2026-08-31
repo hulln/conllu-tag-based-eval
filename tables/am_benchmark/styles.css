@@ -695,7 +695,6 @@ tr:hover .analyse .arrow { transform: translateX(2px); }
 }
 
 .metric-box.primary .val { color: var(--accent); }
-.metric-box.primary .label { color: var(--accent); }
 
 /* ---------- in-page navigation --------------------------------------------
    A row of subsection tabs, not a row of links. One rule under the whole row, which
@@ -1333,9 +1332,9 @@ body[data-examples="open"] { overflow: hidden; }
 }
 
 /* Narrow: the metric table scrolls sideways rather than becoming cards, because a
-   benchmark row only means something as a row. Both label columns are pinned — a
-   score whose system *or* training setup has scrolled away is unreadable — and the
-   layout is fixed so the pinned offsets are exact. */
+   benchmark row only means something as a row. The semantic label columns are
+   pinned when present — System always, Training only in grouped mode — and the
+   layout is fixed so their offsets are exact. */
 @media (max-width: 900px) {
   /* A tighter cell inset for this table only. At 70px a metric column left 46px of
      text room and clipped "Lemmas" by three pixels; 10px gives it 50px without
@@ -1348,23 +1347,25 @@ body[data-examples="open"] { overflow: hidden; }
 
   #comparison th.model,
   #comparison td.train,
-  #comparison thead tr.cols th:nth-child(-n+2),
+  #comparison thead th[data-sort-key="model"],
+  #comparison thead th[data-sort-key="training_condition"],
   #comparison thead tr.groups th:first-child {
     position: sticky;
     z-index: 1;
     background: var(--surface);
   }
-  #comparison thead tr.cols th:nth-child(-n+2),
+  #comparison thead th[data-sort-key="model"],
+  #comparison thead th[data-sort-key="training_condition"],
   #comparison thead tr.groups th:first-child { z-index: 2; }
 
   #comparison th.model,
-  #comparison thead tr.cols th:nth-child(1),
+  #comparison thead th[data-sort-key="model"],
   #comparison thead tr.groups th:first-child { left: 0; }
   #comparison td.train,
-  #comparison thead tr.cols th:nth-child(2) { left: 78px; }
+  #comparison thead th[data-sort-key="training_condition"] { left: 78px; }
 
   #comparison td.train,
-  #comparison thead tr.cols th:nth-child(2) { box-shadow: 1px 0 0 0 var(--border); }
+  #comparison thead th[data-sort-key="training_condition"] { box-shadow: 1px 0 0 0 var(--border); }
 
   /* One training setup selected: only the system column is a label. */
   #comparison thead tr.groups th:first-child { box-shadow: 1px 0 0 0 var(--border); }
@@ -1374,6 +1375,16 @@ body[data-examples="open"] { overflow: hidden; }
      wraps rather than spilling over the first score. */
   #comparison td.train { font-size: 12.5px; white-space: normal; }
   .analyse { font-size: 12.5px; }
+
+  /* Analysis tables scroll as one complete table on narrow screens. Expanded
+     tables still keep their bounded vertical scroller, but their headers stay in
+     normal table flow instead of mixing sticky positioning with two-axis overflow. */
+  [data-ui="analysis"] .expanded-scroll thead th {
+    position: static;
+    top: auto;
+    z-index: auto;
+    box-shadow: none;
+  }
 }
 
 @media (max-width: 620px) {
