@@ -485,19 +485,27 @@
 
     /* Clearing a sort is explicit, as in the CJVT table, but the control sits beside
        the row count rather than inside a narrow header cell. */
+    let sortStatus = null;
     let sortReset = null;
     function renderSortReset() {
       const meta = spec.count && spec.count.parentElement;
       if (!meta) return;
       if (!sortReset) {
+        sortStatus = cell(doc, "span", "", "sort-status");
         sortReset = cell(doc, "button", "Clear sort", "inline-toggle");
         sortReset.type = "button";
         sortReset.addEventListener("click", () => {
           sort = null;
           render();
         });
+        meta.appendChild(sortStatus);
         meta.appendChild(sortReset);
       }
+      sortStatus.textContent = sort
+        ? "Sorted by " + spec.columns[sort.index].label +
+          (sort.direction === "asc" ? " ↑" : " ↓")
+        : "";
+      sortStatus.hidden = !sort;
       sortReset.hidden = !sort;
     }
 

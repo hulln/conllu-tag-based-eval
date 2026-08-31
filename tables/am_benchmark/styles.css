@@ -998,9 +998,9 @@ tr.layer-start > * { border-top: 1.5px solid var(--border-strong); }
 }
 .bar { display: block; height: 100%; background: var(--border-strong); }
 
-/* Rows that open sentence evidence. Score rows remain unmarked; the hooked branch
-   belongs only to subordinate error/confusion patterns, where it has semantic
-   meaning and echoes CJVT without adding another control or tab stop. */
+/* Rows that open sentence evidence. The hooked branch belongs to the drill-down,
+   not to a table family: it marks both error/confusion rows and category-score rows
+   when (and only when) the row can open evidence. It adds no control or tab stop. */
 [data-ui="analysis"] tr.clickable-row { cursor: pointer; }
 [data-ui="analysis"] tr.clickable-row:hover > *,
 [data-ui="analysis"] tr.clickable-row:focus-visible > * { background: var(--surface-sub); }
@@ -1008,11 +1008,11 @@ tr.layer-start > * { border-top: 1.5px solid var(--border-strong); }
 [data-ui="analysis"] tr.selected-row > * { background: var(--accent-soft); }
 [data-ui="analysis"] tr.selected-row td.label { color: var(--accent); }
 
-[data-ui="analysis"] .error-section tr.clickable-row td.label {
+[data-ui="analysis"] tr.clickable-row td.label {
   position: relative;
   padding-left: 27px;
 }
-[data-ui="analysis"] .error-section tr.clickable-row td.label::before {
+[data-ui="analysis"] tr.clickable-row td.label::before {
   content: "↳";
   position: absolute;
   left: 10px;
@@ -1020,9 +1020,9 @@ tr.layer-start > * { border-top: 1.5px solid var(--border-strong); }
   font-family: var(--font-data);
   font-size: 11px;
 }
-[data-ui="analysis"] .error-section tr.clickable-row:hover td.label::before,
-[data-ui="analysis"] .error-section tr.clickable-row:focus-visible td.label::before,
-[data-ui="analysis"] .error-section tr.selected-row td.label::before {
+[data-ui="analysis"] tr.clickable-row:hover td.label::before,
+[data-ui="analysis"] tr.clickable-row:focus-visible td.label::before,
+[data-ui="analysis"] tr.selected-row td.label::before {
   color: var(--accent);
 }
 
@@ -1062,6 +1062,10 @@ tr.layer-start > * { border-top: 1.5px solid var(--border-strong); }
   border-radius: var(--radius);
   background: var(--surface);
 }
+/* The analysis-table rule declares its own compact inset. Restore the disclosure's
+   inset on a table nested here so its first and last cell text aligns with the
+   summary and closing note instead of sitting 6px outside them. */
+[data-ui="analysis"] .disclosure table { --cell-x: 16px; }
 .disclosure > summary {
   padding: var(--s3) var(--cell-x);
   font-size: 13.5px;
@@ -1383,7 +1387,9 @@ body[data-examples="open"] { overflow: hidden; }
   .masthead h1 { font-size: 25px; line-height: 31px; }
   .results-head h2 { font-size: 20px; line-height: 26px; }
   table { font-size: 13px; line-height: 1.38; }
-  tbody td, tbody th { padding: var(--s2) var(--s3); }
+  /* This tighter overview treatment must not replace the analysis tables' 10px
+     horizontal inset; their blue headers and data rows share that compact grid. */
+  #comparison tbody td, #comparison tbody th { padding: var(--s2) var(--s3); }
   .overview { grid-template-columns: repeat(2, 1fr); }
   .metric-box:nth-child(3n) { border-right: 1px solid var(--border); }
   .metric-box:nth-child(2n) { border-right: 0; }

@@ -243,8 +243,9 @@ field; genuinely long prose is capped at roughly 108 characters for readability.
 alignment and hover only where a row is actionable, but their jobs differ. The
 overview retains a light two-row grouped header and humanist-sans values for its
 publication-style comparison. Detailed analysis uses a deep-blue technical header,
-regular-weight monospace values and compact ~30px rows. Interactive error/confusion
-rows carry CJVT's small `↳` branch marker; ordinary score rows do not.
+regular-weight monospace values and compact ~30px rows. Any aggregate row that can
+open sentence evidence carries CJVT's small `↳` branch marker; non-interactive score
+rows do not.
 
 **One edge outside a table.** Every section-level element — headings, notes, counts,
 tallies, availability notes and the filter/export toolbar — starts and ends on the
