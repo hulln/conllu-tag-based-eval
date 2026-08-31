@@ -170,9 +170,9 @@ to `reports/smoke_test/`. Result rows include input/evaluator hashes, all 13 bas
 metric families, repeat status, and provenance. The wrapper never writes to the
 production `predictions/`, `results/`, or `tables/` trees.
 
-## Local UI data bundle
+## Interface data bundle
 
-Build the static prototype's browser bundle from the current result TSV with:
+Build the interface's browser bundle from the current result TSV with:
 
 ~~~text
 python3 scripts/build_ui_data.py
@@ -180,7 +180,7 @@ python3 scripts/build_ui_data.py
 
 `build_ui_data.py` validates the result identifiers, rejects duplicate logical
 keys, discovers evaluator metric families and available score/count fields from
-the TSV header, and writes `ui/data/results.js`. It preserves row-level gold and
+the TSV header, and writes `../tables/am_benchmark/data/results.js`. It preserves row-level gold and
 result statuses so the UI can show or hide provisional warnings without
 language-specific assumptions. The browser never parses CoNLL-U inputs.
 
@@ -190,7 +190,7 @@ language-specific assumptions. The browser never parses CoNLL-U inputs.
 36 stable spaCy/Stanza runs. It resolves nothing of its own: the run list, the
 authoritative gold paths and the canonical prediction paths all come from
 `run_benchmark_evaluation.py`, and the scores come from the unmodified repository
-evaluator. It never writes to the result TSVs or to `ui/data/results.js`.
+evaluator. It never writes to the result TSVs or to the result bundle.
 
 ~~~text
 python3 scripts/build_diagnostics_data.py --dry-run
@@ -198,9 +198,9 @@ python3 scripts/build_diagnostics_data.py
 ~~~
 
 A full run takes roughly three and a half minutes and writes 37 files (36 runs plus
-`index.json`, about 870 KiB) to both `ui/data/diagnostics/` — the working copy,
-gitignored like `ui/data/results.js` — and `../tables/am_benchmark/data/diagnostics/`,
-the deployable copy that is committed. `--output-dir` overrides the destinations,
+`index.json`, about 870 KiB) to `../tables/am_benchmark/data/diagnostics/`, which is the
+interface's only copy and the one that ships. `--output-dir` overrides the
+destination and is repeatable;
 `--language`/`--model`/`--training-condition`/`--test-condition` narrow the selection.
 
 ### What each file holds
@@ -224,9 +224,10 @@ integers only and cannot drift from its own totals.
 
 ### Refusal to emit corpus text
 
-Redistribution permission has not been established for every supplied gold source,
-so the diagnostic set carries derived counts and annotation labels and nothing else.
-This is enforced where the data is produced, not where it is displayed:
+Redistribution permission is not established for every supplied gold source, so the
+diagnostic set carries derived counts and annotation labels and nothing else — for
+every run, including the ones that do have a sentence-example file beside them. This
+is enforced where the data is produced, not where it is displayed:
 
 - `collect_model_profile` is called with `max_examples=0`, so the CJVT profiler's
   example lists stay empty;
@@ -237,8 +238,9 @@ This is enforced where the data is produced, not where it is displayed:
   string that is not a short, single-field annotation label, or that appears outside
   a table or a known provenance field.
 
-The data model leaves room for examples for individually licensed cohorts later.
-The generator does not produce them.
+Sentences for the individually licensed cohorts live in the separate layer described
+below, written by `build_examples_data.py`. This generator produces none of them, and
+its output does not change when that layer is rebuilt.
 
 ### Consistency gate
 
@@ -250,7 +252,7 @@ sum to the evaluator's totals, and that the three error categories sum to exactl
 the run's labelled attachment errors. Any disagreement raises; a gold and prediction
 pair whose underlying text differs already fails earlier, inside the evaluator.
 
-## Sentence examples for the Slovenian runs
+## Sentence examples for the redistributable cohorts
 
 `build_examples_data.py` writes the example layer the analysis page opens when a
 reader selects an error row. It is a separate layer on purpose: the aggregate
@@ -262,18 +264,56 @@ python3 scripts/build_examples_data.py --dry-run
 python3 scripts/build_examples_data.py
 ~~~
 
-A full run takes about eight seconds and writes 13 files (12 Slovenian runs plus
-`index.json`, about 2.2 MiB) to `../tables/am_benchmark/data/examples/`. It never
-writes to `data/diagnostics/`, `ui/data/results.js` or any result TSV.
+A full run takes about half a minute and writes 31 files (30 runs plus
+`index.json`, about 6.8 MiB) to `../tables/am_benchmark/data/examples/`. It never
+writes to `data/diagnostics/`, `data/results.js` or any result TSV.
+`--output-dir` overrides the destination and
+`--language`/`--model`/`--training-condition`/`--test-condition` narrow the selection.
 
 ### Allowlist
 
-`COHORT_SOURCES` names the two cohorts that may be republished as sentences —
-`SL:writtentest` (UD Slovenian SSJ, r2.17) and `SL:spokentest` (UD Slovenian SST,
-r2.16/r2.17), both CC BY-SA 4.0 — together with the attribution the panel shows.
-Run selection reuses `build_diagnostics_data.stable_runs`, then any run whose gold
-cohort is absent from that table raises instead of producing a file. English and
-Dutch therefore have no example layer, and adding one is a deliberate edit here.
+`COHORT_SOURCES` names the cohorts that may be republished as sentences and states
+the attribution the panel shows for each. The identity and the exact split of every
+one of them is what `reports/testset_identification.md` established by
+whole-sequence FORM and `sent_id` hashes:
+
+| Cohort | Corpora | Release | Licence |
+|---|---|---|---|
+| `EN:writtentest` | UD English GUM, test split, 9 written genres | r2.16 / r2.17 | CC BY-NC-SA 4.0 |
+| `EN:spokentest` | UD English GUM, test split, 6 spoken genres | r2.16 / r2.17 | CC BY-NC-SA 4.0 |
+| `NL:writtentest` | UD Dutch LassySmall test (1761 sentences) **+** UD Dutch Alpino test (596) | r2.16 / r2.17 | CC BY-SA 4.0 |
+| `SL:writtentest` | UD Slovenian SSJ, test split | r2.17 | CC BY-SA 4.0 |
+| `SL:spokentest` | UD Slovenian SST, test split | r2.16 / r2.17 | CC BY-SA 4.0 |
+
+`NL:spokentest` is deliberately absent and `WITHHELD_COHORTS` says why: its corpus
+is not identified with enough confidence to establish redistribution rights. GCND
+is a plausible but unverified candidate and its public service is access- and
+copyright-restricted, so no Dutch spoken sentence is published. The reason is
+written there as the sentence the analysis page shows in place of the examples, so
+the licensing decision and the interface cannot disagree about it.
+
+Run selection reuses `build_diagnostics_data.stable_runs` and then filters by
+cohort rather than by language, because Dutch has one cohort inside the allowlist
+and one outside it. A skipped cohort is named in the run output with its reason
+rather than passed over silently, and `build_run` raises before opening a corpus
+file if a run outside `COHORT_SOURCES` ever reaches it. Adding a cohort is a
+deliberate edit to that table.
+
+### Attribution for a cohort built from two treebanks
+
+NL written is one gold file concatenating two test splits, so naming a single
+corpus would misattribute the other. Schema version 2 therefore writes
+`source.parts` — one record per corpus, each with its own `corpus`, `section`,
+`release`, `url` and `licence`, in the order the gold file concatenates them — and
+keeps the flat `corpus`, `release` and `licence` fields of version 1 alongside it,
+restating the same facts for a reader that predates `parts`. `url` stays flat only
+where a single corpus makes it unambiguous. The panel renders `parts`, so it says
+`UD Dutch LassySmall (test split, 1761 sentences) and UD Dutch Alpino (test split,
+596 sentences), r2.16 / r2.17, CC BY-SA 4.0`.
+
+`index.json` carries the same records under `cohorts`, the withheld reasons under
+`withheld_cohorts`, and one entry per run that has a file. It is what the analysis
+page asks whether a run has examples; the page keeps no allowlist of its own.
 
 ### What is stored
 
@@ -307,5 +347,6 @@ Every pattern also carries its full occurrence `total`, so the panel can say
 `Showing 25 of 143 examples` rather than implying the sample is exhaustive.
 
 No speaker, document, audio, MISC or `# text` field is read: the CJVT reader takes
-`sent_id` and token columns, and the Slovenian spoken gold's speaker and recording
-comments never reach the output.
+`sent_id` and token columns and nothing else out of the comment block, so the
+Slovenian spoken gold's speaker and recording comments, GUM's `newdoc`/`meta::*`
+document metadata and the Dutch `archive` labels all stay out of the output.

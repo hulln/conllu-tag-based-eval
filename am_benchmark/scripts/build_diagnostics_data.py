@@ -21,9 +21,11 @@ the page that reads it:
 4. ``assert_aggregate_only`` walks the finished payload and refuses to write any
    string that is not a short, whitespace-free annotation label.
 
-Redistribution permission has not been established for every supplied gold source,
-so this phase publishes derived counts only. The data model leaves room for
-per-cohort examples later; the generator does not produce them.
+Redistribution permission is not established for every supplied gold source, so the
+aggregate set publishes derived counts for every run without exception. Sentences for
+the cohorts that may be republished are a separate layer, written by
+``build_examples_data.py`` under its own licensing allowlist; this generator produces
+none of them and its output is unchanged by that layer's existence.
 """
 
 from __future__ import annotations
@@ -56,10 +58,8 @@ CONTENT_POLICY_NOTE = (
     "of the generator rather than by omission in the interface."
 )
 
-DEFAULT_OUTPUT_DIRS = [
-    BENCHMARK_DIR / "ui/data/diagnostics",
-    REPO_DIR / "tables/am_benchmark/data/diagnostics",
-]
+# One destination: the benchmark interface has a single copy, under tables/.
+DEFAULT_OUTPUT_DIRS = [REPO_DIR / "tables/am_benchmark/data/diagnostics"]
 
 # Matched against every DEPREL/UPOS value the evaluator reports, so per-relation
 # and per-tag results cover the whole tagset actually present.
@@ -124,7 +124,7 @@ def parse_args() -> argparse.Namespace:
         action="append",
         help=(
             "Destination directory for the diagnostics set. Repeatable. Defaults to "
-            "the working UI copy and the deployable copy."
+            "tables/am_benchmark/data/diagnostics."
         ),
     )
     parser.add_argument("--language", action="append", help="Restrict to a language.")
@@ -494,7 +494,7 @@ def main() -> int:
 
     output_dirs = args.output_dir or DEFAULT_OUTPUT_DIRS
     for directory in output_dirs:
-        directory = directory if directory.is_absolute() else BENCHMARK_DIR / directory
+        directory = directory if directory.is_absolute() else REPO_DIR / directory
         total = write_json(directory / "index.json", index)
         for key, payload in payloads.items():
             total += write_json(directory / f"{key}.json", payload)

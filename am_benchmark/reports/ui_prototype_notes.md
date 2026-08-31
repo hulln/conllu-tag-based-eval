@@ -2,9 +2,11 @@
 
 ## Scope and status
 
-The prototype is under `am_benchmark/ui/` and is separate from the deployed
-tables in the repository root. It displays 36 authoritative spaCy/Stanza rows:
-six each for EN/NL/SL written and spoken conditions.
+The interface is under `tables/am_benchmark/`, alongside the other deployed tables
+in the site root. It displays 36 authoritative spaCy/Stanza rows: six each for
+EN/NL/SL written and spoken conditions. It began as a prototype under
+`am_benchmark/ui/`; see "Files and data transformation" below for why that copy is
+gone.
 
 ## Existing interface inspection
 
@@ -26,9 +28,16 @@ options, status text, and result lookup need to be data-driven.
 ## Files and data transformation
 
 - `scripts/build_ui_data.py` reads an evaluation-result TSV.
-- `ui/data/results.js` is the generated compact browser bundle.
-- `ui/index.html`, `ui/styles.css`, and `ui/app.js` implement the local page.
-- `ui/README.md` contains local run instructions.
+- `../tables/am_benchmark/data/results.js` is the generated compact browser bundle.
+- `../tables/am_benchmark/index.html`, `styles.css` and `app.js` implement the page.
+- `../tables/am_benchmark/README.md` contains the run instructions.
+
+The prototype was first built under `am_benchmark/ui/` and copied to
+`tables/am_benchmark/` for deployment. The two copies were folded into the single
+`tables/am_benchmark/` directory once the interface stopped being provisional: five
+files were being committed twice and hand-synchronised, and `tables/` is the
+deployed site root, which is where `build_interactive_comparison_table_v5.py`
+already writes.
 
 The builder uses `reports/authoritative_spacy_stanza_results.tsv` by default. It validates
 required identifiers, rejects duplicate
@@ -38,40 +47,51 @@ empty cells to `null`, and preserves statuses, notices, file identifiers, and
 hashes. It emits 36 rows and 13 evaluator metric families. The frontend does
 not load any CoNLL-U file.
 
-## Selector and URL logic
+## Context controls and URL logic
 
-The controls follow:
+The controls establish a comparison context, and the table then shows the systems
+inside it:
 
 ~~~text
-language -> model -> training condition -> test condition
+language -> test condition -> training condition (or All)
 ~~~
 
-At each level, options are derived from rows matching earlier choices. A future
-partial cross-product therefore cannot expose an impossible downstream option.
-Changing an earlier selector preserves only still-valid later values and
-otherwise falls back to the first available row.
+Language and test condition cascade: at each level, options are derived from rows
+matching earlier choices, so a partial cross-product cannot expose an impossible
+downstream option. Training data is a filter over that context rather than a further
+cascade step, and its default is **All**, which keeps every training setup visible —
+the experimental structure is the thing most of these rows exist to show. Changing an
+earlier control preserves still-valid later values and otherwise falls back to the
+first available row.
 
 State is represented by query parameters:
 
 ~~~text
-?language=SL&model=stanza&training=default&test=spokentest
+?lang=SL&test=spokentest&training=all
 ~~~
 
-Refreshes preserve valid selections. An invalid requested value falls back to
-the nearest valid row and shows an explanatory message instead of an empty or
-broken page.
+`training=all` is the reserved value for "every training setup"; it cannot collide
+with a manifest identifier. An invalid requested value falls back to the nearest
+valid row and shows an explanatory message instead of an empty or broken page.
+
+An earlier version of the interface used `&model=…&training=…` to open one run's
+evaluator output on the overview. Those links still resolve: the training filter is
+applied, while the obsolete model selection is dropped. The evaluator output itself
+moved to the analysis page.
 
 ## Results and provisional handling
 
-The selected view shows five compact F1 cards matching the current interface's
-overview (Lemmas, UPOS, XPOS, UAS, LAS), followed by a complete table of all 13
-evaluator metrics and every score/count field present in the source schema. The
-current TSV has precision, recall, F1, and aligned accuracy but no raw-count
-columns, so the page says counts are unavailable and does not fabricate them.
+The overview is the comparison table and nothing else. Five headline metrics
+(UPOS, XPOS, Lemmas, UAS, LAS) plus MLAS and BLEX appear as columns grouped the way
+the evaluator groups them; the complete 13-family × 4-field evaluator output and the
+provenance block live on the analysis page, so the overview does not carry a third
+level of expandable detail. The current TSV has precision, recall, F1 and aligned
+accuracy but no raw-count columns, so the analysis page says counts are unavailable
+and does not fabricate them.
 
-A compact comparison table contains all successful rows with the selected
-language and test condition, making spaCy/Stanza and training-condition
-comparisons visible without a separate dashboard.
+With Training = All the table groups each system's training runs together; with one
+training setup selected it becomes a one-row-per-system leaderboard sorted by LAS.
+Sorting is group-aware in All mode and never scatters a system's runs.
 
 The warning is row-driven. It remains visible if the row is not successful
 authoritative data or carries a benchmark-use warning. It disappears only when
@@ -111,10 +131,22 @@ Passed checks:
   selector/status readability, metric-card alignment, and table layout; no
   obvious visual defect was found. The temporary screenshot was not retained.
 
+After the interface redesign, a headless-browser pass covered: all six
+language/test contexts; grouped and leaderboard table modes; group-aware sorting;
+best-value emphasis checked against the bundle's own maxima; Analyse links and
+row activation; URL state, refresh and invalid/legacy links; the analysis page's
+title, summary metrics, every table, the full evaluator output and provenance;
+the examples panel where examples exist and its absence where they do not; four
+viewport widths (1440, 1024, 768, 390) for panning, clipping, pinned columns and
+panel behaviour; and keyboard operation of controls, sorting, filters, Show more,
+error rows, dialog trapping and focus return.
+
 ## Before production integration
 
-- Complete manual visual, accessibility, keyboard, and narrow-width review.
 - Review language-specific XPOS terminology and user-facing labels.
-- Decide how detailed error/example data will be generated and represented.
+- Detailed error and example data is decided and implemented: aggregate diagnostics
+  per run (`build_diagnostics_data.py`, text-free for every run) plus a separate
+  sentence-example layer for the redistributable cohorts (`build_examples_data.py`,
+  30 of the 36 runs). What remains is review of the published wording and licences.
 - Integrate only after the prototype data contract and official results are
   accepted; do not overwrite the current production table directly.

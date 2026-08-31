@@ -20,7 +20,7 @@ and SST Slovene treebanks — and its LAS values coincide with the SL results.
 
 Compared against `am_benchmark/reports/authoritative_spacy_stanza_results.tsv`
 (rows with `language=SL`, `test_condition=writtentest`). These values are also
-present in the generated `ui/data/results.js` bundle.
+present in the generated `../tables/am_benchmark/data/results.js` bundle.
 
 ## Comparison
 

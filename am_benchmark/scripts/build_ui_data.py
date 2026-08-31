@@ -11,8 +11,16 @@ from pathlib import Path
 
 
 BENCHMARK_DIR = Path(__file__).resolve().parents[1]
+REPO_DIR = BENCHMARK_DIR.parent
+INTERFACE_DIR = REPO_DIR / "tables/am_benchmark"
 DEFAULT_INPUT = BENCHMARK_DIR / "reports/authoritative_spacy_stanza_results.tsv"
-DEFAULT_OUTPUT = BENCHMARK_DIR / "ui/data/results.js"
+DEFAULT_OUTPUT = INTERFACE_DIR / "data/results.js"
+
+# The bundle is written into the benchmark's own interface directory and nowhere
+# else. The containment rule is what keeps a mistyped --output away from the
+# production tables, results and predictions trees; widening it to exactly these
+# two roots is the whole of the permission this script has.
+ALLOWED_OUTPUT_ROOTS = (INTERFACE_DIR, BENCHMARK_DIR)
 
 REQUIRED_FIELDS = [
     "language",
@@ -48,11 +56,12 @@ def parse_args() -> argparse.Namespace:
 
 def contained_output_path(path: Path) -> Path:
     if not path.is_absolute():
-        path = BENCHMARK_DIR / path
+        path = REPO_DIR / path
     resolved = path.resolve()
-    benchmark_root = BENCHMARK_DIR.resolve()
-    if benchmark_root not in resolved.parents:
-        raise ValueError(f"Output must stay under {benchmark_root}")
+    roots = [root.resolve() for root in ALLOWED_OUTPUT_ROOTS]
+    if not any(root in resolved.parents for root in roots):
+        allowed = " or ".join(str(root) for root in roots)
+        raise ValueError(f"Output must stay under {allowed}")
     return resolved
 
 
@@ -178,8 +187,12 @@ def main() -> int:
         + ";\n",
         encoding="utf-8",
     )
+    try:
+        shown = output_path.relative_to(REPO_DIR)
+    except ValueError:
+        shown = output_path
     print(
-        f"Wrote {output_path.relative_to(BENCHMARK_DIR)} "
+        f"Wrote {shown} "
         f"({payload['source']['row_count']} rows, {len(payload['metrics'])} metrics)"
     )
     return 0

@@ -5,12 +5,13 @@
 })(typeof window !== "undefined" ? window : null, function () {
   "use strict";
 
-  /* This page is deliberately a sibling of tables/comparison_table_v5.html: the
-     controls block, the count toolbar with its Show more toggle, the merge
-     (A<->B) switch, the dark table chrome with a grey accuracy bar, the clickable
-     row with its return-arrow marker, and the examples side panel are all that
-     page's components, adapted to one selected multilingual run rather than to a
-     tool/corpus switch. What deliberately differs is listed in the UI README. */
+  /* One run, read as a short scientific report. The interaction concepts come from
+     tables/comparison_table_v5.html — the Show more toggle, the merge (A<->B)
+     switch, the accuracy bar, the clickable error row and the examples side panel —
+     but the layout is this interface's own: every table carries one toolbar (count
+     left, filter and exports right) directly above it, and the tables are typeset
+     with rules rather than boxed. What deliberately differs is listed in the
+     interface README. */
 
   const DIAGNOSTICS_DIR = "data/diagnostics/";
   const EXAMPLES_DIR = "data/examples/";
@@ -30,21 +31,25 @@
   const ROW_LIMIT = 20;
   const MERGED_PREFIX = "merged~";
 
-  /* Which gold cohorts may have their sentences republished. A licensing fact
-     about the corpora, not something the diagnostic data can state, so it is
-     declared once: a run outside it makes no example request at all. */
-  const EXAMPLE_COHORTS = ["SL:writtentest", "SL:spokentest"];
+  /* Whether a run has sentence examples is a licensing fact about its corpus, and
+     one the generator already decided: data/examples/index.json lists the runs it
+     wrote a file for and the reason each withheld cohort has none. That manifest is
+     asked rather than a second allowlist being kept here, so the two cannot drift.
+     This sentence is only the fallback for a cohort the manifest does not explain. */
   const EXAMPLES_UNAVAILABLE_NOTE =
-    "Sentence examples are currently available for Slovenian test sets.";
+    "Sentence examples are not published for this test set, because public " +
+    "redistribution rights for its underlying corpus are not established.";
 
+  /* The same five headline metrics the overview leads with, described in the same
+     words, so the two surfaces read as one document. */
   const SUMMARY_METRICS = [
     { name: "UPOS", description: "Universal part-of-speech" },
     { name: "XPOS", description: "Language-specific part-of-speech" },
     { name: "Lemmas", description: "Lemmatization" },
-    { name: "UAS", description: "Unlabelled Attachment Score" },
-    /* The dependency sections below elaborate this one number, so it carries the
-       accent border v5 gives its highlighted metric box. */
-    { name: "LAS", description: "Labelled Attachment Score", primary: true }
+    { name: "UAS", description: "Unlabelled attachment score" },
+    /* The dependency sections below elaborate this one number, so it is the only
+       metric that carries the accent. */
+    { name: "LAS", description: "Labelled attachment score", primary: true }
   ];
 
   /* v5 letters its three buckets A/B/C; the wording is this benchmark's. */
@@ -91,11 +96,9 @@
   ];
 
   const POLICY_NOTE =
-    "Scores come from the same CoNLL 2018 evaluation script that produced the benchmark, " +
-    "over the authoritative gold file and the canonical prediction named above; error " +
-    "categories use the published comparison-table definitions. The diagnostic file holds " +
-    "derived counts and annotation labels only — no corpus sentence, fragment, token or " +
-    "lemma. This page reads that one precomputed file and does not parse CoNLL-U.";
+    "Error categories use the published comparison-table definitions. The error and " +
+    "accuracy data holds counts and annotation labels only — no corpus sentence, " +
+    "fragment, token or lemma.";
 
   const EXAMPLE_POLICY_NOTE =
     "Sentence examples for this run are published separately, under the licence named in " +
@@ -144,13 +147,43 @@
     return index.runs.find(run => RUN_FIELDS.every(field => run[field] === request[field])) || null;
   }
 
+  /* What the examples manifest says about one run: the entry naming its file, if it
+     has one, and the sentence to show where it has none. A manifest that is missing
+     or unreadable means no examples, which is how a copy served without an
+     examples directory behaves. */
+  function exampleCatalogue(index, run, diagnostics) {
+    const cohort = ((diagnostics && diagnostics.provenance) || {}).gold_cohort;
+    const runs = index && Array.isArray(index.runs) ? index.runs : [];
+    const entry = runs.filter(item => item.key === run.key)[0] || null;
+    const withheld = index && index.withheld_cohorts && cohort &&
+      Object.prototype.hasOwnProperty.call(index.withheld_cohorts, cohort)
+      ? index.withheld_cohorts[cohort] : "";
+    return { entry: entry, note: withheld || EXAMPLES_UNAVAILABLE_NOTE };
+  }
+
+  /* The run named the way a reader would name it: no manifest identifiers. */
   function contextDescription(run) {
-    return [label("language", run.language), label("test_condition", run.test_condition)]
-      .filter(Boolean).join(" · ");
+    const parts = [label("language", run.language)];
+    if (run.test_condition) parts.push(label("test_condition", run.test_condition) + " test data");
+    return parts.join(" · ");
+  }
+
+  /* The run a link asked for, named the way the page names a run it can show. */
+  function requestDescription(request) {
+    return RUN_FIELDS.map(field => label(field, request[field])).filter(Boolean).join(" · ");
+  }
+
+  /* The complete evaluator output lives in the shared result bundle, the same one
+     the overview reads, so the two surfaces can never disagree about a number. */
+  function resultRow(browserWindow, run) {
+    const bundle = browserWindow && browserWindow.AM_BENCHMARK_RESULTS;
+    if (!bundle || !Array.isArray(bundle.rows)) return null;
+    return bundle.rows.find(row => RUN_FIELDS.every(field => row[field] === run[field])) || null;
   }
 
   function systemDescription(run) {
-    return [label("model", run.model), label("training_condition", run.training_condition)]
+    const training = label("training_condition", run.training_condition);
+    return [label("model", run.model), training ? training + " training" : ""]
       .filter(Boolean).join(" · ");
   }
 
@@ -161,16 +194,26 @@
     return OVERVIEW_PAGE + "?" + params.toString();
   }
 
-  function analysisUrl(run) {
-    const params = new URLSearchParams();
-    for (const field of RUN_FIELDS) params.set(QUERY_NAMES[field], run[field]);
-    return "analysis.html?" + params.toString();
-  }
-
   function cell(doc, tag, text, className) {
     const node = doc.createElement(tag);
     if (text != null) node.textContent = text;
     if (className) node.className = className;
+    return node;
+  }
+
+  /* "A. Wrong head and wrong relation" is two things: an index into the three
+     categories, and the category's name. The letter is structure and takes the
+     accent; the name is content and stays charcoal. Headings without a letter are
+     returned unchanged, so this is safe for the tag layers too. */
+  function sectionHeading(doc, tag, text, className) {
+    const node = cell(doc, tag, null, className);
+    const match = /^([A-Z]\.)\s+(\S[\s\S]*)$/.exec(String(text));
+    if (!match) {
+      node.textContent = text;
+      return node;
+    }
+    node.append(cell(doc, "span", match[1], "section-marker"));
+    node.append(doc.createTextNode(" " + match[2]));
     return node;
   }
 
@@ -187,6 +230,142 @@
      The pattern is named, never a sentence. */
 
   const EXAMPLE_SECTIONS = ["dep", "upos", "xpos", "rel", "upos-acc"];
+  const EXAMPLE_PANELS = {
+    rel: "accuracy",
+    "upos-acc": "accuracy",
+    dep: "dependency-errors",
+    upos: "tagging-errors",
+    xpos: "tagging-errors"
+  };
+
+  function examplePanel(selection) {
+    return selection ? EXAMPLE_PANELS[selection.section] || "" : "";
+  }
+
+  /* --------------------------------------------------------------- view tabs
+     The fragment is explicit reader state, not a scroll position. Panel ids are
+     deliberately prefixed, so writing #accuracy cannot make the browser jump. */
+
+  function createAnalysisTabs(doc, browserWindow) {
+    const tablist = doc.getElementById("section-nav");
+    const tabs = Array.from(tablist.querySelectorAll('[role="tab"][data-panel]'));
+    const panels = new Map();
+    const available = new Map();
+    let selected = "";
+
+    for (const tab of tabs) {
+      const key = tab.dataset.panel;
+      panels.set(key, doc.getElementById(tab.getAttribute("aria-controls")));
+      available.set(key, true);
+    }
+
+    const availableTabs = () => tabs.filter(tab => available.get(tab.dataset.panel));
+    const firstAvailable = () => {
+      const first = availableTabs()[0];
+      return first ? first.dataset.panel : "";
+    };
+    const hashKey = () => String(browserWindow.location.hash || "").replace(/^#/, "");
+
+    function writeHash(key, mode) {
+      if (!key || hashKey() === key) return;
+      const location = browserWindow.location;
+      const url = location.pathname + location.search + "#" + key;
+      try {
+        browserWindow.history[mode + "State"](null, "", url);
+      } catch (error) {
+        /* A non-opaque HTTP page has History API support. This fallback keeps the
+           tabs usable in a restricted preview; no element owns the fragment, so
+           assigning it still cannot scroll to an old heading. */
+        location.hash = key;
+      }
+    }
+
+    function activate(requested, options) {
+      const settings = options || {};
+      const key = available.get(requested) ? requested : firstAvailable();
+      if (!key) return "";
+      selected = key;
+      for (const tab of tabs) {
+        const isAvailable = Boolean(available.get(tab.dataset.panel));
+        const isSelected = isAvailable && tab.dataset.panel === key;
+        tab.hidden = !isAvailable;
+        tab.disabled = !isAvailable;
+        tab.setAttribute("aria-selected", String(isSelected));
+        tab.tabIndex = isSelected ? 0 : -1;
+        const panel = panels.get(tab.dataset.panel);
+        if (panel) panel.hidden = !isSelected;
+      }
+      const activeTab = tabs.find(tab => tab.dataset.panel === key);
+      if (settings.focus && activeTab) activeTab.focus();
+      if (settings.history === "push" || settings.history === "replace") {
+        writeHash(key, settings.history);
+      }
+      return key;
+    }
+
+    function syncFromHistory() {
+      const requested = hashKey();
+      activate(requested || firstAvailable(), {
+        history: requested && !available.get(requested) ? "replace" : "none"
+      });
+    }
+
+    for (const tab of tabs) {
+      tab.addEventListener("click", () => {
+        if (available.get(tab.dataset.panel)) {
+          activate(tab.dataset.panel, { history: "push" });
+        }
+      });
+      tab.addEventListener("keydown", event => {
+        const activeTabs = availableTabs();
+        const position = activeTabs.indexOf(tab);
+        if (position < 0) return;
+        let target = -1;
+        if (event.key === "ArrowLeft") target = (position - 1 + activeTabs.length) % activeTabs.length;
+        if (event.key === "ArrowRight") target = (position + 1) % activeTabs.length;
+        if (event.key === "Home") target = 0;
+        if (event.key === "End") target = activeTabs.length - 1;
+        if (target >= 0) {
+          event.preventDefault();
+          activate(activeTabs[target].dataset.panel, { focus: true, history: "push" });
+        } else if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          activate(tab.dataset.panel, { history: "push" });
+        }
+      });
+    }
+
+    browserWindow.addEventListener("popstate", syncFromHistory);
+    browserWindow.addEventListener("hashchange", syncFromHistory);
+
+    return {
+      activate,
+      initialize(preferred) {
+        if (preferred && available.get(preferred)) {
+          return activate(preferred, { history: "replace" });
+        }
+        const requested = hashKey();
+        return activate(requested || firstAvailable(), {
+          history: requested && !available.get(requested) ? "replace" : "none"
+        });
+      },
+      setAvailable(key, value) {
+        if (!available.has(key)) return;
+        const isAvailable = Boolean(value);
+        available.set(key, isAvailable);
+        const tab = tabs.find(item => item.dataset.panel === key);
+        if (tab) {
+          tab.hidden = !isAvailable;
+          tab.disabled = !isAvailable;
+          if (isAvailable) tab.removeAttribute("aria-disabled");
+          else tab.setAttribute("aria-disabled", "true");
+        }
+        const panel = panels.get(key);
+        if (!isAvailable && panel) panel.hidden = true;
+        if (!isAvailable && selected === key) activate(firstAvailable(), { history: "replace" });
+      }
+    };
+  }
 
   function encodeKeys(keys) {
     return keys.length === 1
@@ -262,30 +441,37 @@
       return result * direction || a.index - b.index;
     }
 
+    /* The same sorting model the overview uses, and the one the CJVT table
+       established: a click on a new column sorts by it, a click on the column
+       already sorted reverses it, and sorting is only turned off through the
+       explicit ✕ on the active header, which restores the natural order. */
     function header(column, index) {
       const classes = ["sortable"];
       if (column.right) classes.unshift("right");
       const th = cell(doc, "th", null, classes.join(" "));
       th.scope = "col";
       th.tabIndex = 0;
-      th.setAttribute("role", "columnheader");
+      th.dataset.sortIndex = String(index);
       const active = sort && sort.index === index;
       th.setAttribute("aria-sort",
         active ? (sort.direction === "asc" ? "ascending" : "descending") : "none");
-      th.title = active
-        ? "Click to reverse; click again to restore the default order"
-        : "Click to sort";
-      th.append(doc.createTextNode(column.label));
-      if (active) {
-        th.append(cell(doc, "span", sort.direction === "asc" ? "▲" : "▼", "sort-ind"));
-      }
+      th.setAttribute("aria-label", column.label + ". Activate to sort.");
+      th.title = active ? "Click to reverse the sort" : "Click to sort by " + column.label;
+      if (column.bar) th.classList.add("has-bar");
+
+      const indicator = cell(doc, "span", null, "sort-ind");
+      indicator.append(cell(doc, "span",
+        active ? (sort.direction === "asc" ? "↑" : "↓") : "", "sort-arrow"));
+      const label = cell(doc, "span", column.label, "col-label");
+      if (column.right) th.append(indicator, label);
+      else th.append(label, indicator);
+
       const activate = () => {
         const first = column.right ? "desc" : "asc";
         if (!sort || sort.index !== index) sort = { index: index, direction: first };
-        else if (sort.direction === first) {
-          sort = { index: index, direction: first === "asc" ? "desc" : "asc" };
-        } else sort = null;
+        else sort = { index: index, direction: sort.direction === "asc" ? "desc" : "asc" };
         render();
+        focusHeader(index);
       };
       th.addEventListener("click", activate);
       th.addEventListener("keydown", event => {
@@ -297,11 +483,39 @@
       return th;
     }
 
+    /* Clearing a sort is explicit, as in the CJVT table, but the control sits beside
+       the row count rather than inside a narrow header cell. */
+    let sortReset = null;
+    function renderSortReset() {
+      const meta = spec.count && spec.count.parentElement;
+      if (!meta) return;
+      if (!sortReset) {
+        sortReset = cell(doc, "button", "Clear sort", "inline-toggle");
+        sortReset.type = "button";
+        sortReset.addEventListener("click", () => {
+          sort = null;
+          render();
+        });
+        meta.appendChild(sortReset);
+      }
+      sortReset.hidden = !sort;
+    }
+
+    /* The header row is rebuilt on every render, so focus goes back to the column
+       the reader just acted on. */
+    function focusHeader(index) {
+      const th = table.querySelector('thead th[data-sort-index="' + index + '"]');
+      if (th && typeof th.focus === "function") th.focus();
+    }
+
     /* A percentage beside a rule of its own length, as v5 draws it: one neutral
        ink, no scale, hidden from assistive technology because the number next to
        it carries the value. */
     function accuracyCell(column, row) {
-      const td = cell(doc, "td", null, "right");
+      /* The cell shares the header's content box; the bar is positioned into the
+         padding beside it, so the number and its column label always right-align
+         on the same edge whatever the bar's width. */
+      const td = cell(doc, "td", null, "right has-bar");
       td.append(doc.createTextNode(column.text(row)));
       const value = column.sortValue(row);
       const wrapper = doc.createElement("span");
@@ -391,6 +605,7 @@
       const total = records.length;
       const visible = Math.min(total, expanded ? total : ROW_LIMIT);
       spec.count.textContent = "Showing " + visible + " / " + total;
+      renderSortReset();
       if (total <= ROW_LIMIT) {
         spec.toggle.hidden = true;
       } else {
@@ -478,6 +693,42 @@
   function headForm(sentence, index) {
     if (index == null || index < 0) return "root";
     return sentence.tokens[index] == null ? "?" : sentence.tokens[index];
+  }
+
+  /* One cohort can come from more than one treebank — NL written is the LassySmall
+     test split followed by the Alpino test split — so the attribution is read from
+     source.parts, falling back to the flat fields a schema-1 file carries. */
+  function sourceParts(file) {
+    const source = (file && file.source) || {};
+    return Array.isArray(source.parts) && source.parts.length ? source.parts : [source];
+  }
+
+  function joinNames(names) {
+    if (names.length < 2) return names.join("");
+    return names.slice(0, -1).join(", ") + " and " + names[names.length - 1];
+  }
+
+  function distinct(values) {
+    const seen = [];
+    for (const value of values) {
+      if (value && seen.indexOf(value) === -1) seen.push(value);
+    }
+    return seen;
+  }
+
+  function sourceText(file) {
+    const parts = sourceParts(file);
+    /* Two treebanks of one cohort are normally taken from the same UD release, so
+       it is stated once at the end rather than after each corpus. */
+    const releases = distinct(parts.map(part => part.release));
+    const shared = releases.length === 1 ? releases[0] : "";
+    const names = parts.map(part => {
+      const detail = [part.section, shared ? "" : part.release].filter(Boolean).join(", ");
+      return part.corpus + (detail ? " (" + detail + ")" : "");
+    });
+    const tail = [shared].concat(distinct(parts.map(part => part.licence))).filter(Boolean);
+    return "Examples from " + joinNames(names) +
+      (tail.length ? ", " + tail.join(", ") : "") + ".";
   }
 
   function mergedLabel(keys) {
@@ -586,6 +837,18 @@
     return { items: items, total: total };
   }
 
+  /* The panel heading is the error pattern itself. The page already says which
+     run this is, so repeating the system name here only crowds the pattern out. */
+  function examplePattern(selection) {
+    const key = selection.keys[0];
+    if (selection.section === "rel" || selection.section === "upos-acc") return key;
+    if (selection.section === "dep") {
+      return selection.category === "head_only" ? key : mergedLabel(selection.keys);
+    }
+    return mergedLabel(selection.keys);
+  }
+
+  /* Exports name the system, because a copied note leaves this page. */
   function exampleTitle(selection, model) {
     const system = label("model", model);
     const key = selection.keys[0];
@@ -625,6 +888,19 @@
         (total === 1 ? noun.replace(/s$/, "") : noun);
     }
     return "Showing " + formatCount(shown) + " of " + formatCount(total) + " " + noun;
+  }
+
+  /* The panel states the population first and the sample second, so a reader
+     never mistakes twenty-five stored sentences for the whole story. */
+  function occurrenceText(selection, total) {
+    const noun = exampleNoun(selection);
+    return formatCount(total) + " " + (total === 1 ? noun.replace(/s$/, "") : noun);
+  }
+
+  function sampleText(shown, total) {
+    if (shown >= total) return "Showing all " + formatCount(shown) +
+      (shown === 1 ? " example" : " examples");
+    return "Showing " + formatCount(shown) + " examples";
   }
 
   function exportColumns(selection) {
@@ -675,8 +951,7 @@
       }
       lines.push("");
     });
-    lines.push("Examples from " + file.source.corpus + " (" + file.source.release + "), " +
-      file.source.licence + ".");
+    lines.push(sourceText(file));
     return lines.join("\n");
   }
 
@@ -729,9 +1004,9 @@
 
   /* ---------------------------------------------------------- examples panel */
 
-  function createExamples(doc, browserWindow, run, diagnostics, clipboard) {
-    const provenance = diagnostics.provenance || {};
-    const available = EXAMPLE_COHORTS.indexOf(provenance.gold_cohort) !== -1;
+  function createExamples(doc, browserWindow, run, catalogue, clipboard, tabs) {
+    const entry = catalogue.entry;
+    const available = Boolean(entry);
     const node = id => doc.getElementById(id);
     const panel = node("examples-panel");
     const backdrop = node("examples-backdrop");
@@ -754,7 +1029,7 @@
     function ensureFile() {
       if (file) return Promise.resolve(file);
       if (!pending) {
-        pending = loadJson(browserWindow, EXAMPLES_DIR + run.key + ".json")
+        pending = loadJson(browserWindow, EXAMPLES_DIR + entry.file)
           .then(loaded => { file = loaded; pending = null; return loaded; })
           .catch(error => { pending = null; throw error; });
       }
@@ -767,7 +1042,8 @@
       if (value) params.set(EXAMPLE_PARAM, value);
       else params.delete(EXAMPLE_PARAM);
       const query = params.toString();
-      return browserWindow.location.pathname + (query ? "?" + query : "");
+      return browserWindow.location.pathname + (query ? "?" + query : "") +
+        (browserWindow.location.hash || "");
     }
 
     function writeUrl() {
@@ -852,7 +1128,7 @@
     }
 
     function render() {
-      node("examples-title").textContent = exampleTitle(selection, run.model);
+      node("examples-title").textContent = examplePattern(selection);
       node("examples-subtitle").textContent = exampleSubtitle(selection);
       const count = node("examples-count");
       body.replaceChildren();
@@ -863,19 +1139,14 @@
         setActions(false);
       } else {
         count.replaceChildren();
+        count.append(cell(doc, "span", occurrenceText(selection, collected.total), "examples-total"));
         count.append(cell(doc, "span",
-          exampleCountText(selection, collected.items.length, collected.total)));
-        if (collected.items.length < collected.total) {
-          count.append(cell(doc, "span",
-            "Stored sample, capped at " + file.max_examples_per_pattern + " per pattern.",
-            "examples-cap"));
-        }
+          sampleText(collected.items.length, collected.total), "examples-shown"));
         collected.items.forEach((item, position) => body.appendChild(renderExample(item, position)));
         setActions(true);
       }
 
-      node("examples-source").textContent = "Examples from " + file.source.corpus +
-        " (" + file.source.release + "), " + file.source.licence + ".";
+      node("examples-source").textContent = sourceText(file);
       body.scrollTop = 0;
     }
 
@@ -1000,6 +1271,7 @@
 
     return {
       available: available,
+      note: catalogue.note,
       register(id, controller) { tables[id] = controller; },
       open: open,
       close: close,
@@ -1007,6 +1279,11 @@
         if (!available || !next) return;
         const table = tables[tableIdFor(next)];
         if (!table) return;
+        /* A requested row can live in a panel hidden by the initial fragment. Make
+           its parent visible before reveal() and scrollIntoView(), and normalise a
+           disagreeing fragment into the same shareable URL. */
+        const parent = examplePanel(next);
+        if (parent && tabs) tabs.activate(parent, { history: "replace" });
         /* A link to a merged row describes a merged view, so put the table in it
            before looking for the row. */
         if (next.keys.length > 1 && table.setMerged) table.setMerged(true);
@@ -1075,7 +1352,7 @@
 
   /* --------------------------------------------------------------- rendering */
 
-  function renderSummary(doc, data, examples) {
+  function renderSummary(doc, data) {
     const summary = data.summary;
     const overviewNode = doc.getElementById("overview");
     overviewNode.replaceChildren();
@@ -1084,21 +1361,32 @@
       const value = Object.prototype.hasOwnProperty.call(summary.f1, metric.name)
         ? summary.f1[metric.name] : null;
       const box = doc.createElement("div");
-      box.className = "metric-box" + (metric.primary ? " highlight" : "");
+      box.className = "metric-box" + (metric.primary ? " primary" : "");
       box.append(cell(doc, "div", metric.name, "label"));
       box.append(cell(doc, "div", formatScore(value), "val"));
       box.append(cell(doc, "div", metric.description, "sub"));
       overviewNode.appendChild(box);
     }
 
-    const provenance = data.provenance || {};
+    /* One quiet line of scale, in words. The cohort identifier, the file names and
+       the checksums belong to the reproducibility section, not above the results. */
     doc.getElementById("run-meta").textContent = [
-      provenance.gold_cohort,
-      provenance.gold_status ? provenance.gold_status.toLowerCase() + " gold" : "",
       formatCount(summary.gold_words) + " gold words",
-      formatCount(summary.aligned_words) + " aligned"
-    ].filter(Boolean).join(" · ");
+      formatCount(summary.aligned_words) + " aligned",
+      summary.relations_attested + " dependency relations",
+      summary.tags_attested + " part-of-speech tags"
+    ].join(" · ");
+  }
 
+  /* Everything a reader needs to reproduce or cite the run, kept behind one
+     disclosure so a page of scientific results does not open with checksums. */
+  function renderProvenance(doc, data, examples) {
+    const provenance = data.provenance || {};
+    const note = doc.getElementById("reproducibility-note");
+    if (note) {
+      note.textContent = "Scores were computed with the CoNLL 2018 evaluation script over the " +
+        "gold and prediction files below, and repeat identically on a re-run.";
+    }
     const list = doc.getElementById("provenance-list");
     list.replaceChildren();
     const entries = [
@@ -1111,15 +1399,66 @@
       ["Evaluator", provenance.evaluator_file, true],
       ["Evaluator SHA-256", provenance.evaluator_sha256, true],
       ["Diagnostic set", data.generator, true],
+      ["Diagnostic file", DIAGNOSTICS_DIR + (data.run && data.run.key ? data.run.key + ".json" : ""), true],
       ["Content policy", data.content_policy, false]
     ];
     for (const entry of entries) {
       if (!entry[1]) continue;
       list.append(cell(doc, "dt", entry[0]), cell(doc, "dd", entry[1], entry[2] ? "mono" : ""));
     }
-    const note = doc.getElementById("policy-note");
-    note.textContent = POLICY_NOTE;
-    if (examples && examples.available) note.append(doc.createTextNode(" " + EXAMPLE_POLICY_NOTE));
+    const policy = doc.getElementById("policy-note");
+    policy.textContent = POLICY_NOTE;
+    if (examples && examples.available) policy.append(doc.createTextNode(" " + EXAMPLE_POLICY_NOTE));
+  }
+
+  /* The full evaluator table, read from the shared result bundle rather than
+     recomputed or duplicated into the diagnostic files. */
+  function renderAllMetrics(doc, row, bundle) {
+    const api = overview();
+    if (!row || !bundle) return false;
+
+    const present = new Set((bundle.metrics || []).flatMap(metric => metric.fields));
+    const fields = api.SCORE_FIELDS.concat(api.COUNT_FIELDS).filter(field => present.has(field));
+
+    const head = doc.getElementById("metrics-head");
+    head.replaceChildren();
+    const headRow = doc.createElement("tr");
+    const first = cell(doc, "th", "Metric");
+    first.scope = "col";
+    headRow.appendChild(first);
+    for (const field of fields) {
+      const th = cell(doc, "th", api.label("metric_field", field), "num");
+      th.scope = "col";
+      headRow.appendChild(th);
+    }
+    head.appendChild(headRow);
+
+    const body = doc.getElementById("metrics-body");
+    body.replaceChildren();
+    const layerOf = name => api.METRIC_LAYERS.findIndex(layer => layer.includes(name));
+    let previousLayer = null;
+    for (const definition of bundle.metrics) {
+      const tr = doc.createElement("tr");
+      const layer = layerOf(definition.name);
+      if (previousLayer !== null && layer !== previousLayer) tr.className = "layer-start";
+      previousLayer = layer;
+      const name = cell(doc, "th", definition.name, "metric-name");
+      name.scope = "row";
+      tr.appendChild(name);
+      for (const field of fields) {
+        const value = api.metricValue(row, definition.name, field);
+        const text = api.COUNT_FIELDS.includes(field)
+          ? api.formatCount(value) : api.formatScore(value);
+        tr.appendChild(cell(doc, "td", text, "num"));
+      }
+      body.appendChild(tr);
+    }
+
+    const hasCounts = api.COUNT_FIELDS.some(field => fields.includes(field));
+    doc.getElementById("metrics-note").textContent = hasCounts
+      ? "Score fields are percentage points; count fields are raw evaluator counts."
+      : "All values are percentage points.";
+    return true;
   }
 
   function wireExports(controller, csvButton, mdButton, filename, clipboard) {
@@ -1194,7 +1533,9 @@
 
     const header = doc.createElement("div");
     header.className = "bucket-header";
-    header.appendChild(cell(doc, "h3", options.heading));
+    header.appendChild(sectionHeading(doc, "h3", options.heading));
+    /* The exports and the merge toggle act on this one table, so they sit in its
+       toolbar rather than beside the heading two paragraphs above it. */
     const actions = doc.createElement("div");
     actions.className = "action-btns";
     let mergeButton = null;
@@ -1212,32 +1553,10 @@
     mdButton.title = "Copy visible rows as Markdown";
     actions.appendChild(csvButton);
     actions.appendChild(mdButton);
-    header.appendChild(actions);
     block.appendChild(header);
 
     if (options.description) {
       block.appendChild(cell(doc, "p", options.description, "note section-note"));
-    }
-
-    let ownFilterInput = null;
-    if (options.filterPlaceholder) {
-      const controls = doc.createElement("div");
-      controls.className = "controls";
-      const main = doc.createElement("div");
-      main.className = "control-main";
-      const field = doc.createElement("label");
-      field.className = "filter-field";
-      const icon = cell(doc, "span", "", "filter-icon");
-      icon.setAttribute("aria-hidden", "true");
-      field.appendChild(icon);
-      field.appendChild(cell(doc, "span", "Filter rows", "sr-only"));
-      ownFilterInput = doc.createElement("input");
-      ownFilterInput.type = "search";
-      ownFilterInput.placeholder = options.filterPlaceholder;
-      field.appendChild(ownFilterInput);
-      main.appendChild(field);
-      controls.appendChild(main);
-      block.appendChild(controls);
     }
 
     const toolbar = doc.createElement("div");
@@ -1251,6 +1570,25 @@
     meta.appendChild(count);
     meta.appendChild(toggle);
     toolbar.appendChild(meta);
+
+    const main = doc.createElement("div");
+    main.className = "control-main";
+    let ownFilterInput = null;
+    if (options.filterPlaceholder) {
+      const field = doc.createElement("label");
+      field.className = "filter-field";
+      const icon = cell(doc, "span", "", "filter-icon");
+      icon.setAttribute("aria-hidden", "true");
+      field.appendChild(icon);
+      field.appendChild(cell(doc, "span", "Filter rows", "sr-only"));
+      ownFilterInput = doc.createElement("input");
+      ownFilterInput.type = "search";
+      ownFilterInput.placeholder = options.filterPlaceholder;
+      field.appendChild(ownFilterInput);
+      main.appendChild(field);
+    }
+    main.appendChild(actions);
+    toolbar.appendChild(main);
     block.appendChild(toolbar);
 
     const wrap = doc.createElement("div");
@@ -1363,7 +1701,7 @@
       if (interactive) examples.register("dep:" + category.key, controller);
       controllers.push(controller);
     }
-    setAvailabilityNote(doc, "dep-examples-note", interactive);
+    setAvailabilityNote(doc, "dep-examples-note", examples);
     return controllers;
   }
 
@@ -1425,65 +1763,58 @@
       container.appendChild(block);
     }
 
-    setAvailabilityNote(doc, "tag-examples-note", interactive);
+    setAvailabilityNote(doc, "tag-examples-note", examples);
   }
 
-  /* Stated once per error section, in the note voice, because it is a property
-     of the corpus rather than a fault the reader should act on. */
-  function setAvailabilityNote(doc, id, interactive) {
+  /* Stated once per error section: either how to open the evidence, or why there is
+     none. The unavailable wording comes from the examples manifest, so the reason is
+     the one the generator recorded — and the "click a row" instruction is never
+     shown for a run whose rows do not respond to a click. */
+  const EXAMPLES_HINT =
+    "Select a row to see sentences for that error pattern; Enter or Space opens the " +
+    "same view and Esc closes it.";
+
+  function setAvailabilityNote(doc, id, examples) {
     const note = doc.getElementById(id);
     if (!note) return;
-    note.textContent = interactive ? "" : EXAMPLES_UNAVAILABLE_NOTE;
-    note.hidden = interactive;
+    const interactive = Boolean(examples && examples.available);
+    note.textContent = interactive
+      ? EXAMPLES_HINT
+      : (examples && examples.note) || EXAMPLES_UNAVAILABLE_NOTE;
+    note.hidden = false;
   }
 
-  function renderRunChoices(doc, index) {
-    const container = doc.getElementById("run-choices");
-    container.replaceChildren();
-    if (!index || !Array.isArray(index.runs) || !index.runs.length) {
-      container.hidden = true;
-      return;
-    }
-    container.appendChild(cell(doc, "h2", "Runs with diagnostics"));
-    const groups = new Map();
-    for (const run of index.runs) {
-      const key = run.language + "|" + run.test_condition;
-      if (!groups.has(key)) groups.set(key, { run: run, items: [] });
-      groups.get(key).items.push(run);
-    }
-    for (const group of groups.values()) {
-      const block = doc.createElement("div");
-      block.className = "choice-group";
-      block.appendChild(cell(doc, "h3", contextDescription(group.run)));
-      const list = doc.createElement("ul");
-      for (const run of group.items) {
-        const item = doc.createElement("li");
-        const link = doc.createElement("a");
-        link.href = analysisUrl(run);
-        link.textContent = systemDescription(run);
-        item.appendChild(link);
-        list.appendChild(item);
+  /* The one thing this page shows when it cannot show a run: a short statement and
+     a single way back. It is deliberately not a run picker — choosing a run is the
+     overview's job, and this page is subordinate to it. */
+  function showEmptyState(doc, title, message) {
+    doc.getElementById("empty-state-title").textContent = title;
+    doc.getElementById("empty-state-message").textContent = message;
+    doc.getElementById("empty-state").hidden = false;
+    /* The empty state carries its own link back, so the breadcrumb above it would
+       only repeat the same destination. */
+    const crumb = doc.querySelector(".crumb");
+    if (crumb) crumb.hidden = true;
+  }
+
+  /* A bare analysis.html names no run and therefore has nothing to analyse. It
+     returns to the overview, replacing its own history entry so that Back goes to
+     wherever the reader came from instead of bouncing off this page again. */
+  function redirectToOverview(browserWindow) {
+    const location = browserWindow.location;
+    /* A partial query still names a context the overview understands, so it travels
+       with the redirect rather than being discarded; the overview already falls back
+       on any value it cannot honour. */
+    const target = OVERVIEW_PAGE + ((location && location.search) || "");
+    try {
+      if (location && typeof location.replace === "function") {
+        location.replace(target);
+        return;
       }
-      block.appendChild(list);
-      container.appendChild(block);
+    } catch (error) {
+      /* fall through: an assignment is the only remaining way to leave */
     }
-    container.hidden = false;
-  }
-
-  function showNotice(doc, text) {
-    const notice = doc.getElementById("notice");
-    notice.textContent = text;
-    notice.hidden = false;
-  }
-
-  function showNoRun(doc, index, message) {
-    showNotice(doc, message);
-    renderRunChoices(doc, index);
-    doc.getElementById("back-link").href = OVERVIEW_PAGE;
-    doc.getElementById("run-context").textContent = "No run selected";
-    doc.getElementById("run-subtitle").hidden = true;
-    doc.getElementById("run-meta").hidden = true;
-    doc.getElementById("run-hero").hidden = false;
+    if (location) location.href = target;
   }
 
   function requestedExample(browserWindow) {
@@ -1500,7 +1831,28 @@
     return response.json();
   }
 
+  /* The same contract check the overview makes, for the same reason: analysis.html
+     and analysis.js are cached independently and must not be paired across
+     versions. */
+  const REQUIRED_ELEMENTS = [
+    "back-link", "run-hero", "run-context", "run-subtitle", "run-meta",
+    "empty-state", "empty-state-title", "empty-state-message",
+    "analysis", "overview", "section-nav",
+    "tab-accuracy", "tab-dependency-errors", "tab-tagging-errors",
+    "tab-all-metrics", "tab-reproducibility",
+    "panel-accuracy", "panel-dependency-errors", "panel-tagging-errors",
+    "panel-all-metrics", "panel-reproducibility",
+    "rel-table", "upos-acc-table", "dep-buckets", "tag-sections",
+    "metrics-disclosure", "metrics-head", "metrics-body", "metrics-note",
+    "all-metrics-note", "reproducibility-note",
+    "provenance-list", "policy-note",
+    "examples-panel", "examples-backdrop", "examples-body"
+  ];
+
   async function start(doc, browserWindow) {
+    const absent = overview().missingElements(doc, REQUIRED_ELEMENTS);
+    if (absent.length) throw new Error(overview().mismatchMessage(absent));
+
     let request;
     try {
       request = overview().parseRequest(browserWindow.location.search);
@@ -1508,12 +1860,18 @@
       request = { language: "", test_condition: "", model: "", training_condition: "" };
     }
 
+    if (!requestIsComplete(request)) {
+      redirectToOverview(browserWindow);
+      doc.body.dataset.uiReady = "redirect";
+      return null;
+    }
+
     let index;
     try {
       index = await loadJson(browserWindow, DIAGNOSTICS_DIR + INDEX_FILE);
     } catch (error) {
       const isFile = String(browserWindow.location.protocol) === "file:";
-      showNotice(doc, isFile
+      showEmptyState(doc, "Diagnostics unavailable", isFile
         ? "This page was opened from the file system, so the browser refused to load the " +
           "diagnostic set. Serve the directory over HTTP (python3 -m http.server) and reopen it."
         : "The diagnostic set could not be loaded (" + error.message + "). Regenerate it with " +
@@ -1524,37 +1882,41 @@
 
     const run = findRun(index, request);
     if (!run) {
-      showNoRun(doc, index, requestIsComplete(request)
-        ? "No diagnostics exist for that combination of language, test data, system and " +
-          "training condition. The runs below are available."
-        : "This page analyses one benchmark run, named by the link that opened it. " +
-          "Choose one below.");
+      showEmptyState(doc, "Run not available",
+        "The benchmark has no diagnostics for " + requestDescription(request) + ". " +
+        "The link may be out of date, or that run may not be part of the evaluated subset.");
       doc.body.dataset.uiReady = "no-run";
       return null;
     }
+
+    /* The examples manifest decides whether this run's rows are interactive, so it
+       is needed before any table is built; it is optional, and fetched alongside the
+       run's diagnostics rather than after them. */
+    const manifest = loadJson(browserWindow, EXAMPLES_DIR + INDEX_FILE).catch(() => null);
 
     let data;
     try {
       data = await loadJson(browserWindow, DIAGNOSTICS_DIR + run.file);
     } catch (error) {
-      showNotice(doc,
+      showEmptyState(doc, "Diagnostics unavailable",
         "The diagnostics file for this run could not be loaded (" + error.message + ").");
       doc.body.dataset.uiReady = "error";
       return null;
     }
+    const catalogue = exampleCatalogue(await manifest, run, data);
 
     doc.title = contextDescription(run) + " — " + systemDescription(run) +
       " — detailed analysis";
     doc.getElementById("run-context").textContent = contextDescription(run);
-    doc.getElementById("run-subtitle").textContent =
-      systemDescription(run) + " training. Accuracy and error breakdowns for this benchmark run.";
+    doc.getElementById("run-subtitle").textContent = systemDescription(run);
     doc.getElementById("back-link").href = overviewUrl(run);
     doc.getElementById("run-hero").hidden = false;
 
+    const tabs = createAnalysisTabs(doc, browserWindow);
     const clipboard = createClipboard(doc, browserWindow);
-    const examples = createExamples(doc, browserWindow, run, data, clipboard);
+    const examples = createExamples(doc, browserWindow, run, catalogue, clipboard, tabs);
 
-    renderSummary(doc, data, examples);
+    renderSummary(doc, data);
     renderAccuracySections(doc, data, examples, clipboard);
 
     /* One filter above the three dependency buckets, as v5 does. */
@@ -1569,12 +1931,17 @@
       doc, data, examples, clipboard, () => dependencyQuery());
     renderTagErrors(doc, data, examples, clipboard);
 
-    doc.getElementById("source-meta").textContent =
-      "Aggregate diagnostics: " + DIAGNOSTICS_DIR + run.file + ".";
+    const hasAllMetrics = renderAllMetrics(
+      doc, resultRow(browserWindow, run), browserWindow.AM_BENCHMARK_RESULTS);
+    tabs.setAvailable("all-metrics", hasAllMetrics);
+    renderProvenance(doc, data, examples);
+
+    const requestedSelection = parseExampleSelection(requestedExample(browserWindow));
+    tabs.initialize(examples.available ? examplePanel(requestedSelection) : "");
     doc.getElementById("analysis").hidden = false;
     doc.body.dataset.uiReady = "true";
 
-    if (examples.available) examples.restore(parseExampleSelection(requestedExample(browserWindow)));
+    if (examples.available) examples.restore(requestedSelection);
     return { run: run, data: data, examples: examples };
   }
 
@@ -1582,21 +1949,25 @@
     RUN_FIELDS,
     QUERY_NAMES,
     ROW_LIMIT,
-    EXAMPLE_COHORTS,
+    REQUIRED_ELEMENTS,
+    EXAMPLES_UNAVAILABLE_NOTE,
     DEPENDENCY_CATEGORIES,
     SUMMARY_METRICS,
     runKey,
     requestIsComplete,
     findRun,
+    exampleCatalogue,
     percentage,
     formatCount,
     overviewUrl,
-    analysisUrl,
+    sourceText,
     parseExampleSelection,
     formatExampleSelection,
+    examplePanel,
     mergeRows,
     mergedLabel,
     collectExamples,
+    examplePattern,
     exampleTitle,
     exampleSubtitle,
     exampleCountText,

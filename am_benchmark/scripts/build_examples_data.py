@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract sentence examples for the Slovenian stable runs only.
+"""Extract sentence examples for the stable runs whose corpus may be republished.
 
 The aggregate diagnostics under ``tables/am_benchmark/data/diagnostics/`` stay
 exactly as they are: counts and annotation labels, no corpus text. This script
@@ -14,9 +14,11 @@ example of which error comes from the published CJVT profiler
 row can only ever belong to an error pattern the aggregate file already reports.
 The emitted counters are checked against that file before anything is written.
 
-ONLY THE ALLOWLISTED COHORTS ARE EXTRACTED. English and Dutch gold were supplied
-for benchmarking and redistribution permission has not been established for them,
-so a run outside ``COHORT_SOURCES`` raises rather than producing a file.
+ONLY THE ALLOWLISTED COHORTS ARE EXTRACTED. ``COHORT_SOURCES`` names the cohorts
+whose underlying treebank is publicly redistributable and states the attribution
+for each; a run outside it is skipped, and ``build_run`` raises if one ever reaches
+it anyway. ``WITHHELD_COHORTS`` records why a cohort is deliberately absent, so an
+omission cannot be read as an oversight.
 """
 
 from __future__ import annotations
@@ -39,7 +41,10 @@ import build_diagnostics_data as diagnostics  # noqa: E402  run selection + run 
 import build_interactive_comparison_table_v2 as v2  # noqa: E402  CJVT error/example semantics
 import run_benchmark_evaluation as benchmark  # noqa: E402  manifest paths + hashing
 
-SCHEMA_VERSION = 1
+# 2 adds ``source.parts``: a cohort whose gold file concatenates two treebanks
+# attributes both instead of naming one of them. The flat ``corpus``/``release``/
+# ``licence`` fields of version 1 are still written and still mean what they did.
+SCHEMA_VERSION = 2
 GENERATOR = "am_benchmark/scripts/build_examples_data.py"
 
 # The panel shows at most this many examples for one error pattern and always
@@ -49,23 +54,80 @@ MAX_EXAMPLES = 25
 DEFAULT_OUTPUT_DIR = REPO_DIR / "tables/am_benchmark/data/examples"
 DIAGNOSTICS_DIR = REPO_DIR / "tables/am_benchmark/data/diagnostics"
 
+UD = "https://github.com/UniversalDependencies/"
+
 # The allowlist is a licensing fact, not something derivable from the data, so it
 # is stated once here. A cohort absent from this table produces no examples.
-# Both Slovenian treebanks are released under CC BY-SA 4.0; the release labels are
-# the ones the benchmark's own test-set identification already established.
+#
+# Each entry lists the corpora the cohort's gold text actually comes from, in the
+# order the gold file concatenates them, with the attribution the panel shows. The
+# identities and the exact splits are the ones ``reports/testset_identification.md``
+# established by whole-sequence FORM and ``sent_id`` hashes.
 COHORT_SOURCES = {
-    "SL:writtentest": {
-        "corpus": "UD Slovenian SSJ",
-        "release": "r2.17",
-        "url": "https://github.com/UniversalDependencies/UD_Slovenian-SSJ",
-        "licence": "CC BY-SA 4.0",
-    },
-    "SL:spokentest": {
-        "corpus": "UD Slovenian SST",
-        "release": "r2.16 / r2.17",
-        "url": "https://github.com/UniversalDependencies/UD_Slovenian-SST",
-        "licence": "CC BY-SA 4.0",
-    },
+    "EN:writtentest": [
+        {
+            "corpus": "UD English GUM",
+            "section": "test split, 9 written genres",
+            "release": "r2.16 / r2.17",
+            "url": UD + "UD_English-GUM",
+            "licence": "CC BY-NC-SA 4.0",
+        },
+    ],
+    "EN:spokentest": [
+        {
+            "corpus": "UD English GUM",
+            "section": "test split, 6 spoken genres",
+            "release": "r2.16 / r2.17",
+            "url": UD + "UD_English-GUM",
+            "licence": "CC BY-NC-SA 4.0",
+        },
+    ],
+    # One cohort, two treebanks: LassySmall test (1761 sentences) followed by
+    # Alpino test (596). Naming either one alone would misattribute the other.
+    "NL:writtentest": [
+        {
+            "corpus": "UD Dutch LassySmall",
+            "section": "test split, 1761 sentences",
+            "release": "r2.16 / r2.17",
+            "url": UD + "UD_Dutch-LassySmall",
+            "licence": "CC BY-SA 4.0",
+        },
+        {
+            "corpus": "UD Dutch Alpino",
+            "section": "test split, 596 sentences",
+            "release": "r2.16 / r2.17",
+            "url": UD + "UD_Dutch-Alpino",
+            "licence": "CC BY-SA 4.0",
+        },
+    ],
+    "SL:writtentest": [
+        {
+            "corpus": "UD Slovenian SSJ",
+            "section": "test split",
+            "release": "r2.17",
+            "url": UD + "UD_Slovenian-SSJ",
+            "licence": "CC BY-SA 4.0",
+        },
+    ],
+    "SL:spokentest": [
+        {
+            "corpus": "UD Slovenian SST",
+            "section": "test split",
+            "release": "r2.16 / r2.17",
+            "url": UD + "UD_Slovenian-SST",
+            "licence": "CC BY-SA 4.0",
+        },
+    ],
+}
+
+# Why a cohort is deliberately outside the allowlist. Written as the sentence the
+# analysis page shows in place of the examples, so the reason lives with the
+# licensing decision rather than in the interface.
+WITHHELD_COHORTS = {
+    "NL:spokentest": (
+        "The corpus behind this test set is not identified with enough confidence to "
+        "establish redistribution rights, so no sentences are published for it."
+    ),
 }
 
 # Positional example columns, declared in the payload so the file reads on its own.
@@ -90,11 +152,12 @@ ROOT = -1
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Write sentence examples for the allowlisted Slovenian stable runs. "
+            "Write sentence examples for the allowlisted stable runs. "
             "Aggregate diagnostics and benchmark results are read-only inputs."
         )
     )
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
+    parser.add_argument("--language", action="append", help="Restrict to a language.")
     parser.add_argument("--test-condition", action="append", help="Restrict to a test condition.")
     parser.add_argument("--model", action="append", help="Restrict to a system.")
     parser.add_argument(
@@ -106,29 +169,66 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def allowlisted_runs(args: argparse.Namespace) -> list[dict[str, str]]:
-    """Stable runs whose gold cohort may be republished as sentences.
+def allowlisted_runs(args: argparse.Namespace) -> tuple[list[dict[str, str]], Counter]:
+    """Stable runs whose gold cohort may be republished as sentences, and the rest.
 
     Selection is the benchmark's own: ``build_diagnostics_data.stable_runs`` applies
     the same manifest filters and permission gate the authoritative evaluation uses.
+    The allowlist then decides, per cohort rather than per language, which of those
+    runs get an example file — a language can have one cohort in the allowlist and
+    another outside it, as Dutch does. Skipped cohorts are returned so the run can
+    name them rather than passing over them silently.
     """
-    languages = sorted({cohort.split(":", 1)[0] for cohort in COHORT_SOURCES})
+    languages = args.language or sorted({cohort.split(":", 1)[0] for cohort in COHORT_SOURCES})
     selection = Namespace(
         language=languages,
         model=args.model,
         training_condition=args.training_condition,
         test_condition=args.test_condition,
     )
-    runs = []
+    runs: list[dict[str, str]] = []
+    skipped: Counter = Counter()
     for row in diagnostics.stable_runs(selection):
-        cohort = row["gold_cohort"]
-        if cohort not in COHORT_SOURCES:
-            raise RuntimeError(
-                f"Refusing to extract examples for {cohort}: not in the redistribution "
-                f"allowlist. Add it to COHORT_SOURCES only when its licence permits."
-            )
-        runs.append(row)
-    return runs
+        if row["gold_cohort"] in COHORT_SOURCES:
+            runs.append(row)
+        else:
+            skipped[row["gold_cohort"]] += 1
+    return runs, skipped
+
+
+def join_distinct(values) -> str:
+    """Join without repeating a value both corpora happen to share."""
+    seen: list[str] = []
+    for value in values:
+        if value and value not in seen:
+            seen.append(value)
+    return " / ".join(seen)
+
+
+def source_record(cohort: str) -> dict[str, Any]:
+    """Attribution for one cohort: every corpus its gold text comes from.
+
+    ``parts`` is the truthful form, because NL written is two treebanks concatenated
+    and naming one of them would misattribute the other. The flat ``corpus``,
+    ``release`` and ``licence`` fields restate it in the shape schema version 1
+    wrote, so a reader that predates ``parts`` still names every corpus and licence;
+    ``url`` stays flat only where one corpus makes it unambiguous.
+    """
+    if cohort not in COHORT_SOURCES:
+        raise RuntimeError(
+            f"Refusing to extract examples for {cohort}: not in the redistribution "
+            f"allowlist. Add it to COHORT_SOURCES only when its licence permits."
+        )
+    parts = COHORT_SOURCES[cohort]
+    record: dict[str, Any] = {
+        "corpus": " + ".join(part["corpus"] for part in parts),
+        "release": join_distinct(part["release"] for part in parts),
+        "licence": join_distinct(part["licence"] for part in parts),
+        "parts": [dict(part) for part in parts],
+    }
+    if len(parts) == 1:
+        record["url"] = parts[0]["url"]
+    return record
 
 
 def sentence_index(gold_sentences, prediction_sentences) -> dict[str, tuple[int, Any, Any]]:
@@ -351,6 +451,10 @@ def check_against_aggregate(key: str, profile: dict[str, Any]) -> dict[str, dict
 def build_run(row: dict[str, str]) -> dict[str, Any]:
     key = diagnostics.run_key(row)
     cohort = row["gold_cohort"]
+    # The gate again, at the only point where a corpus file is opened: selection
+    # already skips a cohort outside the allowlist, and nothing that got past it
+    # may reach the reader.
+    source = source_record(cohort)
     gold_path = benchmark.resolve_manifest_path(row["gold_file"])
     prediction_path = benchmark.resolve_manifest_path(row["selected_prediction"])
 
@@ -433,7 +537,6 @@ def build_run(row: dict[str, str]) -> dict[str, Any]:
     if over_cap:
         raise RuntimeError(f"{key}: a pattern stored more than {MAX_EXAMPLES} examples")
 
-    source = dict(COHORT_SOURCES[cohort])
     source.update({
         "gold_cohort": cohort,
         "gold_file": benchmark.display_path(gold_path),
@@ -473,12 +576,15 @@ def write_json(path: Path, payload: Any) -> int:
 
 def main() -> int:
     args = parse_args()
-    runs = allowlisted_runs(args)
+    runs, skipped = allowlisted_runs(args)
     if not runs:
         print("No allowlisted runs selected.", file=sys.stderr)
         return 2
 
     print(f"Allowlisted cohorts: {', '.join(sorted(COHORT_SOURCES))}")
+    for cohort, count in sorted(skipped.items()):
+        reason = WITHHELD_COHORTS.get(cohort, "not in the redistribution allowlist")
+        print(f"Withheld: {cohort} ({count} runs) — {reason}")
     print(f"Runs selected: {len(runs)}")
     for row in runs:
         print(f"  {diagnostics.run_key(row)}")
@@ -497,12 +603,17 @@ def main() -> int:
         counts = payloads[key]["counts"]
         print(f"  {key}: {counts['examples']} examples over {counts['sentences']} sentences")
 
+    # The manifest is what the analysis page asks whether a run has examples, so it
+    # carries both halves of the decision: the cohorts that do, with their
+    # attribution, and the cohorts deliberately withheld, with the reason the page
+    # shows in place of the panel.
     index = {
         "schema_version": SCHEMA_VERSION,
         "kind": "am-benchmark-examples-index",
         "generator": GENERATOR,
         "max_examples_per_pattern": MAX_EXAMPLES,
-        "cohorts": COHORT_SOURCES,
+        "cohorts": {cohort: source_record(cohort) for cohort in sorted(COHORT_SOURCES)},
+        "withheld_cohorts": dict(sorted(WITHHELD_COHORTS.items())),
         "runs": [
             {
                 "key": key,

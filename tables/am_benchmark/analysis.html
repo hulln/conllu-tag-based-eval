@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>Detailed analysis — multilingual tagging and parsing benchmark</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css?v=10">
 </head>
 <body data-ui="analysis">
   <noscript>
@@ -13,129 +14,166 @@
   </noscript>
 
   <nav class="crumb" aria-label="Breadcrumb">
-    <a class="back-link" id="back-link" href="index.html">&larr; Benchmark overview</a>
+    <a class="back-link" id="back-link" href="index.html">&larr; Back to benchmark</a>
   </nav>
 
   <div class="page-head" id="run-hero" hidden>
     <p class="eyebrow">Detailed analysis</p>
     <h1 id="run-context"></h1>
     <p class="subtitle" id="run-subtitle"></p>
-    <div class="provenance provenance-line" id="run-meta"></div>
-    <details class="provenance-details">
-      <summary>Technical details</summary>
-      <div class="provenance">
-        <dl id="provenance-list"></dl>
-        <p class="policy-note" id="policy-note"></p>
-      </div>
-    </details>
+    <p class="run-meta" id="run-meta"></p>
   </div>
 
-  <div id="notice" class="noscript-note" hidden></div>
-  <div id="run-choices" class="run-choices" hidden></div>
+  <div class="empty-state" id="empty-state" hidden>
+    <h1 id="empty-state-title"></h1>
+    <p id="empty-state-message"></p>
+    <a class="empty-state-action" href="index.html">&larr; Back to benchmark</a>
+  </div>
 
   <main id="analysis" hidden>
     <div class="overview" id="overview"></div>
 
-    <nav class="section-nav" id="section-nav" aria-label="Sections">
-      <a href="#accuracy">Accuracy by category</a>
-      <a href="#dependency-errors">Dependency errors</a>
-      <a href="#tagging-errors">Tagging errors</a>
-    </nav>
+    <!-- Five panels, one visible at a time. The tab labels are the section headings,
+         so no panel repeats its own name below the row; the hash names the open panel
+         and matches no element id, so selecting a tab never scrolls the page. -->
+    <div class="section-nav" id="section-nav" role="tablist" aria-label="Detailed analysis sections">
+      <button class="section-tab" type="button" role="tab" id="tab-accuracy"
+              data-panel="accuracy" aria-controls="panel-accuracy"
+              aria-selected="true">Accuracy by category</button>
+      <button class="section-tab" type="button" role="tab" id="tab-dependency-errors"
+              data-panel="dependency-errors" aria-controls="panel-dependency-errors"
+              aria-selected="false" tabindex="-1">Dependency errors</button>
+      <button class="section-tab" type="button" role="tab" id="tab-tagging-errors"
+              data-panel="tagging-errors" aria-controls="panel-tagging-errors"
+              aria-selected="false" tabindex="-1">Tagging errors</button>
+      <button class="section-tab" type="button" role="tab" id="tab-all-metrics"
+              data-panel="all-metrics" aria-controls="panel-all-metrics"
+              aria-selected="false" tabindex="-1">All evaluation metrics</button>
+      <button class="section-tab" type="button" role="tab" id="tab-reproducibility"
+              data-panel="reproducibility" aria-controls="panel-reproducibility"
+              aria-selected="false" tabindex="-1">Reproducibility</button>
+    </div>
 
-    <h2 id="accuracy">Accuracy by category</h2>
-
-    <h3 id="relation-scores">Dependency relation scores</h3>
-    <div class="controls">
-      <div class="note control-note" id="rel-note">
+    <section class="analysis-panel" id="panel-accuracy" role="tabpanel"
+             aria-labelledby="tab-accuracy">
+      <h3 id="relation-scores">Dependency relation scores</h3>
+      <p class="note section-note" id="rel-note">
         For each UD dependency relation, LAS shows the percentage of gold tokens for which
         the system predicted both the correct syntactic head and the correct relation. The
         table is sorted by the number of examples in the manually annotated test set.
-      </div>
-      <div class="control-main">
-        <label class="filter-field">
-          <span class="filter-icon" aria-hidden="true"></span>
-          <span class="sr-only">Filter dependency relations</span>
-          <input id="rel-filter" type="search" placeholder="e.g. nsubj or obl">
-        </label>
-        <div class="action-btns">
-          <button class="action-btn" id="rel-csv" type="button" title="Export visible rows as CSV">&darr; CSV</button>
-          <button class="action-btn" id="rel-md" type="button" title="Copy visible rows as Markdown">&#x2398; MD</button>
+      </p>
+      <div class="toolbar">
+        <div class="count-meta">
+          <div class="note" id="rel-count"></div>
+          <button id="rel-toggle" class="inline-toggle" type="button" hidden>Show more</button>
+        </div>
+        <div class="control-main">
+          <label class="filter-field">
+            <span class="filter-icon" aria-hidden="true"></span>
+            <span class="sr-only">Filter dependency relations</span>
+            <input id="rel-filter" type="search" placeholder="e.g. nsubj or obl">
+          </label>
+          <div class="action-btns">
+            <button class="action-btn" id="rel-csv" type="button" title="Export visible rows as CSV">&darr; CSV</button>
+            <button class="action-btn" id="rel-md" type="button" title="Copy visible rows as Markdown">&#x2398; MD</button>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="toolbar">
-      <div class="count-meta">
-        <div class="note" id="rel-count"></div>
-        <button id="rel-toggle" class="inline-toggle" type="button" hidden>Show more</button>
+      <div class="table-wrap">
+        <table id="rel-table">
+          <caption class="sr-only">Labelled attachment score for each gold dependency relation.</caption>
+          <thead><tr></tr></thead>
+          <tbody></tbody>
+        </table>
       </div>
-    </div>
-    <div class="table-wrap table-wrap-wide">
-      <table id="rel-table">
-        <caption class="sr-only">Labelled attachment score for each gold dependency relation.</caption>
-        <thead><tr></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
 
-    <h3 id="upos-scores">Part-of-speech tag scores</h3>
-    <div class="controls">
-      <div class="note control-note" id="upos-acc-note">
+      <h3 id="upos-scores">Part-of-speech tag scores</h3>
+      <p class="note section-note" id="upos-acc-note">
         For each universal part-of-speech tag, Accuracy shows the percentage of gold tokens
         the system tagged correctly. The table is sorted by the number of examples in the
         manually annotated test set.
-      </div>
-      <div class="control-main">
-        <label class="filter-field">
-          <span class="filter-icon" aria-hidden="true"></span>
-          <span class="sr-only">Filter part-of-speech tags</span>
-          <input id="upos-acc-filter" type="search" placeholder="e.g. NOUN or VERB">
-        </label>
-        <div class="action-btns">
-          <button class="action-btn" id="upos-acc-csv" type="button" title="Export visible rows as CSV">&darr; CSV</button>
-          <button class="action-btn" id="upos-acc-md" type="button" title="Copy visible rows as Markdown">&#x2398; MD</button>
+      </p>
+      <div class="toolbar">
+        <div class="count-meta">
+          <div class="note" id="upos-acc-count"></div>
+          <button id="upos-acc-toggle" class="inline-toggle" type="button" hidden>Show more</button>
+        </div>
+        <div class="control-main">
+          <label class="filter-field">
+            <span class="filter-icon" aria-hidden="true"></span>
+            <span class="sr-only">Filter part-of-speech tags</span>
+            <input id="upos-acc-filter" type="search" placeholder="e.g. NOUN or VERB">
+          </label>
+          <div class="action-btns">
+            <button class="action-btn" id="upos-acc-csv" type="button" title="Export visible rows as CSV">&darr; CSV</button>
+            <button class="action-btn" id="upos-acc-md" type="button" title="Copy visible rows as Markdown">&#x2398; MD</button>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="toolbar">
-      <div class="count-meta">
-        <div class="note" id="upos-acc-count"></div>
-        <button id="upos-acc-toggle" class="inline-toggle" type="button" hidden>Show more</button>
+      <div class="table-wrap">
+        <table id="upos-acc-table">
+          <caption class="sr-only">Accuracy for each gold universal part-of-speech tag.</caption>
+          <thead><tr></tr></thead>
+          <tbody></tbody>
+        </table>
       </div>
-    </div>
-    <div class="table-wrap table-wrap-wide">
-      <table id="upos-acc-table">
-        <caption class="sr-only">Accuracy for each gold universal part-of-speech tag.</caption>
-        <thead><tr></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
+    </section>
 
-    <h2 id="dependency-errors">Dependency errors</h2>
-    <div class="controls">
-      <div class="note control-note">
+    <section class="analysis-panel" id="panel-dependency-errors" role="tabpanel"
+             aria-labelledby="tab-dependency-errors" hidden>
+      <p class="note section-note">
         Every word whose labelled attachment is wrong falls into exactly one of three
-        categories, so the three totals below account for all of them. Click a row to see
-        examples; <kbd>Enter</kbd> or <kbd>Space</kbd> opens the same view and <kbd>Esc</kbd>
-        closes it.
-      </div>
-      <div class="control-main">
+        categories, so the three totals below account for all of them.
+      </p>
+      <p class="tally" id="dep-tally"></p>
+      <p class="note examples-availability" id="dep-examples-note" hidden></p>
+      <div class="section-filter">
         <label class="filter-field">
           <span class="filter-icon" aria-hidden="true"></span>
-          <span class="sr-only">Filter dependency error rows</span>
-          <input id="dep-filter" type="search" placeholder="e.g. nsubj or obl">
+          <span class="sr-only">Filter dependency error rows in all three categories</span>
+          <input id="dep-filter" type="search" placeholder="Filter all three categories">
         </label>
       </div>
-    </div>
-    <p class="tally" id="dep-tally"></p>
-    <p class="note examples-availability" id="dep-examples-note" hidden></p>
-    <div id="dep-buckets"></div>
+      <div id="dep-buckets"></div>
+    </section>
 
-    <h2 id="tagging-errors">Tagging errors</h2>
-    <p class="note section-note">
-      Where the predicted annotation differs from the gold annotation, by layer.
-    </p>
-    <p class="note examples-availability" id="tag-examples-note" hidden></p>
-    <div id="tag-sections"></div>
+    <section class="analysis-panel" id="panel-tagging-errors" role="tabpanel"
+             aria-labelledby="tab-tagging-errors" hidden>
+      <p class="note section-note">
+        Where the predicted annotation differs from the gold annotation, by layer.
+      </p>
+      <p class="note examples-availability" id="tag-examples-note" hidden></p>
+      <div id="tag-sections"></div>
+    </section>
+
+    <section class="analysis-panel" id="panel-all-metrics" role="tabpanel"
+             aria-labelledby="tab-all-metrics" hidden>
+      <p class="note section-note" id="all-metrics-note">
+        Complete output of the evaluation script for this run: every metric family the
+        evaluator reports, with precision, recall, F1 and aligned accuracy.
+      </p>
+      <details class="disclosure" id="metrics-disclosure">
+        <summary><span class="disclosure-label">Show the full evaluator table</span></summary>
+        <div class="table-wrap">
+          <table id="metrics">
+            <caption class="sr-only">Complete evaluator output for this run.</caption>
+            <thead id="metrics-head"></thead>
+            <tbody id="metrics-body"></tbody>
+          </table>
+        </div>
+        <p class="note" id="metrics-note"></p>
+      </details>
+    </section>
+
+    <section class="analysis-panel" id="panel-reproducibility" role="tabpanel"
+             aria-labelledby="tab-reproducibility" hidden>
+      <p class="note section-note" id="reproducibility-note"></p>
+      <details class="disclosure">
+        <summary><span class="disclosure-label">Technical details</span></summary>
+        <dl class="provenance-list" id="provenance-list"></dl>
+        <p class="note" id="policy-note"></p>
+      </details>
+    </section>
   </main>
 
   <div class="examples-backdrop" id="examples-backdrop" hidden></div>
@@ -147,6 +185,11 @@
         <p class="examples-panel-title" id="examples-title"></p>
         <p class="examples-subtitle" id="examples-subtitle"></p>
       </div>
+      <button type="button" class="examples-panel-close" id="examples-close"
+              title="Close" aria-label="Close examples">&times;</button>
+    </div>
+    <div class="examples-toolbar">
+      <p class="examples-count" id="examples-count"></p>
       <div class="examples-panel-actions">
         <button type="button" class="examples-panel-action nav" id="examples-prev"
                 title="Previous row" aria-label="Previous row">&lsaquo;</button>
@@ -158,22 +201,16 @@
                 title="Export shown examples as CSV">CSV</button>
         <button type="button" class="examples-panel-action" id="examples-md"
                 title="Copy shown examples as Markdown">MD</button>
-        <button type="button" class="examples-panel-close" id="examples-close"
-                title="Close" aria-label="Close examples">&times;</button>
       </div>
     </div>
-    <p class="examples-count" id="examples-count"></p>
     <div class="examples-panel-body" id="examples-body"></div>
     <p class="examples-source" id="examples-source"></p>
   </aside>
 
-  <footer class="ack">
-    <p id="source-meta"></p>
-  </footer>
-
   <div id="app-error" class="noscript-note" hidden></div>
 
-  <script src="app.js"></script>
-  <script src="analysis.js"></script>
+  <script src="data/results.js?v=5"></script>
+  <script src="app.js?v=6"></script>
+  <script src="analysis.js?v=6"></script>
 </body>
 </html>

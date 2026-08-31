@@ -5,10 +5,18 @@
 })(typeof window !== "undefined" ? window : null, function () {
   "use strict";
 
-  /* The reader fixes the comparison context; model and training condition then
-     become the table's rows. Nothing here enumerates combinations — available
-     values always come from the rows actually present in the bundle. */
-  const CONTEXT_DIMENSIONS = ["language", "test_condition"];
+  /* The reader builds a comparison context — language, kind of test data, training
+     setup — and the table then shows the systems that exist inside it. Nothing here
+     enumerates combinations: every option comes from rows actually present in the
+     bundle, so a new language, system or condition appears without a code change. */
+  const CASCADE = ["language", "test_condition"];
+  const TRAINING = "training_condition";
+  const CONTEXT_DIMENSIONS = CASCADE.concat([TRAINING]);
+
+  /* Training data is a filter rather than a cascade step: "All" keeps every
+     training setup visible, which is what makes the experiment's structure legible.
+     Empty state means All; the URL spells it out so a link reads unambiguously. */
+  const TRAINING_ALL = "all";
 
   /* Column groups follow the evaluator's own metric semantics. Only metrics
      present in the bundle are rendered, so a future TSV may add or drop any. */
@@ -18,17 +26,21 @@
     { name: "Content words", metrics: ["MLAS", "BLEX"] }
   ];
 
+  /* The headline parsing metric: the one a reader compares systems on first. It
+     carries a little more weight in the table and nothing else does. */
+  const PRIMARY_METRIC = "LAS";
+
   const METRIC_DESCRIPTIONS = {
     UPOS: "Universal part-of-speech",
     XPOS: "Language-specific part-of-speech",
     Lemmas: "Lemmatization",
-    UAS: "Unlabelled Attachment Score",
-    LAS: "Labelled Attachment Score",
-    MLAS: "Morphology-Aware Labelled Attachment Score",
-    BLEX: "Bi-lexical Dependency Score"
+    UAS: "Unlabelled attachment score",
+    LAS: "Labelled attachment score",
+    MLAS: "Morphology-aware labelled attachment score",
+    BLEX: "Bi-lexical dependency score"
   };
 
-  /* Layers used to separate the full evaluator output in the detail table. */
+  /* Layers used to separate the full evaluator output on the analysis page. */
   const METRIC_LAYERS = [
     ["Tokens", "Sentences", "Words"],
     ["UPOS", "XPOS", "UFeats", "AllTags", "Lemmas"],
@@ -42,7 +54,8 @@
   const AUTHORITATIVE_GOLD = ["CONFIRMED", "AUTHORITATIVE"];
 
   /* Display names. Anything absent falls through to the raw manifest identifier,
-     so new languages, systems and conditions appear without a code change. */
+     so new languages, systems and conditions appear without a code change. The
+     interface never shows an identifier like "writtenandspokentrain" as copy. */
   const LABELS = {
     language: { EN: "English", NL: "Dutch", SL: "Slovenian" },
     model: { spacy: "spaCy", stanza: "Stanza", trankit: "Trankit" },
@@ -74,7 +87,7 @@
 
   const SORT_LABELS = {
     model: "System",
-    training_condition: "Training data"
+    training_condition: "Training"
   };
 
   /* Own-property lookup only: an inherited key such as "constructor" or
@@ -104,7 +117,7 @@
   function resolveContext(data, requested) {
     const state = {};
     let invalid = false;
-    for (const dimension of CONTEXT_DIMENSIONS) {
+    for (const dimension of CASCADE) {
       const options = contextValues(data, state, dimension);
       const wanted = requested[dimension];
       if (wanted && options.includes(wanted)) state[dimension] = wanted;
@@ -112,6 +125,13 @@
         if (wanted) invalid = true;
         state[dimension] = options[0] || "";
       }
+    }
+    const wanted = requested[TRAINING];
+    if (!wanted || wanted === TRAINING_ALL) state[TRAINING] = "";
+    else if (contextValues(data, state, TRAINING).includes(wanted)) state[TRAINING] = wanted;
+    else {
+      invalid = true;
+      state[TRAINING] = "";
     }
     return { state, invalid };
   }
@@ -190,23 +210,75 @@
     return best;
   }
 
+  /* ------------------------------------------------------------------ ordering
+     Two shapes, because the table has two jobs. With one training setup selected
+     it is a leaderboard and rows sort freely. With All selected it shows each
+     system's three training runs together, and sorting must never break that
+     grouping: a metric orders the *groups* by their best value, and the training
+     column orders rows *inside* each group. Nothing scatters a system's runs. */
+
+  function groupRows(rows) {
+    const groups = [];
+    const index = new Map();
+    for (const row of rows) {
+      if (!index.has(row.model)) {
+        index.set(row.model, { model: row.model, rows: [] });
+        groups.push(index.get(row.model));
+      }
+      index.get(row.model).rows.push(row);
+    }
+    return groups;
+  }
+
+  function bestInGroup(group, metric) {
+    const values = group.rows
+      .map(row => metricValue(row, metric, "f1"))
+      .filter(value => typeof value === "number" && !Number.isNaN(value));
+    return values.length ? Math.max.apply(null, values) : null;
+  }
+
+  function sortGroups(rows, sort, data) {
+    const modelOrder = (a, b) => orderIndex(data, "model", a.model) - orderIndex(data, "model", b.model);
+    const trainingOrder = (a, b) =>
+      orderIndex(data, TRAINING, a[TRAINING]) - orderIndex(data, TRAINING, b[TRAINING]);
+    const groups = groupRows(rows.slice().sort((a, b) => modelOrder(a, b) || trainingOrder(a, b)));
+    if (!sort || !sort.key) return groups;
+    const direction = sort.direction === "asc" ? 1 : -1;
+
+    if (sort.key === TRAINING) {
+      for (const group of groups) group.rows.sort((a, b) => trainingOrder(a, b) * direction);
+      return groups;
+    }
+    if (sort.key === "model") {
+      groups.sort((a, b) => modelOrder(a, b) * direction);
+      return groups;
+    }
+    groups.sort((a, b) => {
+      const left = bestInGroup(a, sort.key);
+      const right = bestInGroup(b, sort.key);
+      if (left == null && right == null) return modelOrder(a, b);
+      if (left == null) return 1;
+      if (right == null) return -1;
+      return (left - right) * direction || modelOrder(a, b);
+    });
+    return groups;
+  }
+
   function sortRows(rows, sort, data) {
     const dimensionOrder = (field, a, b) =>
       orderIndex(data, field, a[field]) - orderIndex(data, field, b[field]);
     const naturalOrder = (a, b) =>
-      dimensionOrder("model", a, b) || dimensionOrder("training_condition", a, b);
+      dimensionOrder("model", a, b) || dimensionOrder(TRAINING, a, b);
     const copy = rows.slice();
     if (!sort || !sort.key) return copy.sort(naturalOrder);
 
     const direction = sort.direction === "asc" ? 1 : -1;
     copy.sort((a, b) => {
       if (sort.key === "model") {
-        return dimensionOrder("model", a, b) * direction ||
-          dimensionOrder("training_condition", a, b);
+        return dimensionOrder("model", a, b) * direction || dimensionOrder(TRAINING, a, b);
       }
-      if (sort.key === "training_condition") {
-        return dimensionOrder("training_condition", a, b) * direction ||
-          dimensionOrder("model", a, b);
+      if (sort.key === TRAINING) {
+        return dimensionOrder(TRAINING, a, b) * direction || dimensionOrder("model", a, b);
       }
       const left = metricValue(a, sort.key, "f1");
       const right = metricValue(b, sort.key, "f1");
@@ -220,7 +292,7 @@
   }
 
   function firstSortDirection(key) {
-    return key === "model" || key === "training_condition" ? "asc" : "desc";
+    return key === "model" || key === TRAINING ? "asc" : "desc";
   }
 
   function sortLabel(key) {
@@ -239,6 +311,10 @@
     };
   }
 
+  /* Two decimals, not one. Rounding to a single decimal collapses genuinely
+     different scores into a tie in thirteen of this bundle's context/metric
+     combinations — Slovenian written LAS reaches 93.38 and 93.40 — which would
+     make the best-value emphasis arbitrary. */
   function formatScore(value) {
     if (value == null || Number.isNaN(Number(value))) return "—";
     return Number(value).toFixed(2);
@@ -261,10 +337,65 @@
       .join(" · ");
   }
 
+  /* The heading over the table, in the reader's words rather than the manifest's. */
+  function contextTitle(state) {
+    const parts = [label("language", state.language)];
+    if (state.test_condition) parts.push(label("test_condition", state.test_condition) + " test data");
+    return parts.join(" · ");
+  }
+
+  function countSummary(rows, state) {
+    const systems = new Set(rows.map(row => row.model)).size;
+    const parts = [
+      systems + (systems === 1 ? " system" : " systems"),
+      rows.length + (rows.length === 1 ? " run" : " runs")
+    ];
+    if (state[TRAINING]) {
+      parts.push(label(TRAINING, state[TRAINING]) + " training");
+    }
+    return parts.join(" · ");
+  }
+
+  /* One exact run, addressed the way the analysis page expects it. */
+  function analysisUrl(state, row) {
+    const params = new URLSearchParams();
+    params.set(QUERY_NAMES.language, row.language);
+    params.set(QUERY_NAMES.test_condition, row.test_condition);
+    params.set(QUERY_NAMES.model, row.model);
+    params.set(QUERY_NAMES.training_condition, row.training_condition);
+    return "analysis.html?" + params.toString();
+  }
+
+  /* index.html and app.js are separate files that a browser caches independently,
+     so a reader can end up running one version's script against another version's
+     markup. That fails deep inside rendering as an opaque null reference, so the
+     contract between the two is checked once, up front, and reported in terms the
+     reader can act on. The ?v= query on the script tags is what prevents the pairing
+     in the first place; this is the net under it. */
+  const REQUIRED_ELEMENTS = [
+    "language-control", "test-control", "training-control",
+    "context-title", "context-meta", "context-note",
+    "caveat", "request-note", "empty",
+    "table-wrap", "comparison", "comparison-cols", "comparison-head",
+    "source-details", "url-note"
+  ];
+
+  function missingElements(doc, required) {
+    return (required || REQUIRED_ELEMENTS).filter(id => !doc.getElementById(id));
+  }
+
+  function mismatchMessage(missing) {
+    return "This page's markup does not match its script (missing: " +
+      missing.join(", ") + "). The browser is most likely serving a cached copy of " +
+      "one of them — reload with Ctrl+Shift+R, or Cmd+Shift+R on macOS.";
+  }
+
   function start(data, doc, browserWindow) {
     if (!data || !Array.isArray(data.rows) || !data.rows.length) {
       throw new Error("The result bundle contains no rows.");
     }
+    const missing = missingElements(doc);
+    if (missing.length) throw new Error(mismatchMessage(missing));
 
     /* Reading location is guarded for the same reason writeUrl is: a restricted
        origin must cost the reader their deep link, not the whole interface. */
@@ -277,20 +408,17 @@
     let context = resolveContext(data, requested);
     let state = context.state;
     let invalidRequest = context.invalid;
-    let sort = { key: null, direction: null };
-    let openRun = "";
     let urlSyncBlocked = false;
+    let userSorted = false;
 
     const metrics = comparisonMetrics(data);
     const groups = comparisonGroups(data);
+    const hasPrimary = metrics.includes(PRIMARY_METRIC);
 
-    /* Restore an opened run from the URL only if it exists in this context. */
-    const initialRows = rowsFor(data, state);
-    if (requested.model && requested.training_condition) {
-      const wanted = findRun(initialRows, requested.model, requested.training_condition);
-      if (wanted) openRun = runId(wanted);
-      else invalidRequest = true;
-    }
+    const singleTraining = () => Boolean(state[TRAINING]);
+    const defaultSort = () =>
+      singleTraining() && hasPrimary ? { key: PRIMARY_METRIC, direction: "desc" } : { key: null, direction: null };
+    let sort = defaultSort();
 
     /* Syncing the address bar is a convenience, not part of rendering a result.
        Some environments refuse History API writes outright — a document with an
@@ -303,12 +431,7 @@
       const params = new URLSearchParams();
       params.set(QUERY_NAMES.language, state.language);
       params.set(QUERY_NAMES.test_condition, state.test_condition);
-      const rows = rowsFor(data, state);
-      const open = rows.find(row => runId(row) === openRun);
-      if (open) {
-        params.set(QUERY_NAMES.model, open.model);
-        params.set(QUERY_NAMES.training_condition, open.training_condition);
-      }
+      params.set(QUERY_NAMES[TRAINING], state[TRAINING] || TRAINING_ALL);
       const query = params.toString();
       doc.body.dataset.stateUrl = query;
 
@@ -336,25 +459,32 @@
       note.hidden = false;
     }
 
-    function renderContextControl(dimension, container, labelId) {
-      const options = contextValues(data, state, dimension);
+    /* --------------------------------------------------------------- controls */
+
+    function renderContextControl(dimension, container, labelId, extra) {
+      const values = contextValues(data, state, dimension);
+      const options = (extra || []).concat(values.map(value => ({
+        value: value,
+        text: label(dimension, value)
+      })));
       container.replaceChildren();
 
       /* A handful of values reads better as a segmented control; a long list
          (a future benchmark may have many) falls back to a native select. */
-      if (options.length <= 4) {
+      if (options.length <= 5) {
         const group = doc.createElement("div");
         group.className = "seg";
         group.setAttribute("role", "group");
         group.setAttribute("aria-labelledby", labelId);
-        for (const value of options) {
+        for (const option of options) {
           const button = doc.createElement("button");
           button.type = "button";
-          button.className = "seg-btn" + (options.length === 1 ? " solo" : "");
-          button.textContent = label(dimension, value);
-          button.setAttribute("aria-pressed", String(value === state[dimension]));
+          button.className = "seg-btn";
+          button.textContent = option.text;
+          const selected = option.value === (state[dimension] || "");
+          button.setAttribute("aria-pressed", String(selected));
           if (options.length === 1) button.setAttribute("aria-disabled", "true");
-          else button.addEventListener("click", () => choose(dimension, value));
+          else button.addEventListener("click", () => choose(dimension, option.value));
           group.appendChild(button);
         }
         container.appendChild(group);
@@ -363,46 +493,54 @@
 
       const select = doc.createElement("select");
       select.setAttribute("aria-labelledby", labelId);
-      for (const value of options) {
-        const option = doc.createElement("option");
-        option.value = value;
-        option.textContent = label(dimension, value);
-        option.selected = value === state[dimension];
-        select.appendChild(option);
+      for (const option of options) {
+        const node = doc.createElement("option");
+        node.value = option.value;
+        node.textContent = option.text;
+        node.selected = option.value === (state[dimension] || "");
+        select.appendChild(node);
       }
       select.addEventListener("change", event => choose(dimension, event.target.value));
       container.appendChild(select);
     }
 
     function choose(dimension, value) {
-      if (state[dimension] === value) return;
+      const current = state[dimension] || "";
+      if (current === value) return;
+      const wasSingle = singleTraining();
       const next = Object.assign({}, state, { [dimension]: value });
       /* Later context dimensions may not survive an earlier change. */
       for (const downstream of CONTEXT_DIMENSIONS.slice(CONTEXT_DIMENSIONS.indexOf(dimension) + 1)) {
-        delete next[downstream];
+        if (downstream !== TRAINING) delete next[downstream];
       }
-      const previous = data.rows.find(row => runId(row) === openRun);
       state = resolveContext(data, next).state;
+      /* A choice the reader just made is never a broken link. */
       invalidRequest = false;
-      /* Keep the same system/training open across a context change when it exists. */
-      const carried = previous && findRun(rowsFor(data, state), previous.model, previous.training_condition);
-      openRun = carried ? runId(carried) : "";
+      if (wasSingle !== singleTraining()) reconcileSort();
       render();
     }
 
+    /* The two table shapes do not share every sort key, and an untouched table
+       should open in the ordering that suits the shape it is in. */
+    function reconcileSort() {
+      const valid = sort.key === "model" ||
+        metrics.includes(sort.key) ||
+        (sort.key === TRAINING && !singleTraining());
+      if (!userSorted || !valid) sort = defaultSort();
+    }
+
+    /* ------------------------------------------------------------------ table */
+
     function renderHead() {
+      const grouped = !singleTraining();
       const colgroup = doc.getElementById("comparison-cols");
       colgroup.replaceChildren();
-      for (const className of ["c-model", "c-train"]) {
-        const col = doc.createElement("col");
-        col.className = className;
-        colgroup.appendChild(col);
-      }
+      colgroup.appendChild(cell("col", null, "c-model"));
+      if (grouped) colgroup.appendChild(cell("col", null, "c-train"));
       for (let index = 0; index < metrics.length; index += 1) {
-        const col = doc.createElement("col");
-        col.className = "c-metric";
-        colgroup.appendChild(col);
+        colgroup.appendChild(cell("col", null, "c-metric"));
       }
+      colgroup.appendChild(cell("col", null, "c-action"));
 
       const head = doc.getElementById("comparison-head");
       head.replaceChildren();
@@ -410,57 +548,81 @@
       const groupRow = doc.createElement("tr");
       groupRow.className = "groups";
       const spacer = cell("th", "");
-      spacer.colSpan = 2;
+      spacer.colSpan = grouped ? 2 : 1;
       groupRow.appendChild(spacer);
       for (const group of groups) {
         const th = cell("th", group.name, "grp");
         th.colSpan = group.metrics.length;
+        th.scope = "colgroup";
         groupRow.appendChild(th);
       }
+      groupRow.appendChild(cell("th", ""));
       head.appendChild(groupRow);
 
       const columnRow = doc.createElement("tr");
       columnRow.className = "cols";
       columnRow.appendChild(sortableHeader("model", "System", ""));
-      columnRow.appendChild(sortableHeader("training_condition", "Training data", ""));
+      if (grouped) columnRow.appendChild(sortableHeader(TRAINING, "Training", ""));
       for (const group of groups) {
         group.metrics.forEach((metric, index) => {
-          columnRow.appendChild(sortableHeader(
-            metric,
-            metric,
-            "num" + (index === 0 ? " grp-start" : ""),
-            METRIC_DESCRIPTIONS[metric]
-          ));
+          let className = "num" + (index === 0 ? " grp-start" : "");
+          if (metric === PRIMARY_METRIC) className += " primary";
+          columnRow.appendChild(sortableHeader(metric, metric, className));
         });
       }
+      const action = cell("th", null, "c-action");
+      action.scope = "col";
+      action.appendChild(cell("span", "Run", "sr-only"));
+      columnRow.appendChild(action);
       head.appendChild(columnRow);
     }
 
-    function sortableHeader(key, text, className, description) {
+    /* Sorting follows the CJVT table's model: a click on a new column sorts by it,
+       a click on the column already sorted reverses it, and sorting is never turned
+       off by accident — clearing is an explicit ✕ on the active header that restores
+       the table's natural order. Enter and Space do the same as a click. */
+    function sortableHeader(key, text, className) {
       const th = cell("th", null, (className + " sortable").trim());
       th.scope = "col";
       th.tabIndex = 0;
-      th.setAttribute("role", "columnheader");
+      th.dataset.sortKey = key;
       const active = sort.key === key;
+      const numeric = className.indexOf("num") !== -1;
       th.setAttribute("aria-sort", active ? (sort.direction === "asc" ? "ascending" : "descending") : "none");
+      th.setAttribute("aria-label", text + ". Activate to sort.");
+      th.title = active ? "Click to reverse the sort" : "Click to sort by " + text;
+
+      /* Reserved at a constant width so activating a sort never re-flows the row,
+         and leading on a right-aligned column so the label keeps the numbers' edge. */
+      const indicator = cell("span", null, "sort-ind");
+      indicator.append(cell("span", active ? (sort.direction === "asc" ? "↑" : "↓") : "", "sort-arrow"));
+
+      const label = cell("span", text, "col-label");
+      const description = METRIC_DESCRIPTIONS[key];
       if (description) {
-        th.classList.add("metric-explained");
-        th.dataset.tooltip = description;
-        th.setAttribute("aria-label", text + " — " + description + ". Activate to sort.");
-        const abbreviation = cell("abbr", text, "metric-help");
-        abbreviation.setAttribute("aria-hidden", "true");
-        th.append(abbreviation);
+        /* The expansion of the abbreviation, on hover and on keyboard focus, and
+           announced through aria-describedby rather than duplicated into the name. */
+        label.classList.add("has-tip");
+        const tipId = "tip-" + key.replace(/[^A-Za-z0-9_-]/g, "");
+        const tip = cell("span", description, "col-tip");
+        tip.id = tipId;
+        tip.setAttribute("role", "tooltip");
+        th.setAttribute("aria-describedby", tipId);
+        th.dataset.key = key;
+        if (numeric) th.append(indicator, label, tip);
+        else th.append(label, indicator, tip);
+      } else if (numeric) {
+        th.append(indicator, label);
       } else {
-        th.append(doc.createTextNode(text));
+        th.append(label, indicator);
       }
-      th.append(cell("span", active ? (sort.direction === "asc" ? "▲" : "▼") : "", "sort-mark"));
+
       const activate = () => {
-        const firstDirection = firstSortDirection(key);
-        if (sort.key !== key) sort = { key: key, direction: firstDirection };
-        else if (sort.direction === firstDirection) {
-          sort = { key: key, direction: firstDirection === "asc" ? "desc" : "asc" };
-        } else sort = { key: null, direction: null };
+        userSorted = true;
+        if (sort.key !== key) sort = { key: key, direction: firstSortDirection(key) };
+        else sort = { key: key, direction: sort.direction === "asc" ? "desc" : "asc" };
         render();
+        focusHeader(key);
       };
       th.addEventListener("click", activate);
       th.addEventListener("keydown", event => {
@@ -472,75 +634,136 @@
       return th;
     }
 
-    function renderTable(rows, mixedStatus) {
-      const body = doc.getElementById("comparison-body");
-      body.replaceChildren();
-      const best = bestValues(rows, metrics);
-      const ordered = sortRows(rows, sort, data);
-      const grouped = !sort.key || sort.key === "model";
-      let previousModel = null;
+    /* Clearing a sort is explicit, as in the CJVT table — a click on a header only
+       ever reverses it. The control lives on the summary line rather than inside a
+       header, where at a 106px column width it sat on the cell's centre and was easy
+       to hit when aiming to reverse the sort. */
+    function renderContextMeta(rows) {
+      const meta = doc.getElementById("context-meta");
+      meta.replaceChildren();
+      if (!rows.length) return;
+      meta.append(doc.createTextNode(countSummary(rows, state)));
+      if (!sort.key) return;
+      meta.append(cell("span", "Sorted by " + sortLabel(sort.key) +
+        (sort.direction === "asc" ? " ↑" : " ↓"), "sort-status"));
+      const clear = cell("button", "Clear sort", "inline-toggle");
+      clear.type = "button";
+      clear.addEventListener("click", () => {
+        sort = { key: null, direction: null };
+        userSorted = false;
+        render();
+      });
+      meta.appendChild(clear);
+    }
 
-      for (const row of ordered) {
-        const tr = doc.createElement("tr");
-        tr.className = "row-select";
-        if (grouped && previousModel !== null && row.model !== previousModel) {
-          tr.classList.add("group-start");
-        }
-        previousModel = row.model;
-        if (runId(row) === openRun) tr.classList.add("is-open");
-        tr.tabIndex = 0;
-        tr.setAttribute("aria-expanded", String(runId(row) === openRun));
+    /* The header row is rebuilt on every render, so focus has to be put back on the
+       column the reader just acted on. */
+    function focusHeader(key) {
+      const th = doc.querySelector('#comparison thead th[data-sort-key="' + key + '"]');
+      if (th && typeof th.focus === "function") th.focus();
+    }
 
-        const modelCell = cell("td", null, "model");
-        modelCell.append(cell("span", "↳", "marker"));
-        modelCell.append(doc.createTextNode(label("model", row.model)));
-        tr.appendChild(modelCell);
-
-        const trainingText = label("training_condition", row.training_condition) +
-          (mixedStatus && row.result_status === "success" && !isAuthoritative(row) ? " †" : "");
-        tr.appendChild(cell("td", trainingText, "train"));
-
-        const reason = unavailableReason(row);
-        if (reason) {
-          const td = cell("td", reason, "no-data-cell");
-          td.colSpan = metrics.length;
+    function scoreCells(tr, row, best) {
+      const reason = unavailableReason(row);
+      if (reason) {
+        const td = cell("td", reason, "no-data-cell");
+        td.colSpan = metrics.length;
+        tr.appendChild(td);
+        tr.classList.add("no-data");
+        return;
+      }
+      for (const group of groups) {
+        group.metrics.forEach((metric, index) => {
+          const value = metricValue(row, metric, "f1");
+          let className = "num" + (index === 0 ? " grp-start" : "");
+          if (metric === PRIMARY_METRIC) className += " primary";
+          if (best[metric] != null && value === best[metric]) className += " best";
+          const td = cell("td", formatScore(value), className);
+          if (className.indexOf("best") !== -1) {
+            td.appendChild(cell("span", " (best)", "sr-only"));
+          }
           tr.appendChild(td);
-          tr.classList.add("no-data");
-        } else {
-          for (const group of groups) {
-            group.metrics.forEach((metric, index) => {
-              const value = metricValue(row, metric, "f1");
-              let className = "num" + (index === 0 ? " grp-start" : "");
-              if (best[metric] != null && value === best[metric]) className += " best";
-              tr.appendChild(cell("td", formatScore(value), className));
-            });
-          }
-        }
-
-        const toggle = () => {
-          openRun = openRun === runId(row) ? "" : runId(row);
-          render();
-        };
-        tr.addEventListener("click", toggle);
-        tr.addEventListener("keydown", event => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            toggle();
-          }
         });
-        body.appendChild(tr);
+      }
+    }
+
+    /* The visible action teaches what a row does; the whole row stays clickable
+       as a convenience. The link is the only tab stop, so keyboard users get one
+       predictable target per run rather than two. */
+    function actionCell(tr, row, mixedStatus) {
+      const td = cell("td", null, "c-action");
+      const link = doc.createElement("a");
+      link.className = "analyse";
+      link.href = analysisUrl(state, row);
+      link.append(doc.createTextNode("Analyse"));
+      link.append(cell("span", "→", "arrow"));
+      link.setAttribute("aria-label",
+        "Analyse " + label("model", row.model) + ", " +
+        label(TRAINING, row[TRAINING]) + " training, " + contextDescription(state) + " test data");
+      td.appendChild(link);
+      tr.appendChild(td);
+
+      tr.classList.add("actionable");
+      tr.addEventListener("click", event => {
+        if (event.defaultPrevented || event.button || event.metaKey || event.ctrlKey ||
+            event.shiftKey || event.altKey) return;
+        if (event.target.closest("a")) return;
+        link.click();
+      });
+      if (mixedStatus && row.result_status === "success" && !isAuthoritative(row)) {
+        tr.classList.add("provisional");
+      }
+    }
+
+    function renderTable(rows, mixedStatus) {
+      const table = doc.getElementById("comparison");
+      for (const body of Array.from(table.tBodies)) table.removeChild(body);
+      const best = bestValues(rows, metrics);
+      const grouped = !singleTraining();
+
+      const makeRow = row => {
+        return doc.createElement("tr");
+      };
+
+      if (!grouped) {
+        const body = doc.createElement("tbody");
+        for (const row of sortRows(rows, sort, data)) {
+          const tr = makeRow(row);
+          const th = cell("th", label("model", row.model), "model");
+          th.scope = "row";
+          tr.appendChild(th);
+          scoreCells(tr, row, best);
+          actionCell(tr, row, mixedStatus);
+          body.appendChild(tr);
+        }
+        table.appendChild(body);
+        return;
       }
 
-      /* Sticky headers only once the table is long enough to scroll behind them.
-         The second header row must sit exactly below the first, so its offset is
-         measured rather than guessed. */
-      const wrap = doc.getElementById("table-wrap");
-      const tall = ordered.length > 14;
-      wrap.classList.toggle("tall", tall);
-      if (tall) {
-        const groupRow = doc.querySelector("#comparison-head tr.groups");
-        const height = groupRow && groupRow.getBoundingClientRect ? groupRow.getBoundingClientRect().height : 0;
-        if (height) wrap.style.setProperty("--group-h", Math.round(height) + "px");
+      /* One tbody per system, with the system named once for the whole group.
+         scope="rowgroup" keeps that association for assistive technology, so the
+         name is not lost on the second and third training rows. */
+      for (const group of sortGroups(rows, sort, data)) {
+        const body = doc.createElement("tbody");
+        body.className = "system-group";
+        group.rows.forEach((row, index) => {
+          const tr = makeRow(row);
+          if (index === 0) {
+            const th = cell("th", label("model", row.model), "model");
+            th.scope = "rowgroup";
+            th.rowSpan = group.rows.length;
+            tr.appendChild(th);
+          }
+          const trainingCell = cell("td", label(TRAINING, row[TRAINING]), "train");
+          if (mixedStatus && row.result_status === "success" && !isAuthoritative(row)) {
+            trainingCell.append(cell("span", " †", "flag"));
+          }
+          tr.appendChild(trainingCell);
+          scoreCells(tr, row, best);
+          actionCell(tr, row, mixedStatus);
+          body.appendChild(tr);
+        });
+        table.appendChild(body);
       }
     }
 
@@ -558,8 +781,9 @@
       if (provisional.length === evaluated.length) {
         node.append(cell("strong", "Provisional results — gold version not yet confirmed."));
         node.append(doc.createTextNode(
-          " The scores are reproducible evaluator output over the prediction and gold files named below, " +
-          "but the gold release has not been confirmed for this benchmark. Not citable as benchmark results."
+          " The scores are reproducible evaluator output over the prediction and gold files named " +
+          "on each run's analysis page, but the gold release has not been confirmed for this " +
+          "benchmark. Not citable as benchmark results."
         ));
         node.hidden = false;
         return false;
@@ -573,184 +797,86 @@
       return true;
     }
 
-    function renderDetail(rows) {
-      const section = doc.getElementById("detail");
-      const row = rows.find(candidate => runId(candidate) === openRun) || null;
-      if (!row) {
-        section.hidden = true;
-        return;
-      }
-      section.hidden = false;
-
-      const heading = doc.getElementById("detail-heading");
-      heading.replaceChildren();
-      heading.append(doc.createTextNode(label("model", row.model) + " · " +
-        label("training_condition", row.training_condition) + " training"));
-      heading.append(cell("span", " — " + contextDescription(state) + " test", "qualifier"));
-
-      /* A route to the diagnostic page, not a second view of this one. The link
-         carries the same four parameters the overview already uses, so the target
-         opens on exactly the run that is open here. */
-      const analysisLink = doc.getElementById("detail-analysis-link");
-      if (analysisLink) {
-        const params = new URLSearchParams();
-        params.set(QUERY_NAMES.language, state.language);
-        params.set(QUERY_NAMES.test_condition, state.test_condition);
-        params.set(QUERY_NAMES.model, row.model);
-        params.set(QUERY_NAMES.training_condition, row.training_condition);
-        analysisLink.href = "analysis.html?" + params.toString();
-      }
-
-      const fieldsPresent = new Set((data.metrics || []).flatMap(metric => metric.fields));
-      const fields = SCORE_FIELDS.concat(COUNT_FIELDS).filter(field => fieldsPresent.has(field));
-
-      const head = doc.getElementById("metrics-head");
-      head.replaceChildren();
-      const headRow = doc.createElement("tr");
-      headRow.appendChild(cell("th", "Metric"));
-      for (const field of fields) headRow.appendChild(cell("th", label("metric_field", field), "num"));
-      head.appendChild(headRow);
-
-      const body = doc.getElementById("metrics-body");
-      body.replaceChildren();
-      const reason = unavailableReason(row);
-      if (reason) {
-        const tr = doc.createElement("tr");
-        tr.className = "no-data";
-        const td = cell("td", reason);
-        td.colSpan = fields.length + 1;
-        tr.appendChild(td);
-        body.appendChild(tr);
-      } else {
-        const layerOf = name => METRIC_LAYERS.findIndex(layer => layer.includes(name));
-        let previousLayer = null;
-        for (const definition of data.metrics) {
-          const tr = doc.createElement("tr");
-          const layer = layerOf(definition.name);
-          if (previousLayer !== null && layer !== previousLayer) tr.className = "layer-start";
-          previousLayer = layer;
-          tr.appendChild(cell("td", definition.name, "metric-name"));
-          for (const field of fields) {
-            const value = metricValue(row, definition.name, field);
-            const text = COUNT_FIELDS.includes(field) ? formatCount(value) : formatScore(value);
-            tr.appendChild(cell("td", text, "num"));
-          }
-          body.appendChild(tr);
-        }
-      }
-
-      const summaryList = doc.getElementById("provenance-summary");
-      const technicalList = doc.getElementById("provenance-list");
-      summaryList.replaceChildren();
-      technicalList.replaceChildren();
-      const summaryEntries = [
-        ["Gold cohort", row.gold_cohort, false],
-        ["Gold status", row.gold_status, false],
-        ["Repeat check", row.repeat_deterministic, false]
-      ];
-      const technicalEntries = [
-        ["Gold file", row.gold_file, true],
-        ["Gold SHA-256", row.gold_sha256, true],
-        ["Prediction", row.prediction_file, true],
-        ["Prediction SHA-256", row.prediction_sha256, true],
-        ["Evaluator", row.evaluator_file, true],
-        ["Evaluator SHA-256", row.evaluator_sha256, true]
-      ];
-      for (const [list, entries] of [
-        [summaryList, summaryEntries],
-        [technicalList, technicalEntries]
-      ]) {
-        for (const [term, value, mono] of entries) {
-          if (!value) continue;
-          list.append(cell("dt", term), cell("dd", value, mono ? "mono" : ""));
-        }
-      }
-
-      const note = doc.getElementById("detail-note");
-      const hasCounts = COUNT_FIELDS.some(field => fields.includes(field));
-      note.textContent = hasCounts
-        ? "Score fields are percentage points; count fields are raw evaluator counts."
-        : "Percentage points. This result TSV carries no raw-count columns, so counts are not shown.";
-    }
-
     function render() {
       renderContextControl("language", doc.getElementById("language-control"), "language-label");
       renderContextControl("test_condition", doc.getElementById("test-control"), "test-label");
+      renderContextControl(TRAINING, doc.getElementById("training-control"), "training-label",
+        [{ value: "", text: "All" }]);
 
       const rows = rowsFor(data, state);
-      if (openRun && !rows.some(row => runId(row) === openRun)) openRun = "";
 
-      doc.getElementById("table-heading").textContent =
-        "Systems compared — " + contextDescription(state);
-      const count = doc.getElementById("row-count");
-      count.replaceChildren();
-      if (sort.key) {
-        const indicator = cell(
-          "span",
-          "Sorted by " + sortLabel(sort.key) + " " + (sort.direction === "asc" ? "↑" : "↓"),
-          "sort-status"
-        );
-        indicator.setAttribute("aria-hidden", "true");
-        count.appendChild(indicator);
-      }
-      count.appendChild(cell(
-        "span",
-        rows.length + (rows.length === 1 ? " run" : " runs"),
-        "run-total"
-      ));
+      doc.getElementById("context-title").textContent = contextTitle(state);
+      renderContextMeta(rows);
 
       const empty = doc.getElementById("empty");
       const wrap = doc.getElementById("table-wrap");
-      const note = doc.getElementById("table-note");
+      const note = doc.getElementById("context-note");
       const hasRows = rows.length > 0;
       empty.hidden = hasRows;
       wrap.hidden = !hasRows;
       note.hidden = !hasRows;
+
       if (!hasRows) {
-        empty.textContent = "No evaluated runs for this combination.";
-        doc.getElementById("detail").hidden = true;
+        empty.replaceChildren();
+        empty.append(cell("p", "No results for this combination", "empty-title"));
+        empty.append(cell("p", "Try another test or training condition.", "empty-hint"));
         doc.getElementById("caveat").hidden = true;
       } else {
         renderHead();
         const mixed = renderCaveat(rows);
         renderTable(rows, mixed);
-        renderDetail(rows);
 
-        const parts = ["F1 in percentage points."];
-        if (Object.keys(bestValues(rows, metrics)).length) parts.push("Bold marks the highest value in a column.");
+        const parts = ["Scores are F1 unless noted. Higher is better."];
+        if (Object.keys(bestValues(rows, metrics)).length) {
+          parts.push("Bold marks the best value in each column.");
+        }
         if (mixed) parts.push("† marks a run whose gold version is unconfirmed.");
-        parts.push("Select a row for the complete evaluator output.");
         note.textContent = parts.join(" ");
       }
 
       const request = doc.getElementById("request-note");
       request.hidden = !invalidRequest;
       request.textContent = invalidRequest
-        ? "Part of the requested link was unavailable; the nearest existing result is shown."
+        ? "Part of the requested link was unavailable, so the nearest existing results are shown."
         : "";
 
-      doc.getElementById("source-meta").textContent =
-        data.source.path + " · " + data.source.row_count + " rows · SHA-256 " + data.source.sha256;
+      /* The file this page was built from, kept for citation and reproduction but
+         behind a disclosure: a path and a checksum are implementation facts, not
+         something a reader needs in front of the results. */
+      const details = doc.getElementById("source-details");
+      details.replaceChildren();
+      for (const entry of [
+        ["Result set", data.source.path, true],
+        ["Rows", String(data.source.row_count), false],
+        ["SHA-256", data.source.sha256, true]
+      ]) {
+        if (!entry[1]) continue;
+        details.append(cell("dt", entry[0]), cell("dd", entry[1], entry[2] ? "mono" : ""));
+      }
 
       writeUrl();
       doc.body.dataset.uiReady = "true";
     }
 
-    doc.getElementById("detail-close").addEventListener("click", () => {
-      openRun = "";
-      render();
-    });
-
     render();
     return {
       getState: () => Object.assign({}, state),
-      getOpenRun: () => openRun,
       getSort: () => Object.assign({}, sort)
     };
   }
 
   return {
     CONTEXT_DIMENSIONS,
+    TRAINING_ALL,
+    PRIMARY_METRIC,
+    METRIC_DESCRIPTIONS,
+    METRIC_LAYERS,
+    SCORE_FIELDS,
+    COUNT_FIELDS,
+    QUERY_NAMES,
+    REQUIRED_ELEMENTS,
+    missingElements,
+    mismatchMessage,
     label,
     lookup,
     contextValues,
@@ -762,19 +888,27 @@
     comparisonMetrics,
     comparisonGroups,
     bestValues,
+    groupRows,
+    sortGroups,
     sortRows,
+    sortLabel,
+    contextTitle,
+    countSummary,
+    analysisUrl,
     isAuthoritative,
     unavailableReason,
     parseRequest,
     formatScore,
+    formatCount,
     start
   };
 });
 
 if (typeof window !== "undefined") {
   window.addEventListener("DOMContentLoaded", function () {
-    /* This module is also loaded by the analysis page purely for its display names
-       and URL helpers, so the comparison interface only starts on its own page. */
+    /* This module is also loaded by the analysis page for its display names, metric
+       vocabulary and URL helpers, so the comparison interface only starts on its
+       own page. */
     if (document.body.dataset.ui !== "overview") return;
     try {
       window.AMBenchmarkUI.start(window.AM_BENCHMARK_RESULTS, document, window);

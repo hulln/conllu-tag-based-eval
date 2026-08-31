@@ -142,6 +142,25 @@ These are four separate claims and only the first three were tested here.
   handoff. Exact release labels remain descriptive metadata where text alone cannot
   distinguish releases; the supplied file checksums are authoritative.
 
+## What this evidence is used for
+
+The identifications above are what the published sentence-example layer stands on.
+`am_benchmark/scripts/build_examples_data.py` republishes gold sentences only for a
+cohort whose corpus is identified exactly here *and* publicly licensed:
+
+| Cohort | Corpora behind the allowlist entry | Licence | Examples published |
+|---|---|---|---|
+| EN written | UD_English-GUM test, 9 written genres | CC BY-NC-SA 4.0 | yes |
+| EN spoken | UD_English-GUM test, 6 spoken genres | CC BY-NC-SA 4.0 | yes |
+| NL written | UD_Dutch-LassySmall test + UD_Dutch-Alpino test | CC BY-SA 4.0 (both) | yes, attributed to both treebanks |
+| NL spoken | unidentified (GCND only a WEAK candidate, access-restricted) | unknown | **no** |
+| SL written | UD_Slovenian-SSJ test | CC BY-SA 4.0 | yes |
+| SL spoken | UD_Slovenian-SST test | CC BY-SA 4.0 | yes |
+
+The WEAK identification of NL spoken is precisely why no Dutch spoken sentence is
+published: an unidentified corpus cannot carry an established licence. The aggregate
+diagnostics, which hold no corpus text at all, cover all six cohorts regardless.
+
 ## Reference files used
 
 Downloaded to scratch space for comparison, then discarded. All are public

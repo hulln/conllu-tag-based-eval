@@ -84,8 +84,9 @@ exact structure/surface matches, evaluator compatibility, and normalisation.
 - `source/` — immutable local prediction inputs and `source/gold/` authoritative
   local gold; these transferred/private inputs remain gitignored.
 - `scripts/` — audit, resolution, gold mapping, evaluation, and UI build tools.
-- `ui/` — isolated local static benchmark UI, its detailed-analysis page, and the
-  generated result and diagnostic data.
+- `../tables/am_benchmark/` — the benchmark interface and every bundle the build
+  tools generate. There is one copy of it and it is the deployed one; `tables/` is
+  the site root, as it already is for the v5 comparison table.
 - `reports/source_resolution.md` — source evidence and canonical decisions.
 - `reports/canonical_predictions.tsv` — one row per canonical logical run.
 - `reports/excluded_or_ambiguous_files.tsv` — every noncanonical physical file.
@@ -107,7 +108,8 @@ python3 scripts/build_gold_requirements.py
 python3 scripts/run_benchmark_evaluation.py --execute --initial-debugging-only --model spacy --model stanza --repeat-check
 python3 scripts/build_ui_data.py
 python3 scripts/build_diagnostics_data.py
-python3 -m http.server 8000 --bind 127.0.0.1
+python3 scripts/build_examples_data.py
+cd .. && python3 -m http.server 8000 --bind 127.0.0.1 --directory tables
 ~~~
 
 The authoritative result filename is available only with
@@ -115,17 +117,25 @@ The authoritative result filename is available only with
 An unrestricted run writes `reports/general_evaluation_results.tsv` instead and
 marks the 42 non-stable system rows as provisional.
 
-Open `http://127.0.0.1:8000/ui/`. The browser derives all available dimensions
-from the 36-row result bundle. NL exposes only the canonical spoken condition,
-and authoritative rows do not display a provisional warning.
+Open `http://127.0.0.1:8000/am_benchmark/`. The reader picks a language, a kind of
+test data and a training setup; the table then compares the systems inside that
+context. All available options are derived from the 36-row result bundle, NL exposes
+only the canonical spoken condition, and authoritative rows do not display a
+provisional warning.
 
-Selecting a run offers `ui/analysis.html`, a second page with aggregate error and
-accuracy diagnostics for that run alone: LAS by dependency relation, UPOS accuracy,
-the three dependency error categories, and tagging confusions. Its data is generated
-separately, one file per run, and carries derived counts and annotation labels only —
-no corpus sentence, fragment or token — because redistribution permission has not
-been established for every supplied gold source. See `ui/README.md` and
-`scripts/README.md`.
+Every row carries an `Analyse →` link to `analysis.html`, a second page reporting one
+run alone: five headline metrics, LAS by dependency relation, UPOS accuracy, the
+three dependency error categories, tagging confusions, the complete evaluator output
+and the reproducibility block. Its error and accuracy data is generated separately,
+one file per run, and carries derived counts and annotation labels only — no corpus
+sentence, fragment or token — for every run without exception.
+
+Sentence examples are a second, separate layer under
+`../tables/am_benchmark/data/examples/`, published only for the cohorts whose
+underlying treebank may be redistributed: EN written, EN spoken, NL written, SL
+written and SL spoken, that is 30 of the 36 stable runs. NL spoken has none, because
+its corpus is not identified with enough confidence to establish redistribution
+rights. See `../tables/am_benchmark/README.md` and `scripts/README.md`.
 
 ## Next stage
 

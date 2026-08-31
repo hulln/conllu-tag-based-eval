@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>Multilingual tagging and parsing benchmark</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css?v=10">
 </head>
 <body data-ui="overview">
   <noscript>
@@ -14,13 +15,11 @@
 
   <header class="masthead">
     <h1>Multilingual tagging and parsing benchmark</h1>
-    <span class="scope">CoNLL-U evaluation &middot; English, Dutch and Slovenian</span>
+    <p class="lede">
+      Compare tagging and dependency parsing systems across languages, training setups
+      and written or spoken test data.
+    </p>
   </header>
-
-  <p class="intro">
-    These results compare spaCy and Stanza&mdash;the currently published stable subset&mdash;across
-    training conditions on written and spoken test data; additional systems remain under evaluation.
-  </p>
 
   <div class="context" id="context">
     <div class="field">
@@ -31,15 +30,20 @@
       <span class="field-label" id="test-label">Test data</span>
       <div id="test-control"></div>
     </div>
+    <div class="field">
+      <span class="field-label" id="training-label">Training data</span>
+      <div id="training-control"></div>
+    </div>
   </div>
 
-  <div class="section-head">
-    <h2 id="table-heading">Systems compared</h2>
-    <span class="count" id="row-count"></span>
+  <div class="results-head">
+    <h2 id="context-title"></h2>
+    <p class="results-meta" id="context-meta"></p>
+    <p class="results-note" id="context-note"></p>
   </div>
 
-  <p class="caveat" id="caveat" hidden></p>
-  <p class="request-note caveat" id="request-note" hidden></p>
+  <p class="notice" id="caveat" hidden></p>
+  <p class="notice quiet" id="request-note" hidden></p>
 
   <div id="empty" class="empty" hidden></div>
 
@@ -50,52 +54,25 @@
       </caption>
       <colgroup id="comparison-cols"></colgroup>
       <thead id="comparison-head"></thead>
-      <tbody id="comparison-body"></tbody>
     </table>
   </div>
 
-  <p class="table-note" id="table-note"></p>
-
-  <section class="detail" id="detail" hidden>
-    <div class="detail-head">
-      <h2 id="detail-heading"></h2>
-      <div class="detail-actions">
-        <a class="detail-link" id="detail-analysis-link" href="analysis.html">Detailed analysis &rarr;</a>
-        <button type="button" class="detail-close" id="detail-close">Close &times;</button>
-      </div>
-    </div>
-    <div class="detail-grid">
-      <div class="table-wrap">
-        <table id="metrics">
-          <caption class="sr-only">Complete evaluator output for the selected run.</caption>
-          <thead id="metrics-head"></thead>
-          <tbody id="metrics-body"></tbody>
-        </table>
-      </div>
-      <aside class="provenance" id="provenance">
-        <h3>Reproducibility</h3>
-        <dl id="provenance-summary"></dl>
-        <details class="technical-details">
-          <summary>Technical details</summary>
-          <dl id="provenance-list"></dl>
-        </details>
-      </aside>
-    </div>
-    <p class="table-note" id="detail-note"></p>
-  </section>
-
   <footer class="colophon">
     <p>
-      Scores were computed with the CoNLL 2018 CoNLL-U evaluation script and loaded here as
-      precomputed results; this page does not parse data or calculate metrics in the browser.
+      Scores were computed with the CoNLL 2018 evaluation script, over the gold and
+      prediction files recorded for each run. Open a run's detailed analysis for its
+      full evaluator output and provenance.
     </p>
-    <p class="meta" id="source-meta"></p>
-    <p class="env-note" id="url-note" hidden></p>
+    <details class="disclosure disclosure-quiet">
+      <summary><span class="disclosure-label">Technical details</span></summary>
+      <dl class="provenance-list" id="source-details"></dl>
+    </details>
+    <p class="meta" id="url-note" hidden></p>
   </footer>
 
   <div id="app-error" class="fatal" hidden></div>
 
-  <script src="data/results.js"></script>
-  <script src="app.js"></script>
+  <script src="data/results.js?v=5"></script>
+  <script src="app.js?v=6"></script>
 </body>
 </html>
