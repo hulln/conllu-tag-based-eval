@@ -1,0 +1,1499 @@
+/* =============================================================================
+   IBM Plex Sans — self-hosted, three weights, no third-party request.
+
+   Subset to Latin (incl. Latin Extended-A for Slovene and Czech), the punctuation,
+   arrows and marks the interface uses, and nothing else: 24–25 kB per face. Plex's
+   figures are tabular by construction — every digit advances 600/1000 em — so the
+   numeric columns align on the glyph metrics, not on a font feature.
+
+   The single-storey g is baked in rather than switched on at runtime: the cmap maps
+   U+0067 and the four accented g's straight to Plex's .alt01 outlines, so the glyph
+   cannot depend on a font feature reaching the element. No stylistic set survives the
+   subset. Because that modifies the font, the OFL's reserved name is dropped and the
+   family is declared as "AM Benchmark Sans"; the outlines are IBM Plex Sans.
+   Licence: SIL Open Font License 1.1, fonts/LICENSE.txt.
+   ========================================================================== */
+
+@font-face {
+  font-family: "AM Benchmark Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../am_benchmark/fonts/AMBenchmarkSans-Regular.3a24ffd5.woff2") format("woff2");
+}
+@font-face {
+  font-family: "AM Benchmark Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../am_benchmark/fonts/AMBenchmarkSans-Medium.b4832305.woff2") format("woff2");
+}
+@font-face {
+  font-family: "AM Benchmark Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../am_benchmark/fonts/AMBenchmarkSans-SemiBold.e5dc06f9.woff2") format("woff2");
+}
+
+/* =============================================================================
+   Multilingual tagging and parsing benchmark — interface styles
+
+   One system for both surfaces. The overview compares systems; the analysis page
+   investigates one run. They share the table, the controls, the type scale and
+   the palette so the second never reads as a different application.
+
+   Character: precise, calm, academic. Content is the interface — rules and
+   whitespace do the structural work, not cards, shadows or colour fills.
+   ========================================================================== */
+
+:root {
+  /* ---- colour -------------------------------------------------------------
+     One accent, a desaturated ink blue, reserved for meaning: selection, links,
+     focus, the headline metric. Everything else is neutral. Contrast against the
+     page is 16.4:1 for text, 5.1:1 for muted text and 6.7:1 for the accent; white
+     on the accent fill is 7.2:1. */
+  --bg: #f7f7f4;
+  --surface: #ffffff;
+  --surface-sub: #f2f5f7;
+  --text: #17191d;
+  --muted: #626a73;
+  /* Decoration only — separator dots and the like. Never text: 3.0:1 on the page. */
+  --faint: #89919a;
+  --border: #d8dde2;
+  --border-strong: #bcc4cc;
+  --rule-faint: #eaedf0;
+  --accent: #315b7d;
+  --accent-strong: #24465f;
+  --accent-soft: #eaf1f6;
+  --focus: #315b7d;
+  --flag: #8a5a17;
+  --flag-soft: #fbf3e4;
+  --mark: #f6e7b8;
+  /* A worse score in a comparison. 6.4:1 on the surface. */
+  --neg: #b3261e;
+
+  /* ---- type ---------------------------------------------------------------
+     Two faces, three roles, and the split is the point: the interface is set in a
+     humanist sans, the material it presents is not. A relation name, a tagset label
+     and a corpus sentence are objects of study; setting them in the page's own voice
+     makes them read as prose about the data rather than as the data.
+
+     --font-ui    IBM Plex Sans (declared "AM Benchmark Sans", see above), served from
+                  this directory. Nothing is fetched from
+                  a third party, so the page loads identically offline and leaks no
+                  request. Three weights: Regular for text, Medium for headings,
+                  labels and controls, SemiBold for the best value in a column.
+     --font-data  The reader's own monospace. Tagset identifiers, dependency
+                  relations, error pairs and corpus sentences — the technical
+                  register the interface quotes rather than speaks.
+     --font-mono  The same stack, named separately because the reason differs: a
+                  checksum or a path needs character-by-character comparison, not a
+                  change of register. One face fills both roles; there is no third. */
+  --font-ui: "AM Benchmark Sans", "Segoe UI", Arial, sans-serif;
+  --font-data: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--font-data);
+
+  /* One recipe for every small uppercase label — LANGUAGE, TAGGING, UPOS, DETAILED
+     ANALYSIS. Plex's capitals are already open, so the tracking stays modest: past
+     about .06em the words stop reading as words. */
+  --label-size: 11.5px;
+  --label-track: .05em;
+
+  /* ---- spacing scale ---------------------------------------------------- */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 20px;
+  --s6: 24px;
+  --s8: 32px;
+  --s10: 40px;
+  --s12: 48px;
+  --s16: 64px;
+
+  --radius: 4px;
+  --radius-lg: 6px;
+
+  /* One field for everything: prose, notices and tables share the page width, so
+     every block ends on the same right edge. The page itself stops growing here. */
+  --page-max: 1320px;
+
+  /* ---- table grid ---------------------------------------------------------
+     One horizontal cell padding for every table on both pages. The table field
+     is pulled out by exactly this much, so a cell's *text* — header and body
+     alike — lands on the page's text grid rather than 12px inside a box. */
+  --cell-x: 12px;
+  --cell-y: 8px;
+  --head-y: 10px;
+  --bar-w: 68px;
+  --bar-gap: 8px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; padding: 0; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.52;
+  color: var(--text);
+  background: var(--bg);
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--s8) var(--s10) var(--s16);
+  /* No -webkit-font-smoothing override. Plex Regular already sets a lighter line
+     than the system faces this page used to fall back to; thinning it further on
+     macOS would take the body copy below comfortable. */
+  text-rendering: optimizeLegibility;
+}
+
+[hidden] { display: none !important; }
+
+a { color: var(--accent); text-underline-offset: 2px; }
+a:hover { color: var(--accent-strong); }
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- shared notices ------------------------------------------------
+   Every block on the page spans the same field as the tables, notices and prose
+   included, so no right edge stops short of the one above it. */
+
+.fatal,
+.noscript-note {
+  margin: 0 0 var(--s6);
+  padding: var(--s3) var(--s4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  font-size: 14px;
+}
+
+.notice {
+  margin: 0 0 var(--s4);
+  padding: var(--s3) var(--s4);
+  background: var(--flag-soft);
+  border: 1px solid #eadfc4;
+  border-radius: var(--radius);
+  font-size: 13.5px;
+  color: var(--text);
+}
+.notice.quiet {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--muted);
+}
+
+/* =============================================================================
+   OVERVIEW
+   ========================================================================== */
+
+.masthead { margin-bottom: var(--s8); }
+
+/* Plex Medium carries a title at this size without help: 600 here reads as an
+   announcement rather than a heading, and the page is not announcing anything. */
+.masthead h1 {
+  font-size: 34px;
+  line-height: 40px;
+  font-weight: 500;
+  letter-spacing: -.012em;
+}
+
+.lede {
+  margin-top: var(--s3);
+  max-width: none;
+  font-size: 16px;
+  line-height: 25px;
+  color: var(--muted);
+}
+
+/* ---------- context controls ---------------------------------------------
+   Lightweight filters, not form fields: no field boxes, no shadows, and the
+   label sits above its control as quiet metadata. */
+
+.context {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s6) var(--s8);
+  padding-bottom: var(--s6);
+  border-bottom: 1px solid var(--border);
+}
+
+.field { display: flex; flex-direction: column; gap: var(--s2); }
+
+.field-label {
+  font-size: var(--label-size);
+  font-weight: 600;
+  letter-spacing: var(--label-track);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.seg-btn {
+  appearance: none;
+  min-height: 38px;
+  padding: var(--s2) var(--s4);
+  border: 0;
+  border-right: 1px solid var(--border);
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  /* Regular in both states. Weight on a selected control changed its own width,
+     nudging every button after it along the row — and the fill already says which
+     one is on. */
+  font-weight: 400;
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.seg-btn:last-child { border-right: 0; }
+.seg-btn:hover { background: var(--surface-sub); }
+
+.seg-btn[aria-pressed="true"] {
+  background: var(--accent);
+  color: #fff;
+}
+.seg-btn[aria-pressed="true"]:hover { background: var(--accent-strong); }
+
+.seg-btn[aria-disabled="true"] {
+  cursor: default;
+  color: var(--muted);
+}
+.seg-btn[aria-disabled="true"][aria-pressed="true"] { color: #fff; }
+
+.seg-btn:focus-visible { outline-offset: -3px; }
+/* The ring is inset, so on the selected button it would be accent on accent —
+   invisible. Light on the fill instead. */
+.seg-btn[aria-pressed="true"]:focus-visible { outline-color: #fff; }
+
+.context select {
+  min-height: 38px;
+  padding: var(--s2) var(--s3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font: inherit;
+  font-size: 14px;
+  color: var(--text);
+}
+
+/* ---------- results heading ---------------------------------------------- */
+
+.results-head { margin: var(--s8) 0 var(--s4); }
+
+.results-head h2 {
+  font-size: 23px;
+  line-height: 30px;
+  font-weight: 500;
+  letter-spacing: -.008em;
+}
+
+.results-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--s2);
+  margin-top: var(--s1);
+  font-size: 13.5px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.results-note {
+  margin-top: var(--s1);
+  max-width: none;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted);
+}
+
+/* ---------- table legend ---------------------------------------------------
+   The terms the overview table uses, spelled out under it in the note's quiet
+   register: a term, then what it means, one line per kind of term. */
+
+.table-legend {
+  display: grid;
+  gap: var(--s1);
+  margin-top: var(--s3);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted);
+}
+.table-legend div { display: flex; gap: var(--s2); }
+.table-legend dt { flex: none; min-width: 64px; font-weight: 500; color: var(--text); }
+
+/* ---------- empty state --------------------------------------------------- */
+
+.empty {
+  padding: var(--s6);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.empty-title { font-size: 17px; font-weight: 500; }
+.empty-hint { margin-top: var(--s2); font-size: 14px; color: var(--muted); }
+
+/* =============================================================================
+   TABLES — one treatment, both pages
+   ========================================================================== */
+
+/* One edge for everything outside a table. The table field starts and ends on the
+   same line as the headings, notes, counts and toolbars around it; the cells keep
+   their own internal padding, so the column text sits one cell-padding inside that
+   line. No outer border and no radius: a box would make a results table read as a
+   form control, and rules alone are how a table is typeset. */
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  /* A metric table is wider than a phone. Without paint containment Chromium
+     still counts that width towards the root scroll area, so the whole page pans
+     sideways even though the wrap clips it correctly. The table scrolls; the page
+     does not. */
+  contain: paint;
+  background: var(--surface);
+}
+
+/* Tighter than the page's leading: a table row is one line of data, and Plex's
+   compact x-height keeps 14/19.6 open enough to scan down a column. */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+thead th {
+  padding: var(--head-y) var(--cell-x);
+  background: var(--surface);
+  text-align: left;
+  font-size: 13px;
+  line-height: 17.5px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+/* Opening and closing rules, so the table is bounded without being boxed. */
+thead tr:first-child th { border-top: 1px solid var(--border); }
+thead tr:last-child th { border-bottom: 1.5px solid var(--border-strong); }
+
+/* Metric-family row: quiet, small, and never taller than it must be. */
+thead tr.groups th {
+  padding: var(--s2) var(--cell-x) 0;
+  font-size: var(--label-size);
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: var(--label-track);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+thead tr.groups th.grp { text-align: center; }
+
+thead tr.cols th { padding-top: 6px; }
+thead th.num, th.right { text-align: right; }
+
+/* A metric column that carries a proportion bar. Header and body reserve the same
+   trailing space and the bar is positioned into it, so the column label and its
+   numbers right-align on one edge by construction rather than by arithmetic. */
+th.has-bar, td.has-bar {
+  padding-right: calc(var(--cell-x) + var(--bar-w) + var(--bar-gap));
+}
+td.has-bar { position: relative; }
+
+/* Metric families read as blocks: a gutter, plus a rule two shades lighter than
+   the row rules so it separates without drawing a grid. The family label above sits
+   over its own compartment. */
+th.grp-start, td.grp-start {
+  padding-left: 17px;
+  border-left: 1px solid var(--rule-faint);
+}
+thead tr.groups th.grp { border-left: 1px solid var(--rule-faint); }
+
+/* The headline parsing metric: an accent on the header only. */
+thead th.primary { color: var(--accent); }
+
+.sortable { position: relative; cursor: pointer; user-select: none; }
+.sortable:hover { color: var(--accent); }
+/* Inset, so a focused column header is ringed inside its own cell instead of
+   spilling a rounded box over the rule and the row beneath it. */
+th.sortable:focus-visible { outline-offset: -2px; border-radius: 0; }
+
+/* A dotted rule under an abbreviation is the quiet, conventional sign that an
+   explanation is available; the explanation itself appears on pointer hover and on
+   keyboard focus, and is announced through aria-describedby. */
+.col-label.has-tip {
+  text-decoration: underline dotted var(--border-strong);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.sortable:hover .col-label.has-tip,
+.sortable:focus-visible .col-label.has-tip { text-decoration-color: var(--accent); }
+
+.col-tip {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 5px);
+  right: 0;
+  width: max-content;
+  max-width: 210px;
+  padding: 7px 10px;
+  border-radius: var(--radius);
+  background: var(--text);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 17.5px;
+  letter-spacing: normal;
+  text-align: left;
+  text-transform: none;
+  white-space: normal;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .1s ease;
+}
+.sortable:hover .col-tip,
+.sortable:focus-visible .col-tip,
+.sortable:focus-within .col-tip { opacity: 1; visibility: visible; }
+/* The indicator holds the direction arrow and, once a column is sorted, the clear
+   control. Its width is reserved at all times so activating a sort never re-flows
+   the header row, and on a right-aligned column it leads the label so the label
+   keeps the numbers' edge. */
+.sort-ind {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 11px;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--accent);
+  vertical-align: baseline;
+}
+th.num .sort-ind, th.right .sort-ind { margin-right: 5px; }
+th:not(.num):not(.right) .sort-ind { margin-left: 5px; justify-content: flex-start; }
+
+.sort-arrow { font-size: 11px; }
+
+/* Current sort, stated in words beside the row count, with the control that undoes
+   it. Clearing never hides inside a header cell. */
+.sort-status {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.results-meta .sort-status::before,
+.count-meta .sort-status::before { content: "· "; color: var(--faint); }
+
+tbody td, tbody th {
+  padding: var(--cell-y) var(--cell-x);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+/* Plex's own figures are tabular and lining already; the declaration is for the
+   fallback faces, so a reader without the web font still gets aligned columns. */
+td.num, th.num, td.right, th.right {
+  text-align: right;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+td.no-data-cell {
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* ---------- comparison table --------------------------------------------- */
+
+#comparison { min-width: 860px; }
+#comparison col.c-model { width: 132px; }
+#comparison col.c-train { width: 150px; }
+#comparison col.c-metric { width: auto; }
+#comparison col.c-action { width: 164px; }
+
+#comparison th.model {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  color: var(--text);
+  text-align: left;
+  vertical-align: middle;
+  background: var(--surface);
+  white-space: nowrap;
+}
+
+#comparison td.train {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+#comparison td.primary { color: var(--text); }
+
+/* Best in column: weight alone. A tint on as many as seven scattered cells reads
+   as a heatmap, which would imply a scale the data does not have. Assistive
+   technology gets the same fact as text, so nothing depends on seeing the weight. */
+#comparison td.best { font-weight: 600; }
+
+/* One stronger rule between systems rather than two adjacent ones: the group
+   above gives up its closing rule so the boundary reads as a single line. */
+/* The stronger rule alone marks the boundary: extra padding on a group's first and
+   last rows made them taller than the rows between, so every row keeps one height. */
+.system-group:not(:last-child) > tr:last-child > * { border-bottom: 0; }
+.system-group + .system-group > tr:first-child > * {
+  border-top: 2px solid var(--border-strong);
+}
+
+/* Whole-pixel rows (a 20px line, 8px padding, a 1px or 2px rule), so every row and
+   everything in it sits on the same pixel grid: the thin drawn +/× symbols then
+   render identically on every row instead of some looking heavier than others. */
+#comparison tbody td,
+#comparison tbody th { line-height: 20px; }
+
+#comparison tbody tr.actionable td { cursor: pointer; }
+#comparison tbody tr.actionable:hover td { background: var(--surface-sub); }
+
+.flag { color: var(--flag); }
+
+/* Left-aligned with a generous inset: the symbol sits at the same place on every
+   row, open or closed, so it never jumps, and it keeps clear of the LAS column. */
+td.c-action { text-align: left; padding-left: 28px; }
+
+.analyse {
+  display: inline-flex;
+  align-items: center;
+  /* Exactly one table line tall and aligned to its top, so the link never makes
+     its row taller than the rows' text does; the symbol and words centre inside. */
+  height: 20px;
+  line-height: 20px;
+  vertical-align: top;
+  gap: var(--s2);
+  color: var(--accent);
+  font-size: 13.5px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+tr:hover .analyse-label { text-decoration: underline; }
+
+/* The symbol is the font's own + and ×, not drawn bars: text is snapped to whole
+   screen pixels, so it renders the same on every row at any display scaling, where
+   thin drawn lines came out heavier on some rows than others. Both sit centred in
+   one fixed box, so switching between them never moves anything. */
+.analyse-icon {
+  flex: none;
+  width: 10px;
+  font-size: 15px;
+  font-weight: 400;
+  text-align: center;
+  opacity: .85;
+}
+.analyse-icon::before { content: "+"; }
+.analyse[aria-expanded="true"] .analyse-icon::before { content: "\00d7"; }
+
+/* ---------- footer -------------------------------------------------------- */
+
+/* The rule and the prose both span the page grid, like everything above them. */
+.colophon {
+  margin-top: var(--s12);
+  padding-top: var(--s4);
+  border-top: 1px solid var(--border);
+  font-size: 12.5px;
+  line-height: 18px;
+  color: var(--muted);
+}
+
+.colophon .meta {
+  margin-top: var(--s2);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  overflow-wrap: anywhere;
+}
+
+/* =============================================================================
+   DETAILED ANALYSIS — one run, opened below the overview table
+   ========================================================================== */
+
+/* A strong rule separates the analysis from the comparison above it, and the
+   section lands a little below the viewport edge when scrolled to. */
+.analysis-section {
+  margin-top: var(--s12);
+  padding-top: var(--s8);
+  border-top: 1.5px solid var(--border-strong);
+  scroll-margin-top: var(--s4);
+}
+
+.analysis-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s4);
+}
+
+
+.eyebrow {
+  font-size: var(--label-size);
+  font-weight: 600;
+  letter-spacing: var(--label-track);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.analysis-title {
+  margin-top: var(--s2);
+  font-size: 26px;
+  line-height: 32px;
+  font-weight: 500;
+  letter-spacing: -.01em;
+}
+
+/* The run's context, not a strapline: full text colour so it stays the second
+   thing read, but Regular and near body size so it does not compete with the
+   title above it. */
+.analysis-subtitle {
+  margin-top: 2px;
+  font-size: 15.5px;
+  line-height: 23px;
+  color: var(--text);
+}
+
+.run-meta {
+  margin-top: var(--s3);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.analysis-close { flex: none; }
+
+.analysis-status { padding: var(--s8) 0; }
+.analysis-status .empty-title { font-size: 15px; font-weight: 500; }
+
+/* The run whose analysis is open: the accent's soft fill across the row. */
+#comparison tbody tr.is-open > td { background: var(--accent-soft); }
+#comparison tbody tr.actionable.is-open:hover td { background: var(--accent-soft); }
+
+/* ---------- summary metrics ----------------------------------------------
+   The overview table's own metrics, in the same order and under the same two
+   group labels — Morphology, Syntax — set exactly as the table sets them: an
+   uppercase group label, then each metric named like a column header. Columns
+   divided by rules, not cards. Each group takes width in proportion to its
+   number of tiles, so every tile is the same width. */
+
+.overview {
+  display: flex;
+  margin: var(--s6) 0 var(--s8);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.metric-group { flex: var(--tiles, 1) 1 0; min-width: 0; }
+.metric-group + .metric-group {
+  padding-left: var(--s4);
+  border-left: 1px solid var(--border);
+}
+
+.metric-group-label {
+  padding-top: var(--s3);
+  font-size: var(--label-size);
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: var(--label-track);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.metric-tiles { display: grid; grid-template-columns: repeat(var(--tiles, 1), 1fr); }
+
+.metric-box {
+  padding: var(--s2) var(--s4) var(--s4) 0;
+  border-right: 1px solid var(--border);
+}
+.metric-box:last-child { border-right: 0; }
+.metric-box:not(:first-child) { padding-left: var(--s4); }
+
+.metric-box .label {
+  font-size: 13px;
+  line-height: 17.5px;
+  font-weight: 500;
+  color: var(--text);
+}
+.metric-box .val {
+  margin-top: 6px;
+  font-size: 26px;
+  line-height: 1.12;
+  font-weight: 500;
+  letter-spacing: -.006em;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.metric-box .sub {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 16.5px;
+  color: var(--muted);
+}
+
+.metric-box.primary .val { color: var(--accent); }
+
+/* ---------- in-page navigation --------------------------------------------
+   A row of subsection tabs, not a row of links. One rule under the whole row, which
+   the current tab's own rule sits on; the labels stay charcoal so the row does not
+   read as five links competing with the headings below it.
+
+   The items carry no horizontal padding, so the first label's left edge lands on the
+   same line as the headings, notes and table field — a tab's inset would have pushed
+   it off the grid. Their spacing is a fixed column gap rather than padding, so the
+   rhythm is the same whether a label is one word or three.
+
+   The row sticks to the top of the viewport while a long panel scrolls under it, so
+   the other layers stay one click away. Once stuck it also names the run on its
+   right, because the heading that did so has scrolled out of view. */
+
+.analysis-nav {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s4);
+  margin: var(--s2) 0 var(--s10);
+  padding-top: var(--s3);
+  background: var(--bg);
+  border-bottom: 1px solid var(--rule-faint);
+}
+.analysis-nav.is-stuck { border-bottom-color: var(--border); }
+
+.section-nav {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 28px;
+  row-gap: 4px;
+}
+
+.nav-run {
+  min-width: 0;
+  padding-bottom: 9px;
+  overflow: hidden;
+  font-size: 12.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  visibility: hidden;
+}
+.analysis-nav.is-stuck .nav-run { visibility: visible; }
+
+.section-tab {
+  /* The 2px rule is reserved on every tab and only coloured on the current one, so
+     becoming current never moves anything. The negative margin drops it onto the
+     row's own rule instead of stacking below it. */
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding-bottom: 9px;
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.section-tab:hover {
+  color: var(--text);
+  border-bottom-color: var(--border-strong);
+}
+.section-tab:focus-visible { outline-offset: 3px; }
+
+.section-tab[aria-selected="true"] {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+
+/* Reproducibility is the technical appendix, not a fifth view of the results, so a
+   wider gap separates it from the four that are. The extra space is trailing margin
+   on the tab before it rather than leading margin on Reproducibility itself: when the
+   row wraps, a trailing margin disappears at the end of a line, where a leading one
+   would indent the wrapped tab off the page's left edge. */
+.section-tab[data-panel="all-metrics"] { margin-right: var(--s3); }
+
+/* ---------- headings and notes -------------------------------------------- */
+
+.analysis-section h3 {
+  margin: var(--s8) 0 var(--s2);
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 500;
+}
+/* The three dependency error categories, under their shared heading. */
+.analysis-section h4 {
+  margin: var(--s6) 0 var(--s2);
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 500;
+}
+/* The selected tab supplies the top-level heading. Keep the first item in its panel
+   on one consistent baseline whether that item is a subsection title or a note. */
+.analysis-panel > :first-child { margin-top: 0; }
+
+/* Each layer tab reads in two parts, accuracy per label and then the errors behind
+   it; a wider gap marks where the second part begins. */
+.panel-part { margin-top: var(--s12); }
+.panel-part > h3:first-child { margin-top: 0; }
+
+.note { font-size: 13px; line-height: 18.5px; color: var(--muted); }
+/* One line under each tab's name saying which annotation layers it covers. */
+.tab-intro { margin-bottom: var(--s4); font-size: 14px; line-height: 21px; color: var(--text); }
+.section-note { max-width: none; margin-bottom: var(--s4); }
+/* A caveat or an instruction about the tables below it, so it separates from the
+   totals above rather than running on from them. */
+.examples-availability { max-width: none; margin: var(--s3) 0 var(--s4); }
+.error-section .section-note { margin-bottom: var(--s3); }
+
+/* Total, then the three categories that partition it, separated by mid dots. */
+.tally {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--s3);
+  margin-bottom: 0;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+.tally strong { color: var(--text); font-weight: 500; font-variant-numeric: tabular-nums lining-nums; }
+.tally .tally-part { font-variant-numeric: tabular-nums lining-nums; }
+.tally .tally-part::before { content: "·"; margin-right: var(--s3); color: var(--faint); }
+.tally .tally-part:first-child::before { content: none; }
+.tally .tally-part strong { font-weight: 500; color: var(--text); }
+
+/* ---------- table controls ------------------------------------------------ */
+
+/* One control language for every table: the count and its Show more on the left,
+   the filter and exports on the right, on a single line just above the table they
+   act on. Nothing that acts on a table sits beside a heading any more. */
+.control-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--s2);
+  margin-left: auto;
+}
+
+.tally-toolbar { margin: var(--s4) 0 var(--s6); }
+
+.filter-field {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.filter-field input {
+  width: 210px;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 34px;
+  padding: var(--s1) 26px var(--s1) 26px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--text);
+}
+.filter-field input::placeholder { color: var(--muted); }
+.filter-field input[type="search"]::-webkit-search-cancel-button { display: none; }
+
+.filter-icon {
+  position: absolute;
+  left: var(--s2);
+  width: 11px; height: 11px;
+  border: 1.5px solid var(--muted);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.filter-icon::after {
+  content: "";
+  position: absolute;
+  top: 9px; left: 8px;
+  width: 5px;
+  border-top: 1.5px solid var(--muted);
+  transform: rotate(45deg);
+}
+
+.filter-clear {
+  position: absolute;
+  right: var(--s1);
+  width: 20px; height: 20px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+.filter-clear:hover { background: var(--surface-sub); color: var(--text); }
+
+.action-btns { display: inline-flex; gap: var(--s1); }
+
+.action-btn,
+.toggle-btn,
+.inline-toggle {
+  appearance: none;
+  min-height: 34px;
+  padding: var(--s1) var(--s3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.action-btn:hover,
+.toggle-btn:hover,
+.inline-toggle:hover { border-color: var(--border-strong); color: var(--text); }
+.toggle-btn.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.inline-toggle {
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  padding-left: 0;
+  padding-right: 0;
+}
+.inline-toggle:hover { text-decoration: underline; color: var(--accent-strong); }
+
+/* The toolbar is a section-level element, so it spans the table field exactly: the
+   count starts on the field's left edge and the last control ends on its right. */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s2) var(--s4);
+  margin-bottom: var(--s3);
+  min-height: 34px;
+}
+.count-meta { display: flex; align-items: baseline; gap: var(--s3); }
+
+/* ---------- analysis tables ----------------------------------------------- */
+
+/* CJVT's strongest table qualities, translated into this interface's palette:
+   a compact technical register, a single dark header band and white data rows
+   divided only by fine horizontal rules. The overview keeps its lighter grouped
+   publication header; these rules belong to the analytical tables only. */
+.analysis-section table {
+  --cell-x: 10px;
+  --cell-y: 6px;
+  --head-y: 7px;
+  --bar-w: 60px;
+  --bar-gap: 7px;
+  font-family: var(--font-data);
+  font-size: 12.5px;
+  line-height: 18px;
+}
+
+.analysis-section thead th {
+  padding-top: var(--head-y);
+  padding-bottom: var(--head-y);
+  border-color: var(--accent-strong);
+  background: var(--accent-strong);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  color: #fff;
+  vertical-align: middle;
+}
+
+.analysis-section thead th.primary { color: #fff; }
+.analysis-section thead .sort-ind,
+.analysis-section thead .sort-arrow { color: #fff; }
+.analysis-section thead th.sortable:hover {
+  background: var(--accent);
+  color: #fff;
+}
+.analysis-section thead th.sortable:focus-visible {
+  outline-color: #fff;
+  color: #fff;
+}
+
+.analysis-section tbody td,
+.analysis-section tbody th {
+  padding-top: var(--cell-y);
+  padding-bottom: var(--cell-y);
+  font-family: var(--font-data);
+  font-size: 12.5px;
+  line-height: 18px;
+  font-weight: 400;
+}
+
+/* Relation names, tagset labels and error pairs are quoted material, not the page's
+   own words: the whole analysis table now uses the data face at regular weight, so
+   labels, counts and scores form one coherent technical register. */
+.analysis-section tbody th.label,
+.analysis-section td.label {
+  font-weight: 400;
+  color: var(--text);
+}
+.analysis-section td.metric-name {
+  white-space: nowrap;
+}
+
+.analysis-section tbody th {
+  font-weight: 400;
+  text-align: left;
+}
+.analysis-section th.metric-name { font-weight: 400; }
+
+tr.layer-start > * { border-top: 1.5px solid var(--border-strong); }
+
+/* Proportion bar beside an accuracy value: one neutral bar, no colour scale. */
+.bar-wrap {
+  position: absolute;
+  right: var(--cell-x);
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--bar-w);
+  height: 6px;
+  border-radius: 1px;
+  background: var(--surface-sub);
+  overflow: hidden;
+}
+.bar { display: block; height: 100%; background: var(--border-strong); }
+
+/* Compare mode, after v5: the run being analysed draws the darker bar, the other
+   modality the light one, and the difference is signed — this run's gain in full
+   ink, its loss in red, a tie in muted grey. */
+.bar.bar-this { background: var(--muted); }
+td.diff-pos { color: var(--text); font-weight: 600; }
+td.diff-neg { color: var(--neg); font-weight: 600; }
+td.diff-neut { color: var(--muted); }
+
+/* The analysis spans the page like the table above it. At that width a label and
+   its numbers sit far apart, so every row lights up under the pointer to carry the
+   eye across, and each kind of number column keeps one width in every table — a
+   count, a score with its bar — so tables stacked on the page line up. */
+.analysis-section tbody tr:not(.no-data-row):not(.selected-row):hover > * {
+  background: var(--surface-sub);
+}
+@media (min-width: 901px) {
+  .analysis-section thead th.right { width: 150px; }
+  .analysis-section thead th.right.has-bar { width: 230px; }
+}
+
+/* Rows that open sentence evidence. The hooked branch belongs to the drill-down,
+   not to a table family: it marks both error/confusion rows and category-score rows
+   when (and only when) the row can open evidence. It adds no control or tab stop. */
+.analysis-section tr.clickable-row { cursor: pointer; }
+.analysis-section tr.clickable-row:hover > *,
+.analysis-section tr.clickable-row:focus-visible > * { background: var(--surface-sub); }
+.analysis-section tr.clickable-row:hover td.label { color: var(--accent); }
+.analysis-section tr.selected-row > * { background: var(--accent-soft); }
+.analysis-section tr.selected-row td.label { color: var(--accent); }
+
+.analysis-section tr.clickable-row td.label {
+  position: relative;
+  padding-left: 27px;
+}
+.analysis-section tr.clickable-row td.label::before {
+  content: "↳";
+  position: absolute;
+  left: 10px;
+  color: var(--faint);
+  font-family: var(--font-data);
+  font-size: 11px;
+}
+.analysis-section tr.clickable-row:hover td.label::before,
+.analysis-section tr.clickable-row:focus-visible td.label::before,
+.analysis-section tr.selected-row td.label::before {
+  color: var(--accent);
+}
+
+.analysis-section tr.no-data-row td { color: var(--muted); font-style: italic; }
+
+.expanded-scroll { max-height: 60vh; overflow-y: auto; }
+.expanded-scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  box-shadow: 0 1px 0 var(--accent-strong);
+}
+
+.error-section { margin-bottom: var(--s8); }
+.bucket-header h3,
+.bucket-header h4 { margin-top: 0; }
+
+/* "A." indexes the three categories that partition the errors; the words after it
+   name one. The letter is structure and takes the accent, the name stays charcoal —
+   a heading is not a link. */
+.section-marker {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.stat { display: inline-flex; align-items: baseline; gap: var(--s1); }
+.stat-value { font-weight: 500; font-variant-numeric: tabular-nums lining-nums; }
+.stat-unit { color: var(--muted); }
+
+.metrics-note { margin-top: var(--s3); }
+
+/* ---------- reproducibility ------------------------------------------------
+   Provenance is shown as item/value tables in the same register as every other
+   table in the analysis: nothing to expand, the facts are simply there. A path or
+   a checksum has no spaces, so it may break anywhere rather than widen the table
+   past a phone's width. */
+
+.kv-table col.kv-key { width: 200px; }
+.analysis-section .kv-table tbody th.kv-name { color: var(--muted); white-space: nowrap; }
+.kv-table td.kv-value { overflow-wrap: anywhere; }
+
+.policy-note { margin-top: var(--s4); }
+
+kbd {
+  padding: 1px 5px;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  background: var(--surface);
+  font-family: var(--font-mono);
+  font-size: .88em;
+}
+
+/* =============================================================================
+   SENTENCE EXAMPLES PANEL
+   Corpus evidence, not a developer inspector: the sentence is the largest thing
+   in it, and the annotations sit under it as quiet metadata.
+   ========================================================================== */
+
+.examples-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgba(23, 25, 29, .28);
+}
+
+.examples-panel {
+  position: fixed;
+  z-index: 21;
+  top: var(--s6);
+  right: var(--s6);
+  bottom: var(--s6);
+  width: 500px;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.examples-panel-header {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  padding: var(--s4) var(--s5) var(--s2);
+}
+
+.examples-titles {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-right: 40px;
+}
+.examples-panel-title {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 500;
+  letter-spacing: -.006em;
+  overflow-wrap: anywhere;
+}
+.examples-subtitle { margin-top: 2px; font-size: 12.5px; color: var(--muted); }
+
+/* Navigation and exports read as the panel's toolbar, in the same "count left,
+   controls right" arrangement every table on the page uses — rather than crowding
+   the title into a quarter of the header. */
+.examples-toolbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s2);
+  padding: 0 var(--s5) var(--s3);
+  border-bottom: 1px solid var(--border);
+}
+
+.examples-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.examples-panel-action,
+.examples-panel-close {
+  appearance: none;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 var(--s2);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: var(--label-track);
+  color: var(--muted);
+  cursor: pointer;
+}
+.examples-panel-action:hover:not(:disabled),
+.examples-panel-close:hover { background: var(--surface-sub); color: var(--text); }
+.examples-panel-action:disabled { opacity: .4; cursor: default; }
+.examples-panel-action.nav { font-size: 16px; line-height: 1; color: var(--accent); }
+.examples-panel-action.nav:hover:not(:disabled) { color: var(--accent-strong); }
+/* Row navigation and exports are two jobs, so a gap separates the pairs. */
+.examples-panel-action.nav + .examples-panel-action:not(.nav) { margin-left: var(--s2); }
+.examples-panel-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  padding: 0;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.examples-count {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--s2);
+  font-size: 13px;
+}
+.examples-total { font-weight: 500; font-variant-numeric: tabular-nums lining-nums; }
+.examples-shown { color: var(--muted); font-variant-numeric: tabular-nums lining-nums; }
+
+.examples-panel-body { flex: 1 1 auto; overflow-y: auto; }
+
+.example-item { padding: var(--s3) var(--s4); border-bottom: 1px solid var(--border); }
+.example-item:last-child { border-bottom: 0; }
+
+.example-meta {
+  font-family: var(--font-data);
+  font-size: 11.5px;
+  line-height: 15.5px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.example-meta .example-kind { font-style: italic; }
+
+/* Sentence text remains in the panel's sans UI face; this pass changes only its
+   vertical rhythm, not the examples panel's typographic language. */
+.example-sentence {
+  margin-top: var(--s1);
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 400;
+}
+/* One restrained highlight. The token is evidence, not an alarm. */
+.example-sentence mark {
+  padding: 1px 2px;
+  border-radius: 2px;
+  background: var(--mark);
+  color: inherit;
+  box-shadow: inset 0 -2px 0 0 rgba(138, 90, 23, .45);
+}
+
+.example-facts {
+  margin-top: var(--s1);
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--muted);
+}
+.example-name { color: var(--muted); }
+.example-value { color: var(--text); font-size: 12px; }
+.example-sep { color: var(--faint); }
+
+.examples-empty { padding: var(--s6) var(--s5); color: var(--muted); }
+
+.examples-source {
+  flex: none;
+  padding: var(--s3) var(--s5);
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--muted);
+}
+
+body[data-examples="open"] { overflow: hidden; }
+
+/* =============================================================================
+   RESPONSIVE
+   Tables scroll horizontally rather than becoming cards: a benchmark row only
+   means something as a row.
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  body { padding: var(--s6) 28px var(--s12); }
+  .masthead h1 { font-size: 28px; line-height: 34px; }
+  .lede { font-size: 15px; line-height: 23px; }
+  .analysis-title { font-size: 23px; line-height: 29px; }
+  .analysis-subtitle { font-size: 15px; line-height: 22px; }
+  .results-head h2 { line-height: 28px; }
+  .context { gap: var(--s4) var(--s6); }
+  .control-main { margin-left: auto; }
+
+  /* v5's own behaviour: below this width the panel is a centred sheet. */
+  .examples-panel {
+    top: auto;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    width: auto;
+    max-height: 88vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    border-bottom: 0;
+  }
+}
+
+/* Narrow: the metric table scrolls sideways rather than becoming cards, because a
+   benchmark row only means something as a row. The semantic label columns are
+   pinned when present — System always, Training only in grouped mode — and the
+   layout is fixed so their offsets are exact. */
+@media (max-width: 900px) {
+  /* A tighter cell inset for this table only. At 70px a metric column left 46px of
+     text room and clipped "Lemmas" by three pixels; 10px gives it 50px without
+     widening the table or moving the pinned offsets. */
+  #comparison { min-width: 760px; table-layout: fixed; --cell-x: 10px; }
+  #comparison col.c-model { width: 78px; }
+  #comparison col.c-train { width: 126px; }
+  #comparison col.c-metric { width: 70px; }
+  #comparison col.c-action { width: 138px; }
+  #comparison td.c-action { padding-left: 16px; }
+
+  #comparison th.model,
+  #comparison td.train,
+  #comparison thead th[data-sort-key="model"],
+  #comparison thead th[data-sort-key="training_condition"],
+  #comparison thead tr.groups th:first-child {
+    position: sticky;
+    z-index: 1;
+    background: var(--surface);
+  }
+  #comparison thead th[data-sort-key="model"],
+  #comparison thead th[data-sort-key="training_condition"],
+  #comparison thead tr.groups th:first-child { z-index: 2; }
+
+  #comparison th.model,
+  #comparison thead th[data-sort-key="model"],
+  #comparison thead tr.groups th:first-child { left: 0; }
+  #comparison td.train,
+  #comparison thead th[data-sort-key="training_condition"] { left: 78px; }
+
+  #comparison td.train,
+  #comparison thead th[data-sort-key="training_condition"] { box-shadow: 1px 0 0 0 var(--border); }
+
+  /* One training setup selected: only the system column is a label. */
+  #comparison thead tr.groups th:first-child { box-shadow: 1px 0 0 0 var(--border); }
+
+  #comparison th.model { font-size: 14px; }
+  /* The pinned training column is wide enough for "Written + spoken" on one line:
+     a wrapped label made its row taller than the rest of the table. */
+  #comparison td.train { font-size: 12.5px; white-space: nowrap; }
+  .analyse { font-size: 12.5px; }
+
+  /* Analysis tables scroll as one complete table on narrow screens. Expanded
+     tables still keep their bounded vertical scroller, but their headers stay in
+     normal table flow instead of mixing sticky positioning with two-axis overflow. */
+  .analysis-section .expanded-scroll thead th {
+    position: static;
+    top: auto;
+    z-index: auto;
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 620px) {
+  body { padding: var(--s6) 18px var(--s12); font-size: 14px; }
+  /* The filter takes its own line rather than squeezing the exports off-screen, and
+     a wrapped control row still ends on the table field's edge. */
+  .control-main { width: 100%; justify-content: flex-end; }
+  .filter-field { flex: 1 1 160px; }
+  .filter-field input { width: 100%; }
+  .masthead h1 { font-size: 25px; line-height: 31px; }
+  .results-head h2 { font-size: 20px; line-height: 26px; }
+  table { font-size: 13px; line-height: 1.38; }
+  /* This tighter overview treatment must not replace the analysis tables' 10px
+     horizontal inset; their blue headers and data rows share that compact grid. */
+  #comparison tbody td, #comparison tbody th { padding: var(--s2) var(--s3); }
+  /* On a phone the two groups stack, and Morphology's four tiles fold into two
+     rows of two. */
+  .overview { flex-direction: column; }
+  .metric-group + .metric-group {
+    padding-left: 0;
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+  .metric-tiles { grid-template-columns: repeat(2, 1fr); }
+  .metric-box:nth-child(2n) { border-right: 0; }
+  .metric-box:nth-child(2n+1) { padding-left: 0; }
+  .metric-box:nth-child(n+3) { border-top: 1px solid var(--border); padding-top: var(--s3); }
+  .metric-box .val { font-size: 23px; }
+  .seg-btn { min-height: 40px; padding: var(--s2) var(--s3); font-size: 13.5px; }
+  .field { width: 100%; }
+  .seg { width: 100%; }
+  .seg-btn { flex: 1 1 0; }
+  /* On a phone the tab row wraps onto two lines; pinned, it would hold a fifth of
+     the screen, so here it scrolls away with the page. */
+  .analysis-nav { position: static; }
+  .nav-run { display: none; }
+  /* The data face sets wide, so on a phone the sentence comes down rather than up:
+     at 15.5px a monospace line held barely thirty characters and the sentence read
+     as a column of fragments. */
+  .example-sentence { font-size: 13px; line-height: 20px; }
+  .examples-panel-header, .examples-toolbar { padding-left: var(--s4); padding-right: var(--s4); }
+  .example-item, .examples-source { padding-left: var(--s4); padding-right: var(--s4); }
+}

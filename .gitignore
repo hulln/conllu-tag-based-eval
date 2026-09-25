@@ -93,3 +93,7 @@ references/*.pdf
 
 # Local Netlify folder
 .netlify
+
+# Dutch spoken test set: source and licence not confirmed, text stays local.
+tables/am_benchmark_v2/data/examples/
+tables/am_benchmark_v2/data/layers/NL-spokentest-*

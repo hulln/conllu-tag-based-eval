@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Multilingual tagging and parsing benchmark</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css?v=14">
+</head>
+<body data-ui="overview">
+  <noscript>
+    <div class="fatal">JavaScript is required to read the result bundle.</div>
+  </noscript>
+
+  <header class="masthead">
+    <h1>Multilingual tagging and parsing benchmark</h1>
+    <p class="lede">
+      Compare tagging and dependency parsing systems across languages, training setups
+      and written or spoken test data.
+    </p>
+  </header>
+
+  <div class="context" id="context">
+    <div class="field">
+      <span class="field-label" id="language-label">Language</span>
+      <div id="language-control"></div>
+    </div>
+    <div class="field">
+      <span class="field-label" id="test-label">Test data</span>
+      <div id="test-control"></div>
+    </div>
+  </div>
+
+  <div class="results-head">
+    <h2 id="context-title"></h2>
+    <p class="results-meta" id="context-meta"></p>
+    <p class="results-note" id="context-note"></p>
+  </div>
+
+  <p class="notice" id="file-note" hidden>
+    <strong>Opened from the file system.</strong> The table works, but the browser will
+    not load a run's detailed analysis this way. Serve the <code>tables</code> folder
+    instead: <code>cd tables &amp;&amp; python3 -m http.server 8000</code>, then open
+    <code>http://localhost:8000/am_benchmark_v2/</code>.
+  </p>
+  <p class="notice" id="caveat" hidden></p>
+  <p class="notice quiet" id="request-note" hidden></p>
+
+  <div id="empty" class="empty" hidden></div>
+
+  <div class="table-wrap" id="table-wrap">
+    <table id="comparison">
+      <caption class="sr-only">
+        Evaluator F1 by system and training condition for the selected language and test data.
+      </caption>
+      <colgroup id="comparison-cols"></colgroup>
+      <thead id="comparison-head"></thead>
+    </table>
+  </div>
+  <!-- The terms a reader needs for the table, visible rather than only on hover. -->
+  <dl class="table-legend" id="table-legend">
+    <div>
+      <dt>Training</dt>
+      <dd>Default: the tool's own pretrained model · Written: trained on written data only ·
+        Written + spoken: trained on written and spoken data</dd>
+    </div>
+    <div>
+      <dt>Columns</dt>
+      <dd>UPOS, XPOS: universal and language-specific part-of-speech tags · UFeats: universal
+        morphological features · Lemmas: lemmatisation · UAS, LAS: unlabelled and labelled
+        attachment score (correct head; correct head and relation)</dd>
+    </div>
+  </dl>
+
+  <!-- The detailed analysis of one run opens here, below the table it was chosen
+       from. The shell is static; its contents are cloned from the template below
+       each time a run is opened, so switching runs starts from clean markup. -->
+  <section class="analysis-section" id="analysis-section" data-ui="analysis"
+           aria-labelledby="analysis-title" hidden>
+    <div class="analysis-head">
+      <div class="analysis-heading">
+        <p class="eyebrow">Detailed analysis</p>
+        <h2 class="analysis-title" id="analysis-title"></h2>
+        <p class="analysis-subtitle" id="analysis-subtitle"></p>
+        <p class="run-meta" id="analysis-meta"></p>
+      </div>
+      <button type="button" class="toggle-btn analysis-close" id="analysis-close">Close &times;</button>
+    </div>
+    <div class="analysis-mount" id="analysis-mount"></div>
+  </section>
+
+  <template id="analysis-template">
+    <div class="overview" id="run-summary"></div>
+
+    <!-- Tabs by linguistic layer. Morphology and Syntax each read the same way:
+         accuracy per label first, then the errors behind it. The hash names the open
+         tab and matches no element id, so selecting a tab never scrolls the page. -->
+    <div class="analysis-nav" id="analysis-nav">
+      <div class="section-nav" id="section-nav" role="tablist" aria-label="Detailed analysis sections">
+        <button class="section-tab" type="button" role="tab" id="tab-morphology"
+                data-panel="morphology" aria-controls="panel-morphology"
+                aria-selected="true">Morphology</button>
+        <button class="section-tab" type="button" role="tab" id="tab-syntax"
+                data-panel="syntax" aria-controls="panel-syntax"
+                aria-selected="false" tabindex="-1">Syntax</button>
+        <button class="section-tab" type="button" role="tab" id="tab-all-metrics"
+                data-panel="all-metrics" aria-controls="panel-all-metrics"
+                aria-selected="false" tabindex="-1">All evaluation metrics</button>
+        <button class="section-tab" type="button" role="tab" id="tab-reproducibility"
+                data-panel="reproducibility" aria-controls="panel-reproducibility"
+                aria-selected="false" tabindex="-1">Reproducibility</button>
+      </div>
+      <!-- The run's name, shown only while the row is pinned and the heading that
+           names it has scrolled away. Assistive technology has the heading. -->
+      <p class="nav-run" id="nav-run" aria-hidden="true"></p>
+    </div>
+
+    <section class="analysis-panel" id="panel-morphology" role="tabpanel"
+             aria-labelledby="tab-morphology">
+      <p class="tab-intro">
+        Part-of-speech tagging, lemmatisation and morphological features, compared with the
+        manually annotated test set.
+      </p>
+      <p class="note examples-availability" id="morph-examples-note" hidden></p>
+
+      <h3>Part-of-speech tag scores</h3>
+      <p class="note section-note" id="upos-acc-note">
+        For each UPOS tag, Accuracy is the percentage of its words the system tagged
+        correctly; Occurrences is how often the tag appears in the test set. Most frequent
+        tags first.
+      </p>
+      <div class="toolbar">
+        <div class="count-meta">
+          <div class="note" id="upos-acc-count"></div>
+          <button id="upos-acc-toggle" class="inline-toggle" type="button" hidden>Show more</button>
+        </div>
+        <div class="control-main">
+          <label class="filter-field">
+            <span class="filter-icon" aria-hidden="true"></span>
+            <span class="sr-only">Filter part-of-speech tags</span>
+            <input id="upos-acc-filter" type="search" placeholder="e.g. NOUN or VERB">
+          </label>
+          <div class="action-btns">
+            <button class="toggle-btn" id="upos-acc-compare" type="button" hidden></button>
+            <button class="action-btn" id="upos-acc-csv" type="button" title="Export visible rows as CSV">&darr; CSV</button>
+            <button class="action-btn" id="upos-acc-md" type="button" title="Copy visible rows as Markdown">&#x2398; MD</button>
+          </div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table id="upos-acc-table">
+          <caption class="sr-only">Accuracy for each gold universal part-of-speech tag.</caption>
+          <thead><tr></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- Built like Syntax's errors: one heading, one tally, then a subsection per
+           layer (part of speech, lemmas; features once the diagnostic set has them). -->
+      <div class="panel-part">
+        <h3>Morphology errors</h3>
+        <p class="note section-note">
+          Every word the system annotated differently from the test set, counted separately
+          for part of speech, lemmas and features.
+        </p>
+        <div class="toolbar tally-toolbar">
+          <p class="tally" id="morph-tally"></p>
+        </div>
+        <div id="tag-sections"></div>
+      </div>
+    </section>
+
+    <section class="analysis-panel" id="panel-syntax" role="tabpanel"
+             aria-labelledby="tab-syntax" hidden>
+      <p class="tab-intro">
+        Dependency parsing: each word's head and its Universal Dependencies relation, compared
+        with the manually annotated test set.
+      </p>
+      <p class="note examples-availability" id="syntax-examples-note" hidden></p>
+
+      <h3>Dependency relation scores</h3>
+      <p class="note section-note" id="rel-note">
+        For each relation, LAS is the percentage of its words with both the correct head and
+        the correct relation; Occurrences is how often the relation appears in the test set.
+        Most frequent relations first.
+      </p>
+      <div class="toolbar">
+        <div class="count-meta">
+          <div class="note" id="rel-count"></div>
+          <button id="rel-toggle" class="inline-toggle" type="button" hidden>Show more</button>
+        </div>
+        <div class="control-main">
+          <label class="filter-field">
+            <span class="filter-icon" aria-hidden="true"></span>
+            <span class="sr-only">Filter dependency relations</span>
+            <input id="rel-filter" type="search" placeholder="e.g. nsubj or obl">
+          </label>
+          <div class="action-btns">
+            <button class="toggle-btn" id="rel-compare" type="button" hidden></button>
+            <button class="action-btn" id="rel-csv" type="button" title="Export visible rows as CSV">&darr; CSV</button>
+            <button class="action-btn" id="rel-md" type="button" title="Copy visible rows as Markdown">&#x2398; MD</button>
+          </div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table id="rel-table">
+          <caption class="sr-only">Labelled attachment score for each gold dependency relation.</caption>
+          <thead><tr></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="panel-part">
+        <h3>Dependency errors</h3>
+        <p class="note section-note">
+          Every word with a wrong head, a wrong relation or both falls into exactly one of
+          three types, A, B or C, so the three numbers below add up to the total.
+        </p>
+        <!-- The totals and the one filter for all three tables, laid out like every
+             table's own toolbar: facts on the left, the control on the right. -->
+        <div class="toolbar tally-toolbar">
+          <p class="tally" id="dep-tally"></p>
+          <div class="control-main">
+            <label class="filter-field">
+              <span class="filter-icon" aria-hidden="true"></span>
+              <span class="sr-only">Filter dependency error rows in all three categories</span>
+              <input id="dep-filter" type="search" placeholder="Filter A, B and C">
+            </label>
+          </div>
+        </div>
+        <div id="dep-buckets"></div>
+      </div>
+    </section>
+
+    <section class="analysis-panel" id="panel-all-metrics" role="tabpanel"
+             aria-labelledby="tab-all-metrics" hidden>
+      <p class="note section-note" id="all-metrics-note">
+        Everything the CoNLL 2018 evaluation script reports for this run. Precision is the
+        share of the system's annotations that are correct, recall the share of the test
+        set's annotations the system reproduced, and F1 their harmonic mean — the score shown
+        everywhere else on this page.
+      </p>
+      <div class="table-wrap">
+        <table id="metrics">
+          <caption class="sr-only">Complete evaluator output for this run.</caption>
+          <thead id="metrics-head"></thead>
+          <tbody id="metrics-body"></tbody>
+        </table>
+      </div>
+      <p class="note metrics-note" id="metrics-note"></p>
+    </section>
+
+    <section class="analysis-panel" id="panel-reproducibility" role="tabpanel"
+             aria-labelledby="tab-reproducibility" hidden>
+      <p class="note section-note" id="reproducibility-note"></p>
+
+      <h3>This run</h3>
+      <div class="table-wrap">
+        <table class="kv-table" id="provenance-table">
+          <caption class="sr-only">Files, checksums and status behind this run's scores.</caption>
+          <colgroup><col class="kv-key"><col></colgroup>
+          <thead><tr><th scope="col">Item</th><th scope="col">Value</th></tr></thead>
+          <tbody id="provenance-body"></tbody>
+        </table>
+      </div>
+
+      <h3>Benchmark result set</h3>
+      <p class="note section-note">
+        The overview table, the summary above and All evaluation metrics read their scores
+        from this one file.
+      </p>
+      <div class="table-wrap">
+        <table class="kv-table" id="result-set-table">
+          <caption class="sr-only">The result file the benchmark table is built from.</caption>
+          <colgroup><col class="kv-key"><col></colgroup>
+          <thead><tr><th scope="col">Item</th><th scope="col">Value</th></tr></thead>
+          <tbody id="result-set-body"></tbody>
+        </table>
+      </div>
+
+      <p class="note policy-note" id="policy-note"></p>
+    </section>
+  </template>
+
+  <footer class="colophon">
+    <p>
+      Scores were computed with the CoNLL 2018 evaluation script, over the gold and
+      prediction files recorded for each run. Open a run's detailed analysis for its
+      full evaluator output and provenance, under Reproducibility.
+    </p>
+    <p class="meta" id="url-note" hidden></p>
+  </footer>
+
+  <div class="examples-backdrop" id="examples-backdrop" hidden></div>
+
+  <aside class="examples-panel" id="examples-panel" role="dialog" aria-modal="true"
+         aria-labelledby="examples-title" tabindex="-1" hidden>
+    <div class="examples-panel-header">
+      <div class="examples-titles">
+        <p class="examples-panel-title" id="examples-title"></p>
+        <p class="examples-subtitle" id="examples-subtitle"></p>
+      </div>
+      <button type="button" class="examples-panel-close" id="examples-close"
+              title="Close" aria-label="Close examples">&times;</button>
+    </div>
+    <div class="examples-toolbar">
+      <p class="examples-count" id="examples-count"></p>
+      <div class="examples-panel-actions">
+        <button type="button" class="examples-panel-action nav" id="examples-prev"
+                title="Previous row" aria-label="Previous row">&lsaquo;</button>
+        <button type="button" class="examples-panel-action nav" id="examples-next"
+                title="Next row" aria-label="Next row">&rsaquo;</button>
+        <button type="button" class="examples-panel-action" id="examples-link"
+                title="Copy a direct link to this examples panel">LINK</button>
+        <button type="button" class="examples-panel-action" id="examples-csv"
+                title="Export shown examples as CSV">CSV</button>
+        <button type="button" class="examples-panel-action" id="examples-md"
+                title="Copy shown examples as Markdown">MD</button>
+      </div>
+    </div>
+    <div class="examples-panel-body" id="examples-body"></div>
+    <p class="examples-source" id="examples-source"></p>
+  </aside>
+
+  <div id="app-error" class="fatal" hidden></div>
+
+  <!-- This prototype reads the published bundle of the current interface rather than
+       carrying a second copy of it. -->
+  <script src="../am_benchmark/data/results.js?v=5"></script>
+  <script src="app.js?v=7"></script>
+  <script src="analysis.js?v=12"></script>
+</body>
+</html>
