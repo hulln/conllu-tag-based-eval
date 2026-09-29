@@ -1062,6 +1062,30 @@
 });
 
 if (typeof window !== "undefined") {
+  /* Light by default; the header button switches to dark and the choice is kept
+     for this browser. The saved choice is applied by a script in the page head. */
+  window.addEventListener("DOMContentLoaded", function () {
+    const button = document.getElementById("theme-toggle");
+    if (!button) return;
+    const root = document.documentElement;
+    const sync = () => {
+      const dark = root.dataset.theme === "dark";
+      button.setAttribute("aria-pressed", String(dark));
+      button.classList.toggle("active", dark);
+    };
+    sync();
+    button.addEventListener("click", () => {
+      const dark = root.dataset.theme !== "dark";
+      if (dark) root.dataset.theme = "dark";
+      else delete root.dataset.theme;
+      try {
+        if (dark) localStorage.setItem("am-benchmark-theme", "dark");
+        else localStorage.removeItem("am-benchmark-theme");
+      } catch (error) { /* the choice lasts for this page only */ }
+      sync();
+    });
+  });
+
   window.addEventListener("DOMContentLoaded", function () {
     if (document.body.dataset.ui !== "overview") return;
     try {

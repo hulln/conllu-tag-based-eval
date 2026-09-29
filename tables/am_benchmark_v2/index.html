@@ -6,7 +6,16 @@
   <meta name="robots" content="noindex,nofollow">
   <title>Multilingual tagging and parsing benchmark</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="styles.css?v=14">
+  <link rel="stylesheet" href="styles.css?v=15">
+  <!-- Applied before the page paints, so a reader who chose dark mode never sees
+       a flash of the light page. Storage can be unavailable; light is the default. -->
+  <script>
+    try {
+      if (localStorage.getItem("am-benchmark-theme") === "dark") {
+        document.documentElement.dataset.theme = "dark";
+      }
+    } catch (error) { /* stay light */ }
+  </script>
 </head>
 <body data-ui="overview">
   <noscript>
@@ -14,11 +23,15 @@
   </noscript>
 
   <header class="masthead">
-    <h1>Multilingual tagging and parsing benchmark</h1>
-    <p class="lede">
-      Compare tagging and dependency parsing systems across languages, training setups
-      and written or spoken test data.
-    </p>
+    <div>
+      <h1>Multilingual tagging and parsing benchmark</h1>
+      <p class="lede">
+        Compare tagging and dependency parsing systems across languages, training setups
+        and written or spoken test data.
+      </p>
+    </div>
+    <button type="button" class="toggle-btn theme-toggle" id="theme-toggle"
+            aria-pressed="false">Dark mode</button>
   </header>
 
   <div class="context" id="context">
@@ -331,7 +344,7 @@
   <!-- This prototype reads the published bundle of the current interface rather than
        carrying a second copy of it. -->
   <script src="../am_benchmark/data/results.js?v=5"></script>
-  <script src="app.js?v=7"></script>
-  <script src="analysis.js?v=12"></script>
+  <script src="app.js?v=8"></script>
+  <script src="analysis.js?v=13"></script>
 </body>
 </html>

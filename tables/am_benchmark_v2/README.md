@@ -100,7 +100,8 @@ Dutch spoken test data also gets an unlettered note on UFeats: its gold
 annotates `Mood=Ind` and `PronType=Art`, the written gold does not. The rules
 are in `scoreIssues` and `contextIssue` in `app.js`.
 
-The page follows the system's dark mode setting.
+The page is light by default. A Dark mode button in the header switches to a
+dark theme, and the browser remembers the choice.
 
 ## Decisions made for the prototype (open questions in the feedback note)
 
