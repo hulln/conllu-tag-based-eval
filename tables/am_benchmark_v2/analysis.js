@@ -1408,6 +1408,7 @@
     const summary = data.summary;
     const overviewNode = doc.getElementById("run-summary");
     overviewNode.replaceChildren();
+    const flagged = new Map();
 
     /* The tiles fall into the overview table's two groups, under the same labels,
        so the split into morphology and syntax reads the same in both places. */
@@ -1424,12 +1425,37 @@
         const box = doc.createElement("div");
         box.className = "metric-box" + (metric.primary ? " primary" : "");
         box.append(cell(doc, "div", metric.name, "label"));
-        box.append(cell(doc, "div", formatScore(value), "val"));
+        const valueNode = cell(doc, "div", formatScore(value), "val");
+        const issue = row ? overview().scoreIssues(row)[metric.name] : null;
+        if (issue) {
+          const flag = cell(doc, "sup", issue.mark, "score-flag");
+          flag.setAttribute("aria-hidden", "true");
+          valueNode.append(flag, cell(doc, "span", " (see note " + issue.mark + ")", "sr-only"));
+          flagged.set(issue.mark, issue);
+        }
+        box.append(valueNode);
         box.append(cell(doc, "div", metric.description, "sub"));
         tiles.appendChild(box);
       }
       groupNode.appendChild(tiles);
       overviewNode.appendChild(groupNode);
+    }
+
+    /* The same notes as under the table, for this run only, so a reader who opened
+       the analysis from a link still sees them. */
+    const general = row ? overview().contextIssue(row) : "";
+    if (flagged.size || general) {
+      const notes = cell(doc, "div", null, "notice score-notes summary-notes");
+      notes.append(cell(doc, "strong", "Scores to read with care."));
+      const list = doc.createElement("ul");
+      for (const issue of flagged.values()) {
+        const item = doc.createElement("li");
+        item.append(cell(doc, "span", issue.mark, "score-flag-key"), doc.createTextNode(" " + issue.text));
+        list.appendChild(item);
+      }
+      if (general) list.appendChild(cell(doc, "li", general));
+      notes.appendChild(list);
+      overviewNode.appendChild(notes);
     }
 
     /* One quiet line of scale, in words. Relation and tag counts are left to the
@@ -1583,7 +1609,7 @@
       const score = percentage(row[2], row[1]);
       const otherScore = match ? percentage(match[2], match[1]) : null;
       return {
-        key: row[0], gold: row[1], score: score, inThis: true,
+        key: row[0], gold: row[1], score: score, inThis: true, errors: row[1] - row[2],
         otherGold: match ? match[1] : null, otherScore: otherScore,
         diff: score != null && otherScore != null ? score - otherScore : null
       };
@@ -1669,13 +1695,17 @@
         rows: () => {
           const rows = comparing && other
             ? pairedRows(ownRows, other.tables[config.source].rows)
-            : ownRows.map(row => ({ key: row[0], gold: row[1], score: percentage(row[2], row[1]), inThis: true }));
+            : ownRows.map(row => ({
+              key: row[0], gold: row[1], score: percentage(row[2], row[1]), inThis: true,
+              errors: row[1] - row[2]
+            }));
           const value = query();
           return rows.filter(row => matches(row.key, value));
         },
         rowKeys: row => [row.key],
         rowLabel: row => row.key,
-        isActivatable: row => row.inThis,
+        /* A label scored at 100% has no errors, so no examples stand behind it. */
+        isActivatable: row => row.inThis && row.errors > 0,
         onActivate: interactive
           ? keys => examples.open({ section: config.section, category: "", keys: keys })
           : null

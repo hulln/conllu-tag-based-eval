@@ -72,6 +72,16 @@
   --mark: #f6e7b8;
   /* A worse score in a comparison. 6.4:1 on the surface. */
   --neg: #b3261e;
+  /* Text on an accent fill, the analysis tables' header band, and the page dimmed
+     behind the examples panel. Tokens so the dark palette can redefine them. */
+  --on-accent: #ffffff;
+  --head-band: #24465f;
+  --head-band-hover: #315b7d;
+  --on-head: #ffffff;
+  --flag-border: #eadfc4;
+  --mark-line: rgba(138, 90, 23, .45);
+  --backdrop: rgba(23, 25, 29, .28);
+  color-scheme: light;
 
   /* ---- type ---------------------------------------------------------------
      Two faces, three roles, and the split is the point: the interface is set in a
@@ -128,6 +138,65 @@
   --head-y: 10px;
   --bar-w: 68px;
   --bar-gap: 8px;
+}
+
+/* Dark palette: the same roles, redefined. Follows the system setting unless the
+   page is forced with data-theme="light"; data-theme="dark" forces it. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121417;
+    --surface: #1a1d21;
+    --surface-sub: #22262b;
+    --text: #e4e7ea;
+    --muted: #a3abb4;
+    --faint: #6f7780;
+    --border: #353b42;
+    --border-strong: #4c545d;
+    --rule-faint: #272b30;
+    --accent: #8fb6d8;
+    --accent-strong: #b8d3ea;
+    --accent-soft: #1e2d3a;
+    --focus: #8fb6d8;
+    --flag: #e2b56c;
+    --flag-soft: #2a2418;
+    --mark: #57481d;
+    --neg: #ff8f85;
+    --on-accent: #0f1a24;
+    --head-band: #2a4960;
+    --head-band-hover: #365a76;
+    --on-head: #ffffff;
+    --flag-border: #5a4a2c;
+    --mark-line: rgba(226, 181, 108, .55);
+    --backdrop: rgba(0, 0, 0, .55);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121417;
+  --surface: #1a1d21;
+  --surface-sub: #22262b;
+  --text: #e4e7ea;
+  --muted: #a3abb4;
+  --faint: #6f7780;
+  --border: #353b42;
+  --border-strong: #4c545d;
+  --rule-faint: #272b30;
+  --accent: #8fb6d8;
+  --accent-strong: #b8d3ea;
+  --accent-soft: #1e2d3a;
+  --focus: #8fb6d8;
+  --flag: #e2b56c;
+  --flag-soft: #2a2418;
+  --mark: #57481d;
+  --neg: #ff8f85;
+  --on-accent: #0f1a24;
+  --head-band: #2a4960;
+  --head-band-hover: #365a76;
+  --on-head: #ffffff;
+  --flag-border: #5a4a2c;
+  --mark-line: rgba(226, 181, 108, .55);
+  --backdrop: rgba(0, 0, 0, .55);
+  color-scheme: dark;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -198,11 +267,32 @@ a:hover { color: var(--accent-strong); }
   margin: 0 0 var(--s4);
   padding: var(--s3) var(--s4);
   background: var(--flag-soft);
-  border: 1px solid #eadfc4;
+  border: 1px solid var(--flag-border);
   border-radius: var(--radius);
   font-size: 13.5px;
   color: var(--text);
 }
+/* Marks on scores that do not measure what their column says. Taken out of the
+   flow so the numbers in a column stay aligned. */
+.score-flag {
+  position: absolute;
+  margin-left: 2px;
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--flag);
+}
+.score-flag-key {
+  display: inline-block;
+  min-width: 1em;
+  font-weight: 500;
+  color: var(--flag);
+}
+.score-notes ul { margin: var(--s1) 0 0; padding: 0; list-style: none; }
+.score-notes li { margin-top: var(--s1); }
+.summary-notes { flex: 1 0 100%; margin: var(--s4) 0; }
+
 .notice.quiet {
   background: var(--surface);
   border-color: var(--border);
@@ -284,7 +374,7 @@ a:hover { color: var(--accent-strong); }
 
 .seg-btn[aria-pressed="true"] {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 .seg-btn[aria-pressed="true"]:hover { background: var(--accent-strong); }
 
@@ -292,12 +382,12 @@ a:hover { color: var(--accent-strong); }
   cursor: default;
   color: var(--muted);
 }
-.seg-btn[aria-disabled="true"][aria-pressed="true"] { color: #fff; }
+.seg-btn[aria-disabled="true"][aria-pressed="true"] { color: var(--on-accent); }
 
 .seg-btn:focus-visible { outline-offset: -3px; }
 /* The ring is inset, so on the selected button it would be accent on accent —
    invisible. Light on the fill instead. */
-.seg-btn[aria-pressed="true"]:focus-visible { outline-color: #fff; }
+.seg-btn[aria-pressed="true"]:focus-visible { outline-color: var(--on-accent); }
 
 .context select {
   min-height: 38px;
@@ -474,7 +564,7 @@ th.sortable:focus-visible { outline-offset: -2px; border-radius: 0; }
   padding: 7px 10px;
   border-radius: var(--radius);
   background: var(--text);
-  color: #fff;
+  color: var(--bg);
   font-size: 12.5px;
   font-weight: 400;
   line-height: 17.5px;
@@ -715,6 +805,7 @@ tr:hover .analyse-label { text-decoration: underline; }
 
 .overview {
   display: flex;
+  flex-wrap: wrap;
   margin: var(--s6) 0 var(--s8);
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
@@ -1037,26 +1128,26 @@ tr:hover .analyse-label { text-decoration: underline; }
 .analysis-section thead th {
   padding-top: var(--head-y);
   padding-bottom: var(--head-y);
-  border-color: var(--accent-strong);
-  background: var(--accent-strong);
+  border-color: var(--head-band);
+  background: var(--head-band);
   font-family: var(--font-ui);
   font-size: 12px;
   line-height: 16px;
   font-weight: 500;
-  color: #fff;
+  color: var(--on-head);
   vertical-align: middle;
 }
 
-.analysis-section thead th.primary { color: #fff; }
+.analysis-section thead th.primary { color: var(--on-head); }
 .analysis-section thead .sort-ind,
-.analysis-section thead .sort-arrow { color: #fff; }
+.analysis-section thead .sort-arrow { color: var(--on-head); }
 .analysis-section thead th.sortable:hover {
-  background: var(--accent);
-  color: #fff;
+  background: var(--head-band-hover);
+  color: var(--on-head);
 }
 .analysis-section thead th.sortable:focus-visible {
-  outline-color: #fff;
-  color: #fff;
+  outline-color: var(--on-head);
+  color: var(--on-head);
 }
 
 .analysis-section tbody td,
@@ -1211,7 +1302,7 @@ kbd {
   position: fixed;
   inset: 0;
   z-index: 20;
-  background: rgba(23, 25, 29, .28);
+  background: var(--backdrop);
 }
 
 .examples-panel {
@@ -1344,7 +1435,7 @@ kbd {
   border-radius: 2px;
   background: var(--mark);
   color: inherit;
-  box-shadow: inset 0 -2px 0 0 rgba(138, 90, 23, .45);
+  box-shadow: inset 0 -2px 0 0 var(--mark-line);
 }
 
 .example-facts {

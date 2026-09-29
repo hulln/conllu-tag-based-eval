@@ -58,6 +58,7 @@
       <thead id="comparison-head"></thead>
     </table>
   </div>
+  <div class="notice score-notes" id="score-notes" hidden></div>
   <!-- The terms a reader needs for the table, visible rather than only on hover. -->
   <dl class="table-legend" id="table-legend">
     <div>
@@ -238,8 +239,10 @@
       <p class="note section-note" id="all-metrics-note">
         Everything the CoNLL 2018 evaluation script reports for this run. Precision is the
         share of the system's annotations that are correct, recall the share of the test
-        set's annotations the system reproduced, and F1 their harmonic mean — the score shown
-        everywhere else on this page.
+        set's annotations the system reproduced, and F1 their harmonic mean. F1 is the score
+        in the overview table and the summary above. The per-tag and per-relation tables
+        under Morphology and Syntax use a simpler measure: the percentage of a label's
+        occurrences in the test set that the system got right.
       </p>
       <div class="table-wrap">
         <table id="metrics">

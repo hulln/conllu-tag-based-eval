@@ -83,15 +83,34 @@ the same tab.
   footer under "Technical details", so the page no longer has anything to
   expand.
 
+## Scores marked in the table
+
+Some spaCy scores are evaluator output but do not measure what their column
+says (`am_benchmark/reports/label_audit.md`). The table marks them with a
+letter and explains each letter under the table; the run's summary repeats the
+notes that apply to it:
+
+- **a** — spaCy default, LAS: the root relation is written `ROOT`, not `root`.
+- **b** — English spaCy default, UAS and LAS: not UD relations or attachment
+  conventions.
+- **c** — spaCy trained on written or written + spoken, UFeats: no features
+  predicted.
+
+Dutch spoken test data also gets an unlettered note on UFeats: its gold
+annotates `Mood=Ind` and `PronType=Art`, the written gold does not. The rules
+are in `scoreIssues` and `contextIssue` in `app.js`.
+
+The page follows the system's dark mode setting.
+
 ## Decisions made for the prototype (open questions in the feedback note)
 
 - **Placement:** the analysis opens below the whole table, not inline under
   the clicked row.
 - **XPOS:** removed only from the analysis error tables. The column stays in
   the overview table and the summary.
-- **Tab navigation:** tabs replace the URL fragment instead of adding history
-  entries. The table is on the same page now, so Back leaves the page instead
-  of stepping through tabs.
+- **Browser history:** opening or closing a run, and changing the language or
+  test data, add a history entry, so Back returns to the previous state of the
+  page. Switching tabs and sorting replace the current entry instead.
 
 ## Lemma and feature errors, and Dutch spoken examples
 

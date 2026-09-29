@@ -173,6 +173,57 @@
     return row.error_message || "No result available.";
   }
 
+  /* Scores that are evaluator output but do not measure what their column says,
+     because of how the supplied prediction files are labelled
+     (am_benchmark/reports/label_audit.md). They are shown, marked, and explained
+     under the table and in the run's summary. */
+  const SCORE_ISSUES = {
+    root: {
+      mark: "a",
+      text: "spaCy's pretrained pipelines label the root relation ROOT, while UD and the " +
+        "test set use root. Every root therefore counts as a wrong relation, which lowers LAS."
+    },
+    scheme: {
+      mark: "b",
+      text: "The English spaCy pretrained pipeline does not use UD dependency relations or UD " +
+        "attachment conventions (it uses ClearNLP labels). Its UAS and LAS cannot be " +
+        "compared with the other rows."
+    },
+    nofeats: {
+      mark: "c",
+      text: "This system's output contains no morphological features. The UFeats score is " +
+        "only the share of test-set words that have no features in the manual annotation."
+    }
+  };
+
+  /* {metric: issue} for one row. */
+  function scoreIssues(row) {
+    const issues = {};
+    if (!row || row.model !== "spacy") return issues;
+    if (row.training_condition === "default") {
+      if (row.language === "EN") {
+        issues.UAS = SCORE_ISSUES.scheme;
+        issues.LAS = SCORE_ISSUES.scheme;
+      } else {
+        issues.LAS = SCORE_ISSUES.root;
+      }
+    } else {
+      issues.UFeats = SCORE_ISSUES.nofeats;
+    }
+    return issues;
+  }
+
+  /* A caveat on the gold annotation itself, true of every row in a context. */
+  function contextIssue(state) {
+    if (state.language === "NL" && state.test_condition === "spokentest") {
+      return "UFeats: the Dutch spoken test set annotates Mood=Ind and PronType=Art, " +
+        "the Dutch written test set does not. Systems trained on the written conventions " +
+        "do not predict these features, so UFeats here partly reflects this difference " +
+        "in annotation.";
+    }
+    return "";
+  }
+
   /* Metrics the bundle actually carries, grouped for the comparison header. */
   function comparisonGroups(data) {
     const present = new Set((data.metrics || []).map(metric => metric.name));
@@ -396,12 +447,20 @@
        on the same row wherever that row exists, so switching between written and
        spoken test data compares like with like. */
     let openRun = null;
-    if (requested.model || requested[TRAINING]) {
-      const wanted = { model: requested.model, [TRAINING]: requested[TRAINING] };
+    function openRequestedRun(request) {
+      openRun = null;
+      if (!request.model && !request[TRAINING]) return;
+      const wanted = { model: request.model, [TRAINING]: request[TRAINING] };
       const found = rowsFor(data, state).find(row => sameRun(row, wanted));
       if (found) openRun = { model: found.model, [TRAINING]: found[TRAINING] };
       else invalidRequest = true;
     }
+    openRequestedRun(requested);
+
+    /* Set by a reader's navigation (opening or closing a run, changing language or
+       test data) so the next URL write adds a history entry and Back undoes it.
+       Every other render (sorting, restoring from history) replaces the entry. */
+    let pushNext = false;
 
     const metrics = comparisonMetrics(data);
     const groups = comparisonGroups(data);
@@ -430,11 +489,17 @@
         /* The fragment names the open analysis tab, so it only survives while an
            analysis is open. */
         const hash = openRun ? browserWindow.location.hash || "" : "";
-        browserWindow.history.replaceState(null, "", browserWindow.location.pathname + "?" + query + hash);
+        const url = browserWindow.location.pathname + "?" + query + hash;
+        const current = new URLSearchParams(browserWindow.location.search);
+        current.delete("ex");
+        if (pushNext && current.toString() !== query) browserWindow.history.pushState(null, "", url);
+        else browserWindow.history.replaceState(null, "", url);
       } catch (error) {
         urlSyncBlocked = true;
         doc.body.dataset.urlSync = "blocked";
         reportUrlSyncBlocked(error);
+      } finally {
+        pushNext = false;
       }
     }
 
@@ -506,6 +571,7 @@
       /* A choice the reader just made is never a broken link. */
       invalidRequest = false;
       if (openRun && !rowsFor(data, state).some(row => sameRun(row, openRun))) openRun = null;
+      pushNext = true;
       render();
       syncAnalysis({});
     }
@@ -660,6 +726,13 @@
           if (className.indexOf("best") !== -1) {
             td.appendChild(cell("span", " (best)", "sr-only"));
           }
+          const issue = scoreIssues(row)[metric];
+          if (issue) {
+            const flag = cell("sup", issue.mark, "score-flag");
+            flag.setAttribute("aria-hidden", "true");
+            td.append(flag, cell("span", " (see note " + issue.mark + " below the table)", "sr-only"));
+            td.title = issue.text;
+          }
           tr.appendChild(td);
         });
       }
@@ -772,6 +845,31 @@
       return true;
     }
 
+    /* The notes for the marks in this context's table, each stated once. */
+    function renderScoreNotes(rows) {
+      const node = doc.getElementById("score-notes");
+      if (!node) return;
+      const used = new Map();
+      for (const row of rows) {
+        if (unavailableReason(row)) continue;
+        for (const issue of Object.values(scoreIssues(row))) used.set(issue.mark, issue);
+      }
+      const general = contextIssue(state);
+      node.replaceChildren();
+      node.hidden = !used.size && !general;
+      if (node.hidden) return;
+      node.append(cell("strong", "Scores to read with care."));
+      const list = doc.createElement("ul");
+      for (const issue of Array.from(used.values()).sort((a, b) => a.mark.localeCompare(b.mark))) {
+        const item = doc.createElement("li");
+        const mark = cell("span", issue.mark, "score-flag-key");
+        item.append(mark, doc.createTextNode(" " + issue.text));
+        list.appendChild(item);
+      }
+      if (general) list.appendChild(cell("li", general));
+      node.appendChild(list);
+    }
+
     function render() {
       renderContextControl("language", doc.getElementById("language-control"), "language-label");
       renderContextControl("test_condition", doc.getElementById("test-control"), "test-label");
@@ -796,10 +894,13 @@
         empty.append(cell("p", "No results for this combination", "empty-title"));
         empty.append(cell("p", "Try another language or test data.", "empty-hint"));
         doc.getElementById("caveat").hidden = true;
+        const scoreNotes = doc.getElementById("score-notes");
+        if (scoreNotes) scoreNotes.hidden = true;
       } else {
         renderHead();
         const mixed = renderCaveat(rows);
         renderTable(rows, mixed);
+        renderScoreNotes(rows);
 
         const parts = ["Scores are F1 (%) against the manually annotated test set; higher is better."];
         if (Object.keys(bestValues(rows, metrics)).length) {
@@ -869,6 +970,7 @@
         return;
       }
       openRun = { model: row.model, [TRAINING]: row[TRAINING] };
+      pushNext = true;
       render();
       syncAnalysis({ scroll: true, smooth: true });
     }
@@ -876,6 +978,7 @@
     function closeAnalysis() {
       const closed = openRun;
       openRun = null;
+      pushNext = true;
       render();
       syncAnalysis({});
       /* Focus returns to the row the analysis was opened from. */
@@ -886,6 +989,24 @@
     }
 
     doc.getElementById("analysis-close").addEventListener("click", closeAnalysis);
+
+    /* Back and Forward restore the context and the open run the entry names. */
+    browserWindow.addEventListener("popstate", () => {
+      let request;
+      let example = "";
+      try {
+        request = parseRequest(browserWindow.location.search);
+        example = new URLSearchParams(browserWindow.location.search).get("ex") || "";
+      } catch (error) {
+        return;
+      }
+      const restored = resolveContext(data, request);
+      state = restored.state;
+      invalidRequest = restored.invalid;
+      openRequestedRun(request);
+      render();
+      syncAnalysis({ example: example });
+    });
 
     /* Said up front rather than after the first click: over file:// the browser
        refuses the fetches every analysis depends on. */
@@ -931,6 +1052,8 @@
     analysisUrl,
     isAuthoritative,
     unavailableReason,
+    scoreIssues,
+    contextIssue,
     parseRequest,
     formatScore,
     formatCount,
