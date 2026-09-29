@@ -180,8 +180,8 @@
   const SCORE_ISSUES = {
     root: {
       mark: "a",
-      text: "spaCy's pretrained pipelines label the root relation ROOT, while UD and the " +
-        "test set use root. Every root therefore counts as a wrong relation, which lowers LAS."
+      text: "spaCy's pretrained pipelines label the root relation `ROOT`, while UD and the " +
+        "test set use `root`. Every root therefore counts as a wrong relation, which lowers LAS."
     },
     scheme: {
       mark: "b",
@@ -216,12 +216,29 @@
   /* A caveat on the gold annotation itself, true of every row in a context. */
   function contextIssue(state) {
     if (state.language === "NL" && state.test_condition === "spokentest") {
-      return "UFeats: the Dutch spoken test set annotates Mood=Ind and PronType=Art, " +
+      return "UFeats: the Dutch spoken test set annotates `Mood=Ind` and `PronType=Art`, " +
         "the Dutch written test set does not. Systems trained on the written conventions " +
         "do not predict these features, so UFeats here partly reflects this difference " +
         "in annotation.";
     }
     return "";
+  }
+
+  /* Appends prose to a node, setting `quoted` parts (labels, tags, features) in
+     the data font the tables use, so a label reads the same in text and table. */
+  function appendMarked(doc, node, text) {
+    String(text).split("`").forEach((part, index) => {
+      if (!part) return;
+      if (index % 2) {
+        const term = doc.createElement("span");
+        term.className = "data-term";
+        term.textContent = part;
+        node.appendChild(term);
+      } else {
+        node.appendChild(doc.createTextNode(part));
+      }
+    });
+    return node;
   }
 
   /* Metrics the bundle actually carries, grouped for the comparison header. */
@@ -731,7 +748,7 @@
             const flag = cell("sup", issue.mark, "score-flag");
             flag.setAttribute("aria-hidden", "true");
             td.append(flag, cell("span", " (see note " + issue.mark + " below the table)", "sr-only"));
-            td.title = issue.text;
+            td.title = issue.text.replace(/`/g, "");
           }
           tr.appendChild(td);
         });
@@ -863,10 +880,11 @@
       for (const issue of Array.from(used.values()).sort((a, b) => a.mark.localeCompare(b.mark))) {
         const item = doc.createElement("li");
         const mark = cell("span", issue.mark, "score-flag-key");
-        item.append(mark, doc.createTextNode(" " + issue.text));
+        item.append(mark, doc.createTextNode(" "));
+        appendMarked(doc, item, issue.text);
         list.appendChild(item);
       }
-      if (general) list.appendChild(cell("li", general));
+      if (general) list.appendChild(appendMarked(doc, doc.createElement("li"), general));
       node.appendChild(list);
     }
 
@@ -1054,6 +1072,7 @@
     unavailableReason,
     scoreIssues,
     contextIssue,
+    appendMarked,
     parseRequest,
     formatScore,
     formatCount,
@@ -1071,7 +1090,7 @@ if (typeof window !== "undefined") {
     const sync = () => {
       const dark = root.dataset.theme === "dark";
       button.setAttribute("aria-pressed", String(dark));
-      button.classList.toggle("active", dark);
+      button.title = dark ? "Light mode" : "Dark mode";
     };
     sync();
     button.addEventListener("click", () => {

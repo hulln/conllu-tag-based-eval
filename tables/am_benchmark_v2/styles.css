@@ -260,9 +260,21 @@ a:hover { color: var(--accent-strong); }
   font-weight: 500;
   color: var(--flag);
 }
-.score-notes ul { margin: var(--s1) 0 0; padding: 0; list-style: none; }
-.score-notes li { margin-top: var(--s1); }
-.summary-notes { flex: 1 0 100%; margin: var(--s4) 0; }
+/* Quieter than a notice: no fill or box, one thin rule in the marks' colour. */
+.notice.score-notes {
+  padding: 2px 0 2px var(--s3);
+  background: none;
+  border: 0;
+  border-left: 2px solid var(--mark-line);
+  margin: var(--s3) 0 var(--s4);
+  border-radius: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.score-notes strong { font-weight: 500; color: var(--text); }
+.score-notes ul { margin: 2px 0 0; padding: 0; list-style: none; }
+.score-notes li { margin-top: 2px; }
+.notice.summary-notes { flex: 1 0 100%; margin: var(--s4) 0; }
 
 .notice.quiet {
   background: var(--surface);
@@ -281,7 +293,27 @@ a:hover { color: var(--accent-strong); }
   gap: var(--s4);
   margin-bottom: var(--s8);
 }
-.theme-toggle { flex: none; margin-top: var(--s1); }
+.theme-toggle {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin-top: 2px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.theme-toggle:hover { border-color: var(--border); color: var(--text); }
+.theme-toggle .icon-sun { display: none; }
+:root[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+:root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+/* A label, tag or feature quoted in prose, in the data font the tables use. */
+.data-term { font-family: var(--font-data); font-size: .93em; }
 
 /* Plex Medium carries a title at this size without help: 600 here reads as an
    announcement rather than a heading, and the page is not announcing anything. */
@@ -1202,7 +1234,8 @@ td.diff-neut { color: var(--muted); }
 .analysis-section tr.selected-row > * { background: var(--accent-soft); }
 .analysis-section tr.selected-row td.label { color: var(--accent); }
 
-.analysis-section tr.clickable-row td.label {
+.analysis-section tr.clickable-row td.label,
+.analysis-section table.opens-examples tbody td.label:first-child {
   position: relative;
   padding-left: 27px;
 }

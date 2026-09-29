@@ -447,6 +447,9 @@
     const head = table.querySelector("thead tr");
     const body = table.querySelector("tbody");
     const wrap = table.closest(".table-wrap");
+    /* Rows without examples (a label with no errors) keep the same indent as the
+       rows marked ↳, so the labels in one table line up. */
+    table.classList.toggle("opens-examples", Boolean(spec.onActivate));
     let expanded = false;
     let sort = null;
     let selectedKey = null;
@@ -1450,10 +1453,11 @@
       const list = doc.createElement("ul");
       for (const issue of flagged.values()) {
         const item = doc.createElement("li");
-        item.append(cell(doc, "span", issue.mark, "score-flag-key"), doc.createTextNode(" " + issue.text));
+        item.append(cell(doc, "span", issue.mark, "score-flag-key"), doc.createTextNode(" "));
+        overview().appendMarked(doc, item, issue.text);
         list.appendChild(item);
       }
-      if (general) list.appendChild(cell(doc, "li", general));
+      if (general) list.appendChild(overview().appendMarked(doc, doc.createElement("li"), general));
       notes.appendChild(list);
       overviewNode.appendChild(notes);
     }
@@ -1970,7 +1974,8 @@
   /* A notice inside an error subsection: a bold lead, then the explanation. */
   function layerNotice(doc, lead, text, quiet) {
     const node = cell(doc, "p", null, "notice" + (quiet ? " quiet" : ""));
-    node.append(cell(doc, "strong", lead), doc.createTextNode(" " + text));
+    node.append(cell(doc, "strong", lead), doc.createTextNode(" "));
+    overview().appendMarked(doc, node, text);
     return node;
   }
 
@@ -2060,8 +2065,8 @@
           "add up to more than the total above.",
         notice: blank
           ? layerNotice(doc, "No features in this system's output.",
-            "Its FEATS column is _ for all " + formatCount(features.compared) + " words of the " +
-            "test set, so every feature the test set marks appears below as missing (→ _).", true)
+            "Its `FEATS` column is `_` for all " + formatCount(features.compared) + " words of the " +
+            "test set, so every feature the test set marks appears below as missing (`→ _`).", true)
           : null,
         mergeable: true,
         filterPlaceholder: "e.g. Case or Number",
