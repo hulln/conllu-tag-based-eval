@@ -301,13 +301,12 @@ a:hover { color: var(--accent-strong); }
   height: 36px;
   margin-top: 2px;
   padding: 0;
-  border: 1px solid transparent;
-  border-radius: 50%;
+  border: 0;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
 }
-.theme-toggle:hover { border-color: var(--border); color: var(--text); }
+.theme-toggle:hover { color: var(--text); }
 .theme-toggle .icon-sun { display: none; }
 :root[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
 :root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
