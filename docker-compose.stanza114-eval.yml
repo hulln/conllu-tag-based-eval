@@ -1,0 +1,31 @@
+# Stanza 1.14.0 (package default_accurate) on the three test sets of the CJVT evaluation website.
+#
+# The image tag and build arguments are those of the August 2026 Stanza 1.14 runs, so an existing
+# conllu-stanza:1.14.0 image is reused as is. The Stanza models come from the release-time cache verified
+# in August (references/stanza-1.14.0-default_accurate.json). That cache holds no copy of
+# EMBEDDIA/crosloengual-bert, so the transformer comes from the 2026-08-10 Stanza 1.14 cache, whose
+# snapshot files match the pinned SHA-256 values. Both are mounted read-only so this run cannot change
+# them, and the Hugging Face hub is forced offline so nothing is downloaded during prediction.
+# Runbook: docker/README.stanza114-eval.md
+services:
+  stanza114-eval:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.stanza
+      args:
+        STANZA_VERSION: "1.14.0"
+        TORCH_VERSION: "2.6.0+cu118"
+    image: conllu-stanza:1.14.0
+    gpus: all
+    working_dir: /project
+    volumes:
+      - .:/project
+      - ${STANZA114_CACHE:-/mnt/local-hddpool/niveshull/stanza-eval-release114}:/cache:ro
+      - ${STANZA114_HF_CACHE:-/mnt/local-hddpool/niveshull/stanza-eval/1.14/huggingface}:/hf:ro
+    environment:
+      - STANZA_RESOURCES_DIR=/cache/stanza
+      - HF_HOME=/hf
+      - HF_HUB_OFFLINE=1
+      - TRANSFORMERS_OFFLINE=1
+      # torch.hub is not used by Stanza, but keep any writes off the read-only cache.
+      - TORCH_HOME=/tmp/torch

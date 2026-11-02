@@ -1,0 +1,211 @@
+{
+ "schema_version": 1,
+ "description": "Pinned configuration for evaluating Stanza 1.14.0 (package default_accurate) on the three test sets of the CJVT evaluation website, with the model artifacts verified in August 2026. Generated from the records on branch stanza-1.13-vs-1.14; see 'source'.",
+ "system": {
+  "key": "stanza",
+  "label": "Stanza 1.14.0",
+  "package": "default_accurate",
+  "processors": "tokenize,pos,lemma,depparse",
+  "tokenize_pretokenized": true
+ },
+ "source": {
+  "branch": "stanza-1.13-vs-1.14",
+  "commit": "15ed0df58ae2e49d90dbd0dd49b3f5a82978f328",
+  "model_artifacts": {
+   "path": "experiments/20260811-stanza-release-time-1.13-vs-1.14/model-artifacts.json",
+   "blob": "d91431fc9b48e283c2948f2613f5d4f0a49765f0"
+  },
+  "manifest": {
+   "path": "experiments/20260811-stanza-release-time-1.13-vs-1.14/manifest.json",
+   "blob": "b90bf194e7e297f0c84ce6e7b396683f8193c37e"
+  },
+  "pip_freeze": {
+   "path": "experiments/20260810-stanza-1.13-vs-1.14-ssj/environment/stanza-1.14.0-pip-freeze.txt",
+   "blob": "507091d710eefdadbcc496f64101ccc3b38daa48"
+  }
+ },
+ "resources": {
+  "stanza_resources_version": "1.14.0",
+  "commit": "f016b8e92f0ae9dd76729db44c4a582a72db2252",
+  "resources_json_sha256": "dbaf5f0c740072df4f0c571c750073c21e5af4d23b277ca590f2b64400a58a84",
+  "default_accurate": {
+   "tokenize": "combined_charlm",
+   "lemma": "combined_charlm",
+   "pos": "combined_crosloengual-bert",
+   "depparse": "combined_crosloengual-bert"
+  }
+ },
+ "artifacts": {
+  "tokenize/combined_charlm.pt": {
+   "size_bytes": 2735848,
+   "md5": "4d1c0d8b70440335d1ca568508103aaa",
+   "sha256": "f1c5f1ecaaf0f25514c3c787458e4170ff019f5c47a484ac27ebf996882b0dac"
+  },
+  "lemma/combined_charlm.pt": {
+   "size_bytes": 49265351,
+   "md5": "ed65f0e34223ec836654f7e1c49b9708",
+   "sha256": "89b964766e2c777b478929671161e9f28a151960bd66b9ac6e49892dcc45fdac"
+  },
+  "pos/combined_crosloengual-bert.pt": {
+   "size_bytes": 45292763,
+   "md5": "81efb4bf6671c538dae71da2b2113c0c",
+   "sha256": "8db7bdbbe0bb559031739d109029361f96c50ff18d7b539a3c7ac3f24b823e0c"
+  },
+  "depparse/combined_crosloengual-bert.pt": {
+   "size_bytes": 115347359,
+   "md5": "c640d6c89966bf456a0f5ef526187550",
+   "sha256": "6f52eb9a951336dfea6c6772e6e03b8ff0ebdbaea977088f0803256c7bbc8f8c"
+  },
+  "pretrain/conll17.pt": {
+   "size_bytes": 106897299,
+   "md5": "e9710fbfa537a30610e7c3cb370d52f0",
+   "sha256": "6345c7cef4d258ace8bc58a4df624613b04185af137c784042a56824e20a1eb0"
+  },
+  "forward_charlm/oscar2023.pt": {
+   "size_bytes": 19660363,
+   "md5": "6cf63d4630f8144ceb2095d1cecbb721",
+   "sha256": "4e71581faf86bb7752bc703754645b0e11fb489c0eb67f90bf0871bb0fd1a250"
+  },
+  "backward_charlm/oscar2023.pt": {
+   "size_bytes": 19660351,
+   "md5": "714ab47c45593356da52bd1ab8502a21",
+   "sha256": "9157697803113359ceb6a4f64dfc2b79a9475599ec756f27ba1096ac4acfafec"
+  }
+ },
+ "artifacts_note": "The SHA-256 of each artifact equals the LFS object id of the same file at revision v1.14.0 of huggingface.co/stanfordnlp/stanza-sl (checked 2026-10-30).",
+ "transformer": {
+  "model": "EMBEDDIA/crosloengual-bert",
+  "revision": "750255b6915cf42623143690d8ea79ceab8ee2e8",
+  "snapshot_files": {
+   ".gitattributes": {
+    "size_bytes": 391,
+    "sha256": "f049f7c0d16eaffe605baca479013bcb7a3847077cf6e548ba7b228831cf9c38"
+   },
+   "README.md": {
+    "size_bytes": 1035,
+    "sha256": "c00d973c2c2c257bf48fc8c9cfa3bef79d9f22653b929fd684ccc5ee9f031d71"
+   },
+   "config.json": {
+    "size_bytes": 433,
+    "sha256": "e990f8e0e960e590d3b090c0d04a8420ced461421b75665032d52906e8bee40f"
+   },
+   "flax_model.msgpack": {
+    "size_bytes": 496751463,
+    "sha256": "7e3d879fb10aa50046f9a6fdd227e0139e375b7240f1df9a9f6c63b70f27fafe"
+   },
+   "pytorch_model.bin": {
+    "size_bytes": 499161406,
+    "sha256": "230c770eadd60a36d3d012e4f1067f45fb165fc8da3cb65ca00f210e89184f08"
+   },
+   "tokenizer_config.json": {
+    "size_bytes": 46,
+    "sha256": "dd6dd0d61cbe8d0436cee9caf7b256ff37320da54384feccfdff6a2fa9eb6a7f"
+   },
+   "vocab.txt": {
+    "size_bytes": 329130,
+    "sha256": "af85931a777f7330c0ea06e74464f1ed5b2945cfdf4bc9968151fd1654317b6b"
+   }
+  }
+ },
+ "environment": {
+  "docker_image": "conllu-stanza:1.14.0",
+  "docker_image_id": "sha256:52edf2dff5c8da66ef448be0390728ad3df7a8f9d49f19b94eb3f83d8b83fc14",
+  "stanza": "1.14.0",
+  "torch": "2.6.0+cu118",
+  "pip_freeze": [
+   "accelerate==0.24.1",
+   "certifi==2026.7.22",
+   "charset-normalizer==3.4.9",
+   "colorama==0.4.6",
+   "emoji==2.15.0",
+   "filelock==3.32.2",
+   "fsspec==2026.7.0",
+   "huggingface-hub==0.19.4",
+   "idna==3.18",
+   "Jinja2==3.1.6",
+   "MarkupSafe==3.0.3",
+   "mpmath==1.3.0",
+   "networkx==3.4.2",
+   "numpy==1.26.4",
+   "nvidia-cublas-cu11==11.11.3.6",
+   "nvidia-cuda-cupti-cu11==11.8.87",
+   "nvidia-cuda-nvrtc-cu11==11.8.89",
+   "nvidia-cuda-runtime-cu11==11.8.89",
+   "nvidia-cudnn-cu11==9.1.0.70",
+   "nvidia-cufft-cu11==10.9.0.58",
+   "nvidia-curand-cu11==10.3.0.86",
+   "nvidia-cusolver-cu11==11.4.1.48",
+   "nvidia-cusparse-cu11==11.7.5.86",
+   "nvidia-nccl-cu11==2.21.5",
+   "nvidia-nvtx-cu11==11.8.86",
+   "packaging==26.3",
+   "peft==0.6.2",
+   "platformdirs==4.11.1",
+   "protobuf==7.35.1",
+   "psutil==7.2.2",
+   "PyYAML==6.0.3",
+   "regex==2026.7.19",
+   "requests==2.34.2",
+   "safetensors==0.8.0",
+   "stanza==1.14.0",
+   "sympy==1.13.1",
+   "termcolor==3.3.0",
+   "tokenizers==0.15.2",
+   "tomli==2.4.1",
+   "torch==2.6.0+cu118",
+   "tqdm==4.70.0",
+   "transformers==4.35.2",
+   "triton==3.2.0",
+   "typing_extensions==4.10.0",
+   "udapi==0.5.2",
+   "udtools==0.2.8",
+   "urllib3==2.7.0"
+  ]
+ },
+ "cache": {
+  "host_root": "/mnt/local-hddpool/niveshull/stanza-eval-release114",
+  "container_root": "/cache",
+  "stanza_resources_dir": "/cache/stanza",
+  "hf_host_root": "/mnt/local-hddpool/niveshull/stanza-eval/1.14/huggingface",
+  "hf_home": "/hf",
+  "hf_note": "Checked on the server on 2026-11-02: stanza-eval-release114/huggingface is empty (directory unchanged since 2026-08-11 03:08), although the August release-time notes say the pinned snapshot was placed there. The 2026-08-10 Stanza 1.14 cache holds refs/main = 750255b6 and the four files needed for PyTorch loading (config.json, pytorch_model.bin, tokenizer_config.json, vocab.txt), all matching the pinned SHA-256; the stanza-eval-release112/113 caches hold all seven pinned files with the same values."
+ },
+ "test_sets": [
+  {
+   "key": "ssj",
+   "gold": "data/gold/sl_ssj-ud-test.conllu",
+   "sha256": "c14d5d2f4f20a7ad43e0f598a2e18c5e41f08364ab36be1c87d6d9eae7f5c8b0",
+   "sentences": 1282,
+   "words": 25442
+  },
+  {
+   "key": "sst",
+   "gold": "data/gold/sl_sst-ud-test.conllu",
+   "sha256": "6824234edf98cbbedb2e981644c324a3058c2920ed6cdcd7f467e835cfe25eeb",
+   "sentences": 432,
+   "words": 11443
+  },
+  {
+   "key": "pog",
+   "gold": "data/gold/sl_sst-ud-test-pog.conllu",
+   "sha256": "898fdadbde212991f9e93388fa6e2aae4fbf65fa18a103539066c329b7c0d756",
+   "sentences": 420,
+   "words": 11443
+  }
+ ],
+ "august_reference": {
+  "ssj": {
+   "prediction": "predictions/output/20260811-stanza-1.14-release-defaults_sl-ssj-ud-test_full_stanza-1.14.0-release-accurate_aligned_predicted.conllu",
+   "prediction_sha256": "d7fe4ee4c3c820ed9b32b00c040dc9fccaac7e915511907e50b0caaea420afeb",
+   "eval": "results/output/20260811-stanza-1.14-release-defaults_sl-ssj-ud-test_full/main/stanza-1.14.0-release-accurate_aligned_eval.txt",
+   "eval_sha256": "46ca9fad6e5b66b37ad51e7463600f017549cad3bee1f1748568e656f630815b"
+  },
+  "sst": {
+   "prediction": "predictions/output/20260811-stanza-1.14-release-defaults_sl-sst-ud-test_full_stanza-1.14.0-release-accurate_aligned_predicted.conllu",
+   "prediction_sha256": "d7ff2519b6205bcc61906cb58b5c3ec9e4eee25589cdc25986679f66eb791969",
+   "eval": "results/output/20260811-stanza-1.14-release-defaults_sl-sst-ud-test_full/main/stanza-1.14.0-release-accurate_aligned_eval.txt",
+   "eval_sha256": "fcc592b2b501ed089867846e7b6fa222a334007661d016cfaa5b1f6c7a5bc15f"
+  },
+  "pog": null
+ }
+}
