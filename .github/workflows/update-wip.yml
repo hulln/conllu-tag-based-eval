@@ -1,0 +1,22 @@
+# Rebuild https://wip.nhull.eu when the evaluation pages change on main.
+# The wip site fetches tables/ from this repository on every build (see the
+# wip repository's sources.txt), so it only needs to be told to rebuild.
+# The Netlify build hook URL is stored as the repository secret WIP_BUILD_HOOK.
+name: Update wip.nhull.eu
+
+on:
+  push:
+    branches: [main]
+    paths: ["tables/**"]
+  workflow_dispatch:
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ask Netlify to rebuild the wip site
+        env:
+          HOOK: ${{ secrets.WIP_BUILD_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then echo "The secret WIP_BUILD_HOOK is not set." >&2; exit 1; fi
+          curl --fail --silent --show-error -X POST -d '{}' "$HOOK"

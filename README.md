@@ -51,13 +51,10 @@ favicons, and logos) are mirrored to a separate deploy repository on the CJVT
 Gitea (`webapps/oznacevalnik-eval`); this repository remains the development
 workspace.
 
-**Drafts and earlier versions** are at https://wip.nhull.eu/eval/. They are copied
-from `tables/` into the separate `wip` repository, which Netlify publishes on push:
-
-```bash
-scripts/publish_to_wip.sh ~/Projekti/wip   # files git ignores are never copied
-cd ~/Projekti/wip && git add -A eval && git commit -m "Update eval" && git push
-```
+**Drafts and earlier versions** are at https://wip.nhull.eu/eval/. The `wip`
+site fetches `tables/` from this repository's `main` on every build, so only what
+git tracks goes online. A push that changes `tables/` on `main` triggers the
+rebuild ([.github/workflows/update-wip.yml](.github/workflows/update-wip.yml)).
 
 ## Setup & rerun
 
