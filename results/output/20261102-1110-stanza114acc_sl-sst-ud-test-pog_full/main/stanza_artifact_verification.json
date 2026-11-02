@@ -1,0 +1,78 @@
+{
+ "pins": "/project/references/stanza-1.14.0-default_accurate.json",
+ "stanza_dir": "/cache/stanza",
+ "hf_home": "/hf",
+ "status": "PASS",
+ "checks": [
+  {
+   "check": "resources.json sha256",
+   "ok": true,
+   "detail": "dbaf5f0c740072df4f0c571c750073c21e5af4d23b277ca590f2b64400a58a84 (expected dbaf5f0c740072df4f0c571c750073c21e5af4d23b277ca590f2b64400a58a84)"
+  },
+  {
+   "check": "resources.json package mapping",
+   "ok": true,
+   "detail": "{\"tokenize\": \"combined_charlm\", \"lemma\": \"combined_charlm\", \"pos\": \"combined_crosloengual-bert\", \"depparse\": \"combined_crosloengual-bert\"}"
+  },
+  {
+   "check": "artifact tokenize/combined_charlm.pt",
+   "ok": true,
+   "detail": "size 2735848 sha256 f1c5f1ecaaf0f25514c3c787458e4170ff019f5c47a484ac27ebf996882b0dac"
+  },
+  {
+   "check": "artifact lemma/combined_charlm.pt",
+   "ok": true,
+   "detail": "size 49265351 sha256 89b964766e2c777b478929671161e9f28a151960bd66b9ac6e49892dcc45fdac"
+  },
+  {
+   "check": "artifact pos/combined_crosloengual-bert.pt",
+   "ok": true,
+   "detail": "size 45292763 sha256 8db7bdbbe0bb559031739d109029361f96c50ff18d7b539a3c7ac3f24b823e0c"
+  },
+  {
+   "check": "artifact depparse/combined_crosloengual-bert.pt",
+   "ok": true,
+   "detail": "size 115347359 sha256 6f52eb9a951336dfea6c6772e6e03b8ff0ebdbaea977088f0803256c7bbc8f8c"
+  },
+  {
+   "check": "artifact pretrain/conll17.pt",
+   "ok": true,
+   "detail": "size 106897299 sha256 6345c7cef4d258ace8bc58a4df624613b04185af137c784042a56824e20a1eb0"
+  },
+  {
+   "check": "artifact forward_charlm/oscar2023.pt",
+   "ok": true,
+   "detail": "size 19660363 sha256 4e71581faf86bb7752bc703754645b0e11fb489c0eb67f90bf0871bb0fd1a250"
+  },
+  {
+   "check": "artifact backward_charlm/oscar2023.pt",
+   "ok": true,
+   "detail": "size 19660351 sha256 9157697803113359ceb6a4f64dfc2b79a9475599ec756f27ba1096ac4acfafec"
+  },
+  {
+   "check": "transformer refs/main",
+   "ok": true,
+   "detail": "750255b6915cf42623143690d8ea79ceab8ee2e8 (expected 750255b6915cf42623143690d8ea79ceab8ee2e8)"
+  },
+  {
+   "check": "transformer config.json",
+   "ok": true,
+   "detail": "e990f8e0e960e590d3b090c0d04a8420ced461421b75665032d52906e8bee40f"
+  },
+  {
+   "check": "transformer pytorch_model.bin",
+   "ok": true,
+   "detail": "230c770eadd60a36d3d012e4f1067f45fb165fc8da3cb65ca00f210e89184f08"
+  },
+  {
+   "check": "transformer tokenizer_config.json",
+   "ok": true,
+   "detail": "dd6dd0d61cbe8d0436cee9caf7b256ff37320da54384feccfdff6a2fa9eb6a7f"
+  },
+  {
+   "check": "transformer vocab.txt",
+   "ok": true,
+   "detail": "af85931a777f7330c0ea06e74464f1ed5b2945cfdf4bc9968151fd1654317b6b"
+  }
+ ]
+}

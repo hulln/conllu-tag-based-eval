@@ -1,0 +1,63 @@
+{
+ "schema_version": 1,
+ "run_id": "20261102-1110-stanza114acc_sl-sst-ud-test-pog_full",
+ "run_stamp": "20261102-1110-stanza114acc",
+ "dataset_tag": "sl-sst-ud-test-pog",
+ "run_label": "full",
+ "mode": "aligned",
+ "system": {
+  "key": "stanza",
+  "label": "Stanza 1.14.0",
+  "package": "default_accurate",
+  "processors": "tokenize,pos,lemma,depparse",
+  "tokenize_pretokenized": true
+ },
+ "source": {
+  "commit": null,
+  "note": "git not available in this environment; record the commit from the host"
+ },
+ "config": {
+  "path": "references/stanza-1.14.0-default_accurate.json",
+  "sha256": "b6da00864922004760af8da0089b91e8f1161b00bf5970f6d5c7a0773d5769a7"
+ },
+ "dataset": {
+  "gold_file": "data/gold/sl_sst-ud-test-pog.conllu",
+  "sha256": "898fdadbde212991f9e93388fa6e2aae4fbf65fa18a103539066c329b7c0d756"
+ },
+ "commands": {
+  "runner": "scripts/run_stanza_eval.py --run-stamp 20261102-1110-stanza114acc",
+  "prediction": "/usr/local/bin/python scripts/predict_stanza.py --gold data/gold/sl_sst-ud-test-pog.conllu --package default_accurate --output predictions/output/20261102-1110-stanza114acc_sl-sst-ud-test-pog_full_stanza_aligned_predicted.conllu --provenance-out results/output/20261102-1110-stanza114acc_sl-sst-ud-test-pog_full/main/stanza_prediction_provenance.json --require-gpu",
+  "qa": "/usr/local/bin/python scripts/qa_validate_system_run.py --system stanza --run-stamp 20261102-1110-stanza114acc --gold data/gold/sl_sst-ud-test-pog.conllu --run-label full --pred-root predictions/output --results-root results/output"
+ },
+ "prediction_provenance": "results/output/20261102-1110-stanza114acc_sl-sst-ud-test-pog_full/main/stanza_prediction_provenance.json",
+ "artifact_verification": "PASS",
+ "august_reference_check": null,
+ "qa_status": "PASS",
+ "metrics": {
+  "BLEX": 68.21,
+  "LAS": 80.48,
+  "Lemmas": 90.45,
+  "MLAS": 67.94,
+  "UAS": 84.82,
+  "UFeats": 91.84,
+  "UPOS": 94.24,
+  "XPOS": 91.04
+ },
+ "file_hashes": {
+  "predictions/output/20261102-1110-stanza114acc_sl-sst-ud-test-pog_full_stanza_aligned_predicted.conllu": "9ab7cd3ad5c395d45ce176271f78e9a701cd99ff9c86c0a30789e282b965f5c1",
+  "results/output/20261102-1110-stanza114acc_sl-sst-ud-test-pog_full/main/stanza_aligned_eval.txt": "97681e50b7ce5c8896bddd1c76bdd7a4dda4b34b55efa87e11ecadb4baf47d11",
+  "results/output/20261102-1110-stanza114acc_sl-sst-ud-test-pog_full/diagnostics/stanza_aligned_eval-tagged.txt": "caafe210784e9a4a8c6c1cae73288ab127f14942e8def2fb68fef80c23bb3203",
+  "results/output/20261102-1110-stanza114acc_sl-sst-ud-test-pog_full/diagnostics/stanza_aligned_errors.md": "716e29dfeadfc52ac4d72b256a77347276cda7db3642199f03fbd1ba66309063",
+  "results/output/20261102-1110-stanza114acc_sl-sst-ud-test-pog_full/main/qa_validation.md": "4f56e91445d59e1f7eb75fc2f54746449fd1d4f95a34b9ddab3a1fd5d322c13f"
+ },
+ "script_hashes": {
+  "scripts/run_stanza_eval.py": "23d691ee9b924098108fc97c4d612c69719f5fc5a08a22c8f23178147a656325",
+  "scripts/predict_stanza.py": "081fda59278b5475f6e6544e0769b99843ffa2509631e187213e2f0ac2bb8b49",
+  "scripts/verify_stanza_artifacts.py": "b1e7f92de2944d01edf6294dae1fb0955fdd639c15e1653b821169ae1735f2d6",
+  "scripts/qa_validate_system_run.py": "da1c0e10f7ea24493cfc70e72727ed874368b88d4be7b2154c3ef403230a3ab6",
+  "scripts/qa_validate_run.py": "26f96277c50df5b2f04d74d5863fc9b21bf3eb1665db6f704b458ab1933dd71a",
+  "scripts/run_pipeline.py": "2e8f90e496bbdcc659679f57112e895b330069b70e8b97a03bb4b748f19f6d1d",
+  "scripts/conll18_ud_eval_tag-based.py": "e7eb23ce69747e5c9176f55fffe47dcddc8c1774c9703c1f2f16e6848f96fa95",
+  "scripts/analyze_errors.py": "006ba095e888ac5b99c991478f11fcb5c8250c036875c9f16ea704c588fb9b10"
+ }
+}

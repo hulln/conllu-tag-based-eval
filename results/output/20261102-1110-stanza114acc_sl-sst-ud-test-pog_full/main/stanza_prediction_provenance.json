@@ -1,0 +1,151 @@
+{
+ "argv": [
+  "scripts/predict_stanza.py",
+  "--gold",
+  "data/gold/sl_sst-ud-test-pog.conllu",
+  "--package",
+  "default_accurate",
+  "--output",
+  "predictions/output/20261102-1110-stanza114acc_sl-sst-ud-test-pog_full_stanza_aligned_predicted.conllu",
+  "--provenance-out",
+  "results/output/20261102-1110-stanza114acc_sl-sst-ud-test-pog_full/main/stanza_prediction_provenance.json",
+  "--require-gpu"
+ ],
+ "package": "default_accurate",
+ "stanza_version": "1.14.0",
+ "torch_version": "2.6.0+cu118",
+ "torch_cuda_version": "11.8",
+ "cuda_available": true,
+ "cuda_device": "NVIDIA GeForce GTX 1080 Ti",
+ "env": {
+  "STANZA_RESOURCES_DIR": "/cache/stanza",
+  "HF_HOME": "/hf",
+  "HF_HUB_OFFLINE": "1",
+  "TRANSFORMERS_OFFLINE": "1",
+  "TORCH_HOME": "/tmp/torch"
+ },
+ "gold": {
+  "path": "data/gold/sl_sst-ud-test-pog.conllu",
+  "sha256": "898fdadbde212991f9e93388fa6e2aae4fbf65fa18a103539066c329b7c0d756"
+ },
+ "output": {
+  "path": "predictions/output/20261102-1110-stanza114acc_sl-sst-ud-test-pog_full_stanza_aligned_predicted.conllu",
+  "sha256": "9ab7cd3ad5c395d45ce176271f78e9a701cd99ff9c86c0a30789e282b965f5c1"
+ },
+ "sentences": 420,
+ "loaded_model_files": {
+  "pipeline:tokenize_model_path": {
+   "path": "/cache/stanza/sl/tokenize/combined_charlm.pt",
+   "sha256": "f1c5f1ecaaf0f25514c3c787458e4170ff019f5c47a484ac27ebf996882b0dac"
+  },
+  "pipeline:tokenize_forward_charlm_path": {
+   "path": "/cache/stanza/sl/forward_charlm/oscar2023.pt",
+   "sha256": "4e71581faf86bb7752bc703754645b0e11fb489c0eb67f90bf0871bb0fd1a250"
+  },
+  "pipeline:pos_model_path": {
+   "path": "/cache/stanza/sl/pos/combined_crosloengual-bert.pt",
+   "sha256": "8db7bdbbe0bb559031739d109029361f96c50ff18d7b539a3c7ac3f24b823e0c"
+  },
+  "pipeline:pos_pretrain_path": {
+   "path": "/cache/stanza/sl/pretrain/conll17.pt",
+   "sha256": "6345c7cef4d258ace8bc58a4df624613b04185af137c784042a56824e20a1eb0"
+  },
+  "pipeline:pos_forward_charlm_path": {
+   "path": "/cache/stanza/sl/forward_charlm/oscar2023.pt",
+   "sha256": "4e71581faf86bb7752bc703754645b0e11fb489c0eb67f90bf0871bb0fd1a250"
+  },
+  "pipeline:pos_backward_charlm_path": {
+   "path": "/cache/stanza/sl/backward_charlm/oscar2023.pt",
+   "sha256": "9157697803113359ceb6a4f64dfc2b79a9475599ec756f27ba1096ac4acfafec"
+  },
+  "pipeline:lemma_model_path": {
+   "path": "/cache/stanza/sl/lemma/combined_charlm.pt",
+   "sha256": "89b964766e2c777b478929671161e9f28a151960bd66b9ac6e49892dcc45fdac"
+  },
+  "pipeline:lemma_pretrain_path": {
+   "path": "/cache/stanza/sl/pretrain/conll17.pt",
+   "sha256": "6345c7cef4d258ace8bc58a4df624613b04185af137c784042a56824e20a1eb0"
+  },
+  "pipeline:lemma_forward_charlm_path": {
+   "path": "/cache/stanza/sl/forward_charlm/oscar2023.pt",
+   "sha256": "4e71581faf86bb7752bc703754645b0e11fb489c0eb67f90bf0871bb0fd1a250"
+  },
+  "pipeline:lemma_backward_charlm_path": {
+   "path": "/cache/stanza/sl/backward_charlm/oscar2023.pt",
+   "sha256": "9157697803113359ceb6a4f64dfc2b79a9475599ec756f27ba1096ac4acfafec"
+  },
+  "pipeline:depparse_model_path": {
+   "path": "/cache/stanza/sl/depparse/combined_crosloengual-bert.pt",
+   "sha256": "6f52eb9a951336dfea6c6772e6e03b8ff0ebdbaea977088f0803256c7bbc8f8c"
+  },
+  "pipeline:depparse_pretrain_path": {
+   "path": "/cache/stanza/sl/pretrain/conll17.pt",
+   "sha256": "6345c7cef4d258ace8bc58a4df624613b04185af137c784042a56824e20a1eb0"
+  },
+  "pipeline:depparse_forward_charlm_path": {
+   "path": "/cache/stanza/sl/forward_charlm/oscar2023.pt",
+   "sha256": "4e71581faf86bb7752bc703754645b0e11fb489c0eb67f90bf0871bb0fd1a250"
+  },
+  "pipeline:depparse_backward_charlm_path": {
+   "path": "/cache/stanza/sl/backward_charlm/oscar2023.pt",
+   "sha256": "9157697803113359ceb6a4f64dfc2b79a9475599ec756f27ba1096ac4acfafec"
+  },
+  "tokenize:model_path": {
+   "path": "/cache/stanza/sl/tokenize/combined_charlm.pt",
+   "sha256": "f1c5f1ecaaf0f25514c3c787458e4170ff019f5c47a484ac27ebf996882b0dac"
+  },
+  "tokenize:forward_charlm_path": {
+   "path": "/cache/stanza/sl/forward_charlm/oscar2023.pt",
+   "sha256": "4e71581faf86bb7752bc703754645b0e11fb489c0eb67f90bf0871bb0fd1a250"
+  },
+  "pos:model_path": {
+   "path": "/cache/stanza/sl/pos/combined_crosloengual-bert.pt",
+   "sha256": "8db7bdbbe0bb559031739d109029361f96c50ff18d7b539a3c7ac3f24b823e0c"
+  },
+  "pos:pretrain_path": {
+   "path": "/cache/stanza/sl/pretrain/conll17.pt",
+   "sha256": "6345c7cef4d258ace8bc58a4df624613b04185af137c784042a56824e20a1eb0"
+  },
+  "pos:forward_charlm_path": {
+   "path": "/cache/stanza/sl/forward_charlm/oscar2023.pt",
+   "sha256": "4e71581faf86bb7752bc703754645b0e11fb489c0eb67f90bf0871bb0fd1a250"
+  },
+  "pos:backward_charlm_path": {
+   "path": "/cache/stanza/sl/backward_charlm/oscar2023.pt",
+   "sha256": "9157697803113359ceb6a4f64dfc2b79a9475599ec756f27ba1096ac4acfafec"
+  },
+  "lemma:model_path": {
+   "path": "/cache/stanza/sl/lemma/combined_charlm.pt",
+   "sha256": "89b964766e2c777b478929671161e9f28a151960bd66b9ac6e49892dcc45fdac"
+  },
+  "lemma:pretrain_path": {
+   "path": "/cache/stanza/sl/pretrain/conll17.pt",
+   "sha256": "6345c7cef4d258ace8bc58a4df624613b04185af137c784042a56824e20a1eb0"
+  },
+  "lemma:forward_charlm_path": {
+   "path": "/cache/stanza/sl/forward_charlm/oscar2023.pt",
+   "sha256": "4e71581faf86bb7752bc703754645b0e11fb489c0eb67f90bf0871bb0fd1a250"
+  },
+  "lemma:backward_charlm_path": {
+   "path": "/cache/stanza/sl/backward_charlm/oscar2023.pt",
+   "sha256": "9157697803113359ceb6a4f64dfc2b79a9475599ec756f27ba1096ac4acfafec"
+  },
+  "depparse:model_path": {
+   "path": "/cache/stanza/sl/depparse/combined_crosloengual-bert.pt",
+   "sha256": "6f52eb9a951336dfea6c6772e6e03b8ff0ebdbaea977088f0803256c7bbc8f8c"
+  },
+  "depparse:pretrain_path": {
+   "path": "/cache/stanza/sl/pretrain/conll17.pt",
+   "sha256": "6345c7cef4d258ace8bc58a4df624613b04185af137c784042a56824e20a1eb0"
+  },
+  "depparse:forward_charlm_path": {
+   "path": "/cache/stanza/sl/forward_charlm/oscar2023.pt",
+   "sha256": "4e71581faf86bb7752bc703754645b0e11fb489c0eb67f90bf0871bb0fd1a250"
+  },
+  "depparse:backward_charlm_path": {
+   "path": "/cache/stanza/sl/backward_charlm/oscar2023.pt",
+   "sha256": "9157697803113359ceb6a4f64dfc2b79a9475599ec756f27ba1096ac4acfafec"
+  }
+ },
+ "transformers_version": "4.35.2"
+}

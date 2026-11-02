@@ -1,0 +1,17 @@
+{
+ "counts": {
+  "sentences": 1282,
+  "gold_sentences": 1282,
+  "multiple_roots": 0,
+  "no_root": 0,
+  "cycles": 0,
+  "head_out_of_range": 0,
+  "head_not_integer": 0,
+  "root_label_mismatch": 0,
+  "id_mismatch": 0,
+  "form_mismatch": 0,
+  "length_mismatch": 0,
+  "blocking_problems": 0
+ },
+ "examples": []
+}
