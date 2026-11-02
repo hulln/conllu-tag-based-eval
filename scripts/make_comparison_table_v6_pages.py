@@ -104,8 +104,8 @@ SL = COMMON + [
     ('    <a href="comparison_table_v5_sl.html" aria-current="page">SL</a>', '    <a href="comparison_table_v6_sl.html" aria-current="page">SL</a>'),
     ('    <a href="comparison_table_v5.html" hreflang="en">EN</a>', '    <a href="comparison_table_v6.html" hreflang="en">EN</a>'),
     ('<header class="page-head">\n',
-     '<div class="draft-note"><strong>Osnutek</strong> (2. 11. 2026): kot tretje orodje je dodana Stanza 1.14. Še ni objavljeno; '
-     'objavljena različica je na <a href="https://orodja.cjvt.si/oznacevalnik/eval/">orodja.cjvt.si/oznacevalnik/eval</a>.</div>\n'
+     '<div class="draft-note"><strong>Osnutek</strong> (2. 11. 2026): kot tretje orodje je dodana Stanza 1.14. Še neobjavljeno; '
+     'objavljena različica dostopna na: <a href="https://orodja.cjvt.si/oznacevalnik/eval/">orodja.cjvt.si/oznacevalnik/eval</a>.</div>\n'
      '<header class="page-head">\n'),
     ("        ? `${cfg.subtitle} <em>Prikazana primerjava: razlika = ${modelLabel()} &minus; ${otherLabel()}.</em>`\n",
      "        ? `${cfg.subtitle} <em>Prikazana primerjava: razlika = ${modelLabel()} &minus; ${labelOf(ok)}.</em>`\n"),
