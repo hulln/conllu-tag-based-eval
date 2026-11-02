@@ -51,7 +51,7 @@ STANZA_PROV = (
 )
 POG_TRAINING_NOTE = (
     'Of the three tools, only SPOT-Trankit 1.3 has colloquial transcriptions in its training data. '
-    'CLASSLA-Stanza and Stanza were trained on spoken Slovenian in standardised transcription only.'
+    'The training data of CLASSLA-Stanza and Stanza contain spoken Slovenian only in standardised transcription.'
 )
 
 CORPORA = []

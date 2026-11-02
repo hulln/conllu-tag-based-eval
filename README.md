@@ -62,7 +62,7 @@ rebuild ([.github/workflows/update-wip.yml](.github/workflows/update-wip.yml)).
 python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
 ```
 
-Add gold files to [data/gold/](data/gold/) (see [data/README.md](data/README.md)),
+Add gold files to `data/gold/` (gitignored; see [data/README.md](data/README.md)),
 then run the aligned pipeline or the dedicated Trankit 1.3 Docker workflow:
 
 ```bash

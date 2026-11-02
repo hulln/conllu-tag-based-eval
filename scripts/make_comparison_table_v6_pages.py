@@ -16,11 +16,11 @@ TABLES = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().pa
 
 STANZA_PROV_SL = (
     "Stanza &mdash; izdaja <strong>1.14.0</strong>, paket <code>default_accurate</code> "
-    "(slovenski modeli <code>combined</code>; označevalnik in razčlenjevalnik uporabljata transformer "
-    '<a href="https://huggingface.co/EMBEDDIA/crosloengual-bert">CroSloEngual BERT</a>), '
+    "(slovenski modeli <code>combined</code>; modela za oblikoskladenjsko označevanje in skladenjsko razčlenjevanje "
+    'uporabljata transformer <a href="https://huggingface.co/EMBEDDIA/crosloengual-bert">CroSloEngual BERT</a>), '
     'pognana s <a href="https://pypi.org/project/stanza/1.14.0/">stanza==1.14.0</a> in datotekami modelov iz te izdaje. '
-    "Naučena na UD Slovenian SSJ in SST (standardizirani zapis), označevalnik in lematizator tudi na delih "
-    "učnega korpusa SUK 1.1."
+    "Naučena na UD Slovenian SSJ in SST (standardizirani zapis), modela za oblikoskladenjsko označevanje in "
+    "lematizacijo tudi na delih učnega korpusa SUK 1.1."
 )
 POG_NOTE_SL = (
     "Od treh orodij ima le SPOT-Trankit 1.3 med učnimi podatki tudi pogovorni zapis. "
@@ -39,6 +39,11 @@ DRAFT_CSS = """<meta name="robots" content="noindex,nofollow">
   .table-wrap-wide table.compare-multi td:nth-child(2) { width: 10%; }
   table.compare-multi th { white-space: normal; vertical-align: bottom; line-height: 1.3; }
   table.compare-multi .bar-wrap { width: 48px; }
+  /* Three tools in the tool switch: on phones the labels wrap (at the hyphen or
+     space) instead of pushing the last button out of view. */
+  @media (max-width: 560px) {
+    .seg .seg-btn { white-space: normal; padding: 7px 6px; }
+  }
 </style>
 """
 
@@ -105,7 +110,7 @@ SL = COMMON + [
     ('    <a href="comparison_table_v5.html" hreflang="en">EN</a>', '    <a href="comparison_table_v6.html" hreflang="en">EN</a>'),
     ('<header class="page-head">\n',
      '<div class="draft-note"><strong>Osnutek</strong> (2. 11. 2026): kot tretje orodje je dodana Stanza 1.14. Še neobjavljeno; '
-     'objavljena različica dostopna na: <a href="https://orodja.cjvt.si/oznacevalnik/eval/">orodja.cjvt.si/oznacevalnik/eval</a>.</div>\n'
+     'objavljena različica je dostopna na: <a href="https://orodja.cjvt.si/oznacevalnik/eval/">orodja.cjvt.si/oznacevalnik/eval</a>.</div>\n'
      '<header class="page-head">\n'),
     ("        ? `${cfg.subtitle} <em>Prikazana primerjava: razlika = ${modelLabel()} &minus; ${otherLabel()}.</em>`\n",
      "        ? `${cfg.subtitle} <em>Prikazana primerjava: razlika = ${modelLabel()} &minus; ${labelOf(ok)}.</em>`\n"),
@@ -160,8 +165,9 @@ MULTI_COMPARE = r"""    // One "compare with" switch per tool (the static button
       const rows = cfg.rows();
       const q = filterInput ? filterInput.value.trim().toLowerCase() : '';
       const filtered = q ? rows.filter(r => r.tag.toLowerCase().includes(q)) : rows;
+      // Default order: gold count, as the table note says; then the scores.
       const sorted = filtered.slice().sort((a, b) =>
-        (b[mk] - a[mk]) || tie.reduce((d, k) => d || (b[k] - a[k]), 0) || (b.count - a.count) || a.tag.localeCompare(b.tag));
+        (b.count - a.count) || (b[mk] - a[mk]) || tie.reduce((d, k) => d || (b[k] - a[k]), 0) || a.tag.localeCompare(b.tag));
 
       // Header row (rebuilt fresh, so sort listeners do not accumulate).
       if (others.length) {
