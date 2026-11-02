@@ -6,15 +6,20 @@ sentence/token boundaries fixed, predictions on pre-tokenised text).
 
 ## Results
 
-**Current table:** [live v5 table](https://conllu-tag-based-eval-table.netlify.app/comparison_table_v5.html)
+**Current table:** [live v5 table](https://wip.nhull.eu/eval/comparison_table_v5.html)
 ([local file](tables/comparison_table_v5.html)) combines SSJ written, SST
 standardised, and supplied SST colloquial (`pog`) evaluation. It provides per-tool
 metric summaries, accuracy/error tables, examples, compare mode, deep links, and
 CSV/Markdown export.
 
-**Slovenian version:** [live v5 table](https://conllu-tag-based-eval-table.netlify.app/comparison_table_v5_sl.html)
+**Slovenian version:** [live v5 table](https://wip.nhull.eu/eval/comparison_table_v5_sl.html)
 ([local file](tables/comparison_table_v5_sl.html)). Both pages use the same generated
 data bundle.
+
+**Draft v6:** [EN](https://wip.nhull.eu/eval/comparison_table_v6.html) ·
+[SL](https://wip.nhull.eu/eval/comparison_table_v6_sl.html) adds Stanza 1.14
+(`default_accurate`) as a third tool; not published yet. How it was run:
+[docker/README.stanza114-eval.md](docker/README.stanza114-eval.md).
 
 v5 uses [SPOT-Trankit 1.3](https://www.clarin.si/repository/xmlui/handle/11356/2201)
 for all test sets and [CLASSLA-Stanza 2.2.1](https://pypi.org/project/classla/2.2.1/).
@@ -32,19 +37,27 @@ See [references/v5_publication_qa_2026-06-22.md](references/v5_publication_qa_20
 and [references/sst_vs_pog_comparison_2026-06-22.md](references/sst_vs_pog_comparison_2026-06-22.md)
 for the data audit.
 
-Previous table versions are kept for traceability: [v4](https://conllu-tag-based-eval-table.netlify.app/comparison_table_v4.html),
-[v3 SST](https://conllu-tag-based-eval-table.netlify.app/comparison_table_v3_sst.html),
-[v2 SSJ](https://conllu-tag-based-eval-table.netlify.app/comparison_table_v2_ssj.html),
-and [v1 legacy](https://conllu-tag-based-eval-table.netlify.app/comparison_table_v1_ssj.html).
+Previous table versions are kept for traceability: [v4](https://wip.nhull.eu/eval/comparison_table_v4.html),
+[v3 SST](https://wip.nhull.eu/eval/comparison_table_v3_sst.html),
+[v2 SSJ](https://wip.nhull.eu/eval/comparison_table_v2_ssj.html),
+and [v1 legacy](https://wip.nhull.eu/eval/comparison_table_v1_ssj.html).
 
-## Publishing (CJVT)
+## Publishing
 
-The v5 pages (EN + SL) are being published on CJVT infrastructure at
-https://orodja.cjvt.si/oznacevalnik/eval/ (in progress, July 2026). Only the
+**CJVT:** the v5 pages (EN + SL) are published at
+https://orodja.cjvt.si/oznacevalnik/eval/. Only the
 files needed to serve the pages (the two v5 HTMLs, the shared data bundle,
 favicons, and logos) are mirrored to a separate deploy repository on the CJVT
 Gitea (`webapps/oznacevalnik-eval`); this repository remains the development
 workspace.
+
+**Drafts and earlier versions** are at https://wip.nhull.eu/eval/. They are copied
+from `tables/` into the separate `wip` repository, which Netlify publishes on push:
+
+```bash
+scripts/publish_to_wip.sh ~/Projekti/wip   # files git ignores are never copied
+cd ~/Projekti/wip && git add -A eval && git commit -m "Update eval" && git push
+```
 
 ## Setup & rerun
 
@@ -62,10 +75,11 @@ python3 scripts/run_pipeline.py --modes aligned --gold data/gold/sl_ssj-ud-test.
 bash scripts/run_trankit13_eval.sh        # GPU=1 to use a GPU
 ```
 
-Regenerate the v5 data bundle:
+Regenerate the v5 data bundle, or the v6 data bundle and pages:
 
 ```bash
 python3 scripts/build_interactive_comparison_table_v5.py
+python3 scripts/build_interactive_comparison_table_v6.py && python3 scripts/make_comparison_table_v6_pages.py
 ```
 
 ## Reproducibility
