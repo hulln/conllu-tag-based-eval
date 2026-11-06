@@ -4,10 +4,11 @@
     python3 scripts/make_comparison_table_v6_pages.py            # writes into tables/
     python3 scripts/build_interactive_comparison_table_v6.py     # the data file
 
-v6 is v5 with Stanza 1.14 as a third tool: a draft notice, a "compare with"
-switch per tool (one or both at once), each tool's own run in the Details box,
-and the Slovenian Stanza texts. Every edit must match exactly once, so a changed
-v5 page fails loudly instead of producing a half-edited v6 page.
+v6 is v5 with Stanza 1.14 as a third tool: a "compare with" switch per tool
+(one or both at once), each tool's own run in the Details box, the Slovenian
+Stanza texts, the part-of-speech table labelled F1 (the score it shows), and the
+shorter acknowledgement. Every edit must match exactly once, so a changed v5
+page fails loudly instead of producing a half-edited v6 page.
 """
 import sys
 from pathlib import Path
@@ -27,9 +28,7 @@ POG_NOTE_SL = (
     "Učni podatki orodij CLASSLA-Stanza in Stanza vsebujejo govorjeno slovenščino le v standardiziranem zapisu."
 )
 
-DRAFT_CSS = """<meta name="robots" content="noindex,nofollow">
-<style>
-  .draft-note { max-width: 980px; margin: 0 0 14px; padding: 8px 12px; border-left: 3px solid #e12a26; background: #fff; font-size: 14px; color: #161616; }
+V6_CSS = """<style>
   /* Compared with two tools: seven columns, so a narrower label and count column,
      headers that may wrap onto two lines, and shorter bars. */
   .table-wrap-wide table.compare-multi { min-width: 760px; }
@@ -49,7 +48,7 @@ DRAFT_CSS = """<meta name="robots" content="noindex,nofollow">
 
 COMMON = [
     ('<meta name="viewport" content="width=device-width, initial-scale=1.0">\n',
-     '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n' + DRAFT_CSS),
+     '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n' + V6_CSS),
     ('<script src="comparison_table_v5_data.js"></script>', '<script src="comparison_table_v6_data.js"></script>'),
     ("const DATA = window.TABLE_DATA_V5;", "const DATA = window.TABLE_DATA_V6;"),
     ("  function otherKey() { return state.model === 'trankit' ? 'classla' : 'trankit'; }\n",
@@ -81,15 +80,42 @@ COMMON = [
     ("    compareBtn.addEventListener('click', () => { compare = !compare; expanded = false; render(); });\n", ""),
     ("        compare = false;\n", "        compareWith = null;\n"),
     ("        c.run_id,\n", "        runId(c),\n"),
+    # The per-tag scores in both score tables are the evaluator's F1 column
+    # (precision and recall differ per tag), so the part-of-speech table says
+    # F1, not accuracy, and both descriptions say what F1 is.
+    ("    metricWord: 'accuracy', metricWordCap: 'Accuracy',\n", "    metricWord: 'F1', metricWordCap: 'F1',\n"),
+    ("csvSuffix: '_upos-accuracy.csv',", "csvSuffix: '_upos-f1.csv',"),
 ]
+
+ACK_LINKS = ('<a href="https://www.ff.uni-lj.si/mapcase" target="_blank" rel="noopener">MAPCASE</a> (J6-70213) {conj}\n'
+             '  <a href="https://www.cjvt.si/llm4dh/en/" target="_blank" rel="noopener">LLM4DH</a> (GC-002)')
 
 EN = COMMON + [
     ('    <a href="comparison_table_v5_sl.html" hreflang="sl">SL</a>', '    <a href="comparison_table_v6_sl.html" hreflang="sl">SL</a>'),
     ('    <a href="comparison_table_v5.html" aria-current="page">EN</a>', '    <a href="comparison_table_v6.html" aria-current="page">EN</a>'),
-    ('<header class="page-head">\n',
-     '<div class="draft-note"><strong>Draft</strong> (2 November 2026): Stanza 1.14 added as a third tool. Not published yet; '
-     'the published version is at <a href="https://orodja.cjvt.si/oznacevalnik/eval/">orodja.cjvt.si/oznacevalnik/eval</a>.</div>\n'
-     '<header class="page-head">\n'),
+    ("    subtitle: 'For each UD dependency relation, LAS shows the percentage of tokens for which the tool predicted "
+     "both the correct syntactic head and the correct dependency relation. ",
+     "    subtitle: 'For each UD dependency relation, LAS is an F1 score, the harmonic mean of precision and recall. "
+     "A token counts as correct when the tool predicted both the correct syntactic head and the correct dependency "
+     "relation; precision is computed over the tokens the tool gave this relation, recall over the tokens with this "
+     "relation in the manually annotated test set. "),
+    ("tagHeader: 'UPOS', shortMetric: 'Accuracy',", "tagHeader: 'UPOS', shortMetric: 'F1',"),
+    ("    subtitle: 'For each universal part-of-speech tag (UPOS), Accuracy shows the percentage of tokens for which "
+     "the tool predicted the correct part-of-speech tag. ",
+     "    subtitle: 'For each universal part-of-speech tag (UPOS), F1 is the harmonic mean of precision (the share of "
+     "tokens the tool gave this tag that really have it) and recall (the share of tokens with this tag that the tool "
+     "tagged correctly). "),
+    ('  This work was partially supported by the research projects\n'
+     '  <a href="https://spot.ff.uni-lj.si/en/" target="_blank" rel="noopener">SPOT</a>,\n'
+     '  <a href="https://www.cjvt.si/llm4dh/en/" target="_blank" rel="noopener">LLM4DH</a> and\n'
+     '  <a href="https://www.ff.uni-lj.si/mapcase" target="_blank" rel="noopener">MAPCASE</a>\n'
+     '  (ARIS grant nos. Z6-4617, GC-002 and J6-70213), with infrastructural support from the\n'
+     '  <a href="https://www.cjvt.si/" target="_blank" rel="noopener">Centre for Language Resources and Technologies at the University of Ljubljana (CJVT UL)</a>\n'
+     '  and the <a href="https://www.clarin.si/" target="_blank" rel="noopener">Common Language Resources and Technology Infrastructure, Slovenia (CLARIN.SI)</a>.\n'
+     '  The interactive website was developed by Nives Hüll under the supervision of Kaja Dobrovoljc Zor.\n',
+     '  This online service was developed by Nives Hüll under the supervision of Kaja Dobrovoljc Zor,\n'
+     '  with support from the ARIS-funded projects\n'
+     '  ' + ACK_LINKS.format(conj="and") + '.\n'),
     ("        ? `${cfg.subtitle} <em>Comparison shown: difference = ${modelLabel()} &minus; ${otherLabel()}.</em>`\n",
      "        ? `${cfg.subtitle} <em>Comparison shown: difference = ${modelLabel()} &minus; ${labelOf(ok)}.</em>`\n"),
     ("      compareBtn.textContent = compare ? 'Hide comparison' : `Compare with ${otherShort()}`;\n",
@@ -108,10 +134,29 @@ EN = COMMON + [
 SL = COMMON + [
     ('    <a href="comparison_table_v5_sl.html" aria-current="page">SL</a>', '    <a href="comparison_table_v6_sl.html" aria-current="page">SL</a>'),
     ('    <a href="comparison_table_v5.html" hreflang="en">EN</a>', '    <a href="comparison_table_v6.html" hreflang="en">EN</a>'),
-    ('<header class="page-head">\n',
-     '<div class="draft-note"><strong>Osnutek</strong> (2. 11. 2026): kot tretje orodje je dodana Stanza 1.14. Še neobjavljeno; '
-     'objavljena različica je dostopna na: <a href="https://orodja.cjvt.si/oznacevalnik/eval/">orodja.cjvt.si/oznacevalnik/eval</a>.</div>\n'
-     '<header class="page-head">\n'),
+    ("    subtitle: 'Metrika LAS za vsako skladenjsko relacijo UD prikazuje delež pojavnic, pri katerih je orodje "
+     "pravilno napovedalo tako nadrejeno pojavnico (jedro) kot skladenjsko relacijo. ",
+     "    subtitle: 'Metrika LAS za vsako skladenjsko relacijo UD je mera F1, tj. harmonična sredina natančnosti in "
+     "priklica. Pojavnica šteje kot pravilna, če je orodje pravilno napovedalo tako nadrejeno pojavnico (jedro) kot "
+     "skladenjsko relacijo; natančnost se računa med pojavnicami, ki jim je orodje pripisalo to relacijo, priklic pa "
+     "med pojavnicami s to relacijo v ročno označeni referenčni testni množici. "),
+    ("tagHeader: 'UPOS', shortMetric: 'Natančnost',", "tagHeader: 'UPOS', shortMetric: 'F1',"),
+    ("    subtitle: 'Natančnost za vsako univerzalno besednovrstno oznako (UPOS) prikazuje delež pojavnic, ki jim je "
+     "orodje pripisalo pravilno besedno vrsto. ",
+     "    subtitle: 'Mera F1 za vsako univerzalno besednovrstno oznako (UPOS) je harmonična sredina natančnosti "
+     "(delež pravilnih med pojavnicami, ki jim je orodje pripisalo to oznako) in priklica (delež pojavnic s to "
+     "oznako, ki jih je orodje pravilno označilo). "),
+    ('  To delo je nastalo v okviru raziskovalnih projektov\n'
+     '  <a href="https://spot.ff.uni-lj.si/en/" target="_blank" rel="noopener">SPOT</a>,\n'
+     '  <a href="https://www.cjvt.si/llm4dh/en/" target="_blank" rel="noopener">LLM4DH</a> in\n'
+     '  <a href="https://www.ff.uni-lj.si/mapcase" target="_blank" rel="noopener">MAPCASE</a>\n'
+     '  (ARIS št. Z6-4617, GC-002 in J6-70213) z infrastrukturno podporo\n'
+     '  <a href="https://www.cjvt.si/" target="_blank" rel="noopener">Centra za jezikovne vire in tehnologije Univerze v Ljubljani (CJVT UL)</a>\n'
+     '  in <a href="https://www.clarin.si/" target="_blank" rel="noopener">Slovenske raziskovalne infrastrukture za jezikovne vire in tehnologije (CLARIN.SI)</a>.\n'
+     '  Interaktivno spletno stran je izdelala Nives Hüll pod mentorstvom Kaje Dobrovoljc Zor.\n',
+     '  To spletno storitev je razvila Nives Hüll pod mentorstvom Kaje Dobrovoljc Zor,\n'
+     '  s podporo projektov\n'
+     '  ' + ACK_LINKS.format(conj="in") + ', ki ju financira ARIS.\n'),
     ("        ? `${cfg.subtitle} <em>Prikazana primerjava: razlika = ${modelLabel()} &minus; ${otherLabel()}.</em>`\n",
      "        ? `${cfg.subtitle} <em>Prikazana primerjava: razlika = ${modelLabel()} &minus; ${labelOf(ok)}.</em>`\n"),
     ("      compareBtn.textContent = compare ? 'Skrij primerjavo' : `Primerjaj s ${otherShort()}`;\n",

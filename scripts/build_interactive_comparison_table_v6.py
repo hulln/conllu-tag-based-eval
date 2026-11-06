@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the data bundle for the v6 interactive comparison table (draft).
+"""Build the data bundle for the v6 interactive comparison table.
 
 v6 is v5 with a third tool, Stanza 1.14 (``package="default_accurate"``):
 

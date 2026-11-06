@@ -3,9 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex,nofollow">
 <style>
-  .draft-note { max-width: 980px; margin: 0 0 14px; padding: 8px 12px; border-left: 3px solid #e12a26; background: #fff; font-size: 14px; color: #161616; }
   /* Compared with two tools: seven columns, so a narrower label and count column,
      headers that may wrap onto two lines, and shorter bars. */
   .table-wrap-wide table.compare-multi { min-width: 760px; }
@@ -1065,7 +1063,6 @@
     view the comparison.
   </div>
 </noscript>
-<div class="draft-note"><strong>Draft</strong> (2 November 2026): Stanza 1.14 added as a third tool. Not published yet; the published version is at <a href="https://orodja.cjvt.si/oznacevalnik/eval/">orodja.cjvt.si/oznacevalnik/eval</a>.</div>
 <header class="page-head">
   <nav class="lang-switch" aria-label="Language / Jezik">
     <a href="comparison_table_v6_sl.html" hreflang="sl">SL</a>
@@ -1295,14 +1292,10 @@
 
 <h2 id="acknowledgement">Acknowledgement</h2>
 <div class="ack" id="ack-text">
-  This work was partially supported by the research projects
-  <a href="https://spot.ff.uni-lj.si/en/" target="_blank" rel="noopener">SPOT</a>,
-  <a href="https://www.cjvt.si/llm4dh/en/" target="_blank" rel="noopener">LLM4DH</a> and
-  <a href="https://www.ff.uni-lj.si/mapcase" target="_blank" rel="noopener">MAPCASE</a>
-  (ARIS grant nos. Z6-4617, GC-002 and J6-70213), with infrastructural support from the
-  <a href="https://www.cjvt.si/" target="_blank" rel="noopener">Centre for Language Resources and Technologies at the University of Ljubljana (CJVT UL)</a>
-  and the <a href="https://www.clarin.si/" target="_blank" rel="noopener">Common Language Resources and Technology Infrastructure, Slovenia (CLARIN.SI)</a>.
-  The interactive website was developed by Nives Hüll under the supervision of Kaja Dobrovoljc Zor.
+  This online service was developed by Nives Hüll under the supervision of Kaja Dobrovoljc Zor,
+  with support from the ARIS-funded projects
+  <a href="https://www.ff.uni-lj.si/mapcase" target="_blank" rel="noopener">MAPCASE</a> (J6-70213) and
+  <a href="https://www.cjvt.si/llm4dh/en/" target="_blank" rel="noopener">LLM4DH</a> (GC-002).
 </div>
 
 <h2 id="citation">Recommended citation</h2>
@@ -2168,17 +2161,17 @@
     filterInputId: 'rel-filter', noteId: 'rel-note', compareBtnId: 'rel-compare-btn',
     tagHeader: 'Relation', shortMetric: 'LAS', headerSuffix: ' LAS',
     metricWord: 'LAS', metricWordCap: 'LAS',
-    subtitle: 'For each UD dependency relation, LAS shows the percentage of tokens for which the tool predicted both the correct syntactic head and the correct dependency relation. The table is sorted by the number of examples in the manually annotated test set.',
+    subtitle: 'For each UD dependency relation, LAS is an F1 score, the harmonic mean of precision and recall. A token counts as correct when the tool predicted both the correct syntactic head and the correct dependency relation; precision is computed over the tokens the tool gave this relation, recall over the tokens with this relation in the manually annotated test set. The table is sorted by the number of examples in the manually annotated test set.',
     csvBtnId: 'rel-csv-btn', mdBtnId: 'rel-md-btn', csvSuffix: '_las-by-relation.csv',
     rows: () => corpus().deprel_accuracy_rows,
   });
   makeAccTable({
     tbodyId: 'upos-acc-table', countNoteId: 'upos-acc-count-note', toggleId: 'upos-acc-toggle',
     filterInputId: 'upos-acc-filter', noteId: 'upos-acc-note', compareBtnId: 'upos-acc-compare-btn',
-    tagHeader: 'UPOS', shortMetric: 'Accuracy', headerSuffix: '',
-    metricWord: 'accuracy', metricWordCap: 'Accuracy',
-    subtitle: 'For each universal part-of-speech tag (UPOS), Accuracy shows the percentage of tokens for which the tool predicted the correct part-of-speech tag. The table is sorted by the number of examples in the manually annotated test set.',
-    csvBtnId: 'upos-acc-csv-btn', mdBtnId: 'upos-acc-md-btn', csvSuffix: '_upos-accuracy.csv',
+    tagHeader: 'UPOS', shortMetric: 'F1', headerSuffix: '',
+    metricWord: 'F1', metricWordCap: 'F1',
+    subtitle: 'For each universal part-of-speech tag (UPOS), F1 is the harmonic mean of precision (the share of tokens the tool gave this tag that really have it) and recall (the share of tokens with this tag that the tool tagged correctly). The table is sorted by the number of examples in the manually annotated test set.',
+    csvBtnId: 'upos-acc-csv-btn', mdBtnId: 'upos-acc-md-btn', csvSuffix: '_upos-f1.csv',
     rows: () => corpus().upos_accuracy_rows,
   });
 

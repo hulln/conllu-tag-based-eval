@@ -6,50 +6,51 @@ sentence/token boundaries fixed, predictions on pre-tokenised text).
 
 ## Results
 
-**Current table:** [live v5 table](https://wip.nhull.eu/eval/comparison_table_v5.html)
-([local file](tables/comparison_table_v5.html)) combines SSJ written, SST
-standardised, and supplied SST colloquial (`pog`) evaluation. It provides per-tool
-metric summaries, accuracy/error tables, examples, compare mode, deep links, and
-CSV/Markdown export.
+**Current table (v6):** published at https://orodja.cjvt.si/oznacevalnik/eval/
+([EN](https://orodja.cjvt.si/oznacevalnik/eval/en/) · [SL](https://orodja.cjvt.si/oznacevalnik/eval/sl/));
+local files [EN](tables/comparison_table_v6.html) · [SL](tables/comparison_table_v6_sl.html).
+It combines SSJ written, SST standardised, and supplied SST colloquial (`pog`)
+evaluation for three tools, with per-tool metric summaries, per-tag F1 tables,
+error tables with examples, compare mode, deep links, and CSV/Markdown export.
+Both pages use the same generated data bundle.
 
-**Slovenian version:** [live v5 table](https://wip.nhull.eu/eval/comparison_table_v5_sl.html)
-([local file](tables/comparison_table_v5_sl.html)). Both pages use the same generated
-data bundle.
-
-**Draft v6:** [EN](https://wip.nhull.eu/eval/comparison_table_v6.html) ·
-[SL](https://wip.nhull.eu/eval/comparison_table_v6_sl.html) adds Stanza 1.14
-(`default_accurate`) as a third tool; not published yet. How it was run:
-[docker/README.stanza114-eval.md](docker/README.stanza114-eval.md).
-
-v5 uses [SPOT-Trankit 1.3](https://www.clarin.si/repository/xmlui/handle/11356/2201)
+v6 is v5 with Stanza 1.14 (`default_accurate`) as a third tool; how it was run:
+[docker/README.stanza114-eval.md](docker/README.stanza114-eval.md). SPOT-Trankit
+and CLASSLA-Stanza results are v5's: v5 uses [SPOT-Trankit 1.3](https://www.clarin.si/repository/xmlui/handle/11356/2201)
 for all test sets and [CLASSLA-Stanza 2.2.1](https://pypi.org/project/classla/2.2.1/).
 Evaluation is aligned: gold sentence and token boundaries are fixed, and the
 models predict lemma, POS/morphology, and dependency annotation.
 
-| Test set | Gold data | SPOT-Trankit | CLASSLA-Stanza |
-|---|---|---|---|
-| SSJ written | UD Slovenian SSJ `r2.17` | 1.3 | `classla.Pipeline('sl', pos_use_lexicon=True)` |
-| SST standardised | UD Slovenian SST `r2.16` / `r2.17` | 1.3 | `classla.Pipeline('sl', type='spoken')` |
-| SST colloquial | supplied `pog` test file | 1.3 | `classla.Pipeline('sl', type='spoken')` |
+| Test set | Gold data | SPOT-Trankit | CLASSLA-Stanza | Stanza (v6) |
+|---|---|---|---|---|
+| SSJ written | UD Slovenian SSJ `r2.17` | 1.3 | `classla.Pipeline('sl', pos_use_lexicon=True)` | 1.14.0 `default_accurate` |
+| SST standardised | UD Slovenian SST `r2.16` / `r2.17` | 1.3 | `classla.Pipeline('sl', type='spoken')` | 1.14.0 `default_accurate` |
+| SST colloquial | supplied `pog` test file | 1.3 | `classla.Pipeline('sl', type='spoken')` | 1.14.0 `default_accurate` |
 
-The supplied paired `stan` file is present locally but is not evaluated in v5.
+The supplied paired `stan` file is present locally but is not evaluated in v5 or v6.
 See [references/v5_publication_qa_2026-06-22.md](references/v5_publication_qa_2026-06-22.md)
 and [references/sst_vs_pog_comparison_2026-06-22.md](references/sst_vs_pog_comparison_2026-06-22.md)
 for the data audit.
 
-Previous table versions are kept for traceability: [v4](https://wip.nhull.eu/eval/comparison_table_v4.html),
+Previous table versions are kept for traceability: [v5](https://wip.nhull.eu/eval/comparison_table_v5.html)
+([SL](https://wip.nhull.eu/eval/comparison_table_v5_sl.html)), [v4](https://wip.nhull.eu/eval/comparison_table_v4.html),
 [v3 SST](https://wip.nhull.eu/eval/comparison_table_v3_sst.html),
 [v2 SSJ](https://wip.nhull.eu/eval/comparison_table_v2_ssj.html),
 and [v1 legacy](https://wip.nhull.eu/eval/comparison_table_v1_ssj.html).
 
 ## Publishing
 
-**CJVT:** the v5 pages (EN + SL) are published at
-https://orodja.cjvt.si/oznacevalnik/eval/. Only the
-files needed to serve the pages (the two v5 HTMLs, the shared data bundle,
-favicons, and logos) are mirrored to a separate deploy repository on the CJVT
-Gitea (`webapps/oznacevalnik-eval`); this repository remains the development
-workspace.
+**CJVT:** the current pages (EN + SL) are published at
+https://orodja.cjvt.si/oznacevalnik/eval/. Only the files needed to serve them
+are copied to a separate deploy repository on the CJVT Gitea
+(`webapps/oznacevalnik-eval`), under version-neutral names (`en.html`, `sl.html`,
+`data.js`, favicons, logos); this repository remains the development workspace.
+The deploy is not automatic: after a push to Gitea, CJVT pulls the repository
+onto the server, so they need to be told.
+
+```bash
+python3 scripts/export_cjvt_deploy.py ../oznacevalnik-eval   # then commit and push there
+```
 
 **Drafts and earlier versions** are at https://wip.nhull.eu/eval/. The `wip`
 site fetches `tables/` from this repository's `main` on every build, so only what
@@ -72,7 +73,8 @@ python3 scripts/run_pipeline.py --modes aligned --gold data/gold/sl_ssj-ud-test.
 bash scripts/run_trankit13_eval.sh        # GPU=1 to use a GPU
 ```
 
-Regenerate the v5 data bundle, or the v6 data bundle and pages:
+Regenerate the v5 data bundle, or the v6 data bundle and pages (the v6 pages
+are made from the v5 pages by exact-match edits):
 
 ```bash
 python3 scripts/build_interactive_comparison_table_v5.py

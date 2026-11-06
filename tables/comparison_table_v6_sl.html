@@ -3,9 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex,nofollow">
 <style>
-  .draft-note { max-width: 980px; margin: 0 0 14px; padding: 8px 12px; border-left: 3px solid #e12a26; background: #fff; font-size: 14px; color: #161616; }
   /* Compared with two tools: seven columns, so a narrower label and count column,
      headers that may wrap onto two lines, and shorter bars. */
   .table-wrap-wide table.compare-multi { min-width: 760px; }
@@ -1065,7 +1063,6 @@
     brskalniku omogočite JavaScript.
   </div>
 </noscript>
-<div class="draft-note"><strong>Osnutek</strong> (2. 11. 2026): kot tretje orodje je dodana Stanza 1.14. Še neobjavljeno; objavljena različica je dostopna na: <a href="https://orodja.cjvt.si/oznacevalnik/eval/">orodja.cjvt.si/oznacevalnik/eval</a>.</div>
 <header class="page-head">
   <nav class="lang-switch" aria-label="Language / Jezik">
     <a href="comparison_table_v6_sl.html" aria-current="page">SL</a>
@@ -1295,14 +1292,10 @@
 
 <h2 id="acknowledgement">Zahvala</h2>
 <div class="ack" id="ack-text">
-  To delo je nastalo v okviru raziskovalnih projektov
-  <a href="https://spot.ff.uni-lj.si/en/" target="_blank" rel="noopener">SPOT</a>,
-  <a href="https://www.cjvt.si/llm4dh/en/" target="_blank" rel="noopener">LLM4DH</a> in
-  <a href="https://www.ff.uni-lj.si/mapcase" target="_blank" rel="noopener">MAPCASE</a>
-  (ARIS št. Z6-4617, GC-002 in J6-70213) z infrastrukturno podporo
-  <a href="https://www.cjvt.si/" target="_blank" rel="noopener">Centra za jezikovne vire in tehnologije Univerze v Ljubljani (CJVT UL)</a>
-  in <a href="https://www.clarin.si/" target="_blank" rel="noopener">Slovenske raziskovalne infrastrukture za jezikovne vire in tehnologije (CLARIN.SI)</a>.
-  Interaktivno spletno stran je izdelala Nives Hüll pod mentorstvom Kaje Dobrovoljc Zor.
+  To spletno storitev je razvila Nives Hüll pod mentorstvom Kaje Dobrovoljc Zor,
+  s podporo projektov
+  <a href="https://www.ff.uni-lj.si/mapcase" target="_blank" rel="noopener">MAPCASE</a> (J6-70213) in
+  <a href="https://www.cjvt.si/llm4dh/en/" target="_blank" rel="noopener">LLM4DH</a> (GC-002), ki ju financira ARIS.
 </div>
 
 <h2 id="citation">Priporočeno citiranje</h2>
@@ -2180,17 +2173,17 @@
     filterInputId: 'rel-filter', noteId: 'rel-note', compareBtnId: 'rel-compare-btn',
     tagHeader: 'Relacija', shortMetric: 'LAS', headerSuffix: ' LAS',
     metricWord: 'LAS', metricWordCap: 'LAS',
-    subtitle: 'Metrika LAS za vsako skladenjsko relacijo UD prikazuje delež pojavnic, pri katerih je orodje pravilno napovedalo tako nadrejeno pojavnico (jedro) kot skladenjsko relacijo. Tabela je urejena po številu pojavitev v ročno označeni referenčni testni množici.',
+    subtitle: 'Metrika LAS za vsako skladenjsko relacijo UD je mera F1, tj. harmonična sredina natančnosti in priklica. Pojavnica šteje kot pravilna, če je orodje pravilno napovedalo tako nadrejeno pojavnico (jedro) kot skladenjsko relacijo; natančnost se računa med pojavnicami, ki jim je orodje pripisalo to relacijo, priklic pa med pojavnicami s to relacijo v ročno označeni referenčni testni množici. Tabela je urejena po številu pojavitev v ročno označeni referenčni testni množici.',
     csvBtnId: 'rel-csv-btn', mdBtnId: 'rel-md-btn', csvSuffix: '_las-by-relation.csv',
     rows: () => corpus().deprel_accuracy_rows,
   });
   makeAccTable({
     tbodyId: 'upos-acc-table', countNoteId: 'upos-acc-count-note', toggleId: 'upos-acc-toggle',
     filterInputId: 'upos-acc-filter', noteId: 'upos-acc-note', compareBtnId: 'upos-acc-compare-btn',
-    tagHeader: 'UPOS', shortMetric: 'Natančnost', headerSuffix: '',
-    metricWord: 'accuracy', metricWordCap: 'Accuracy',
-    subtitle: 'Natančnost za vsako univerzalno besednovrstno oznako (UPOS) prikazuje delež pojavnic, ki jim je orodje pripisalo pravilno besedno vrsto. Tabela je urejena po številu pojavitev v ročno označeni referenčni testni množici.',
-    csvBtnId: 'upos-acc-csv-btn', mdBtnId: 'upos-acc-md-btn', csvSuffix: '_upos-accuracy.csv',
+    tagHeader: 'UPOS', shortMetric: 'F1', headerSuffix: '',
+    metricWord: 'F1', metricWordCap: 'F1',
+    subtitle: 'Mera F1 za vsako univerzalno besednovrstno oznako (UPOS) je harmonična sredina natančnosti (delež pravilnih med pojavnicami, ki jim je orodje pripisalo to oznako) in priklica (delež pojavnic s to oznako, ki jih je orodje pravilno označilo). Tabela je urejena po številu pojavitev v ročno označeni referenčni testni množici.',
+    csvBtnId: 'upos-acc-csv-btn', mdBtnId: 'upos-acc-md-btn', csvSuffix: '_upos-f1.csv',
     rows: () => corpus().upos_accuracy_rows,
   });
 
