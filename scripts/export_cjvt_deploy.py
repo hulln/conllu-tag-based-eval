@@ -11,9 +11,7 @@ have version-neutral names and a new table version only needs a pull:
     data.js             the shared data bundle
     favicon*, logos/    as in tables/
 
-The EN/SL switch links to ../en/ and ../sl/. The v5 filenames, which were the
-index files until v6, stay as redirects to en.html and sl.html, so old links
-(and /en/, /sl/ before nginx is switched to the new index files) keep working.
+The EN/SL switch links to ../en/ and ../sl/.
 """
 import shutil
 import sys
@@ -34,14 +32,6 @@ PAGES = {
     ]),
 }
 DATA_SCRIPT = (f'<script src="comparison_table_{VERSION}_data.js"></script>', '<script src="data.js"></script>')
-
-REDIRECTS = {"comparison_table_v5.html": "en.html", "comparison_table_v5_sl.html": "sl.html"}
-REDIRECT_PAGE = """<!doctype html>
-<html><head><meta charset="utf-8"><title>Redirect</title>
-<script>location.replace('{target}' + location.hash);</script>
-<noscript><meta http-equiv="refresh" content="0; url={target}"></noscript>
-</head><body><a href="{target}">{target}</a></body></html>
-"""
 
 
 def main() -> None:
@@ -67,8 +57,6 @@ def main() -> None:
     (out / "logos").mkdir(exist_ok=True)
     for name in LOGOS:
         shutil.copyfile(TABLES / "logos" / name, out / "logos" / name)
-    for name, target in REDIRECTS.items():
-        (out / name).write_text(REDIRECT_PAGE.format(target=target), encoding="utf-8")
     print(f"exported {VERSION} to {out}")
 
 
